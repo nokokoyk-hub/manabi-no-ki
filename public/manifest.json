@@ -1,0 +1,9 @@
+{
+  "short_name": "まなびの木",
+  "name": "まなびの木 - たのしく まなぼう",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4CAF50",
+  "background_color": "#FFF8F0"
+}
