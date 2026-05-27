@@ -9,7 +9,7 @@ import { COLORS } from '../constants/colors';
 
 const HomeScreen = ({ 
   leaves, flowers, fruits, streak, todayDone,
-  onStartLearning, onOpenMimamori 
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock
 }) => {
   return (
     <div style={{
@@ -123,6 +123,35 @@ const HomeScreen = ({
       </div>
 
       {/* 下部カード */}
+      <div style={{
+        padding: '0 20px 24px',
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
+      }}>
+        <div onClick={onStartOkurigana} style={{
+          background: 'white', borderRadius: 16, padding: 16,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E8F5E9',
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 4 }}>✏️</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>おくりがな</div>
+          <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
+            かんじの れんしゅう
+          </div>
+        </div>
+        <div onClick={onStartClock} style={{
+          background: 'white', borderRadius: 16, padding: 16,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E3F2FD',
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 4 }}>⏰</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>とけい</div>
+          <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
+            なんじ なんぷん？
+          </div>
+        </div>
+      </div>
+
+      {/* ごほうび・ふくしゅう */}
       <div style={{
         padding: '0 20px 100px',
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,

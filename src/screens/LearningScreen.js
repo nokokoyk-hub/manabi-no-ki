@@ -5,11 +5,23 @@
 
 import React, { useState } from 'react';
 import StarBurst from '../components/StarBurst';
+import ClockSVG from '../components/ClockSVG';
 import { COLORS } from '../constants/colors';
-import { getTodayQuestions } from '../data/questions';
+import { getTodayQuestions, getQuestionsByCategory } from '../data/questions';
 
-const LearningScreen = ({ onComplete, onBack }) => {
-  const [questions] = useState(() => getTodayQuestions(5));
+// モード名の表示テキスト
+const MODE_LABELS = {
+  mission: 'きょうの ミッション',
+  okurigana: 'おくりがな れんしゅう',
+  clock: 'とけい れんしゅう',
+};
+
+const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
+  const [questions] = useState(() => {
+    if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5);
+    if (mode === 'clock') return getQuestionsByCategory('clock', 5);
+    return getTodayQuestions(5);
+  });
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
@@ -71,7 +83,7 @@ const LearningScreen = ({ onComplete, onBack }) => {
         </button>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, color: COLORS.textLight, fontWeight: 600 }}>
-            きょうの ミッション
+            {MODE_LABELS[mode] || 'きょうの ミッション'}
           </div>
           <div style={{
             height: 8, background: '#E8F5E9', borderRadius: 4, marginTop: 4,
@@ -106,6 +118,12 @@ const LearningScreen = ({ onComplete, onBack }) => {
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
           marginBottom: 20,
         }}>
+          {/* 時計タイプの場合はアナログ時計を表示 */}
+          {q.type === 'clock' && q.clockTime && (
+            <div style={{ marginBottom: 16 }}>
+              <ClockSVG hour={q.clockTime.hour} minute={q.clockTime.minute} />
+            </div>
+          )}
           <div style={{
             fontSize: 26, fontWeight: 800, color: COLORS.text,
             textAlign: 'center', lineHeight: 1.6,
