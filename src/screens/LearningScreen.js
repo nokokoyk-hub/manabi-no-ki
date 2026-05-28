@@ -48,7 +48,7 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
             setSelected(null);
             setShowResult(false);
           } else {
-            onComplete(newScore);
+            onComplete(newScore, questions.length);
           }
         }, 1500);
       }, 500);
