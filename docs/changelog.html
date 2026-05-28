@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌳 まなびの木 - 変更履歴</title>
+  <style>
+    body { font-family: 'Helvetica Neue', sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background: #FFF8F0; color: #4E342E; }
+    h1 { color: #2E7D32; }
+    .version { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .version h2 { color: #FF9800; margin-top: 0; }
+    .version .date { color: #8D6E63; font-size: 14px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; line-height: 1.6; }
+    .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-right: 4px; }
+    .new { background: #E8F5E9; color: #2E7D32; }
+    .fix { background: #FFF3E0; color: #E65100; }
+    .infra { background: #E3F2FD; color: #1565C0; }
+  </style>
+</head>
+<body>
+  <h1>🌳 まなびの木 — 変更履歴</h1>
+
+  <div class="version">
+    <h2>v0.1.1</h2>
+    <div class="date">2026年5月28日（水）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> アナログ時計SVGコンポーネント（ClockSVG.js）追加</li>
+      <li><span class="tag new">NEW</span> 送り仮名問題6問追加（走/読/書/聞/歩/食）</li>
+      <li><span class="tag new">NEW</span> 時計の読み方問題5問追加（ビジュアル付き）</li>
+      <li><span class="tag new">NEW</span> ホーム画面に「おくりがな」「とけい」専用れんしゅうボタン追加</li>
+      <li><span class="tag new">NEW</span> LearningScreenをモード対応（mission/okurigana/clock）</li>
+      <li><span class="tag new">NEW</span> 算数問題1問追加（6×9）</li>
+      <li><span class="tag new">NEW</span> 問題データにカテゴリ別・教科別取得関数追加</li>
+      <li><span class="tag fix">FIX</span> APP_VERSION未使用警告修正（Vercel CI対応）</li>
+      <li><span class="tag infra">INFRA</span> Vercelデプロイ完了・Deployment Protection OFF設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.1.0</h2>
+    <div class="date">2026年5月27日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> プロジェクト初期構築</li>
+      <li><span class="tag new">NEW</span> ホーム画面（まなびの木ビジュアル）</li>
+      <li><span class="tag new">NEW</span> 学習画面（小2レベル問題・選択肢式）</li>
+      <li><span class="tag new">NEW</span> みまもり画面（保護者向け学習状況）</li>
+      <li><span class="tag new">NEW</span> ADHD+LD対応UI（丸文字フォント・大ボタン・ふりがな）</li>
+      <li><span class="tag new">NEW</span> 木の成長システム（葉/花/実）</li>
+      <li><span class="tag new">NEW</span> 正解演出（StarBurst）</li>
+      <li><span class="tag infra">INFRA</span> GitHub リポジトリ作成（nokokoyk-hub/manabi-no-ki）</li>
+      <li><span class="tag infra">INFRA</span> ファイル分割済み（screens/components/data/constants）</li>
+    </ul>
+  </div>
+
+</body>
+</html>
