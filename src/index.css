@@ -33,3 +33,8 @@ button:active {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(20px); }
 }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}

@@ -1,49 +1,112 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.1.0
-// 最終更新: 2026/05/27
+// バージョン: 0.2.0
+// 最終更新: 2026/05/28
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
 // - 画面遷移ロジックを壊さないこと
+// - Supabase連携ロジックは lib/storage.js に集約
 // ============================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
+import { loadProgress, saveProgress, recordSession, DEFAULT_PROGRESS } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.2.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
-
-  // 学習モード: 'mission'(ミッション), 'okurigana'(送り仮名), 'clock'(時計)
   const [learningMode, setLearningMode] = useState('mission');
 
-  // 木の成長状態（将来はSupabaseで永続化）
-  const [leaves, setLeaves] = useState(5);
-  const [flowers, setFlowers] = useState(2);
-  const [fruits, setFruits] = useState(0);
-  const [todayDone, setTodayDone] = useState(false);
-  const [streak, setStreak] = useState(3);
+  // 木の成長状態（Supabaseから読み込み）
+  const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
+  const [flowers, setFlowers] = useState(DEFAULT_PROGRESS.flowers);
+  const [fruits, setFruits] = useState(DEFAULT_PROGRESS.fruits);
+  const [todayDone, setTodayDone] = useState(DEFAULT_PROGRESS.todayDone);
+  const [streak, setStreak] = useState(DEFAULT_PROGRESS.streak);
+
+  // ローディング状態
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 起動時にSupabaseからデータ読み込み
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const progress = await loadProgress();
+        setLeaves(progress.leaves);
+        setFlowers(progress.flowers);
+        setFruits(progress.fruits);
+        setStreak(progress.streak);
+        setTodayDone(progress.todayDone);
+      } catch (err) {
+        console.error('初期読み込みエラー:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    init();
+  }, []);
 
   // 学習完了時のハンドラ
-  const handleLearningComplete = (score) => {
-    setLeaves(prev => Math.min(10, prev + 1));
-    if (score >= 3) setFlowers(prev => Math.min(5, prev + 1));
-    if (score >= 4) setFruits(prev => Math.min(3, prev + 1));
+  const handleLearningComplete = useCallback(async (score, totalQuestions) => {
+    const newLeaves = Math.min(10, leaves + 1);
+    const newFlowers = score >= 3 ? Math.min(5, flowers + 1) : flowers;
+    const newFruits = score >= 4 ? Math.min(3, fruits + 1) : fruits;
+    const newTodayDone = learningMode === 'mission' ? true : todayDone;
+    const newStreak = learningMode === 'mission' && !todayDone ? streak + 1 : streak;
+
+    // React state更新
+    setLeaves(newLeaves);
+    setFlowers(newFlowers);
+    setFruits(newFruits);
     if (learningMode === 'mission') setTodayDone(true);
-    setStreak(prev => prev + 1);
+    if (learningMode === 'mission' && !todayDone) setStreak(newStreak);
     setScreen('home');
-  };
+
+    // Supabaseに保存（非同期・UIブロックしない）
+    await saveProgress({
+      leaves: newLeaves,
+      flowers: newFlowers,
+      fruits: newFruits,
+      streak: newStreak,
+      todayDone: newTodayDone,
+    });
+
+    // セッション記録
+    await recordSession(learningMode, score, totalQuestions || 5);
+  }, [leaves, flowers, fruits, streak, todayDone, learningMode]);
 
   // 学習開始ハンドラ
   const startLearning = (mode) => {
     setLearningMode(mode);
     setScreen('learning');
   };
+
+  // ローディング画面
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(180deg, #E3F2FD 0%, #F1F8E9 40%, #FFFFFF 100%)',
+        fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+      }}>
+        <div style={{ fontSize: 48, marginBottom: 16, animation: 'pulse 1.5s ease-in-out infinite' }}>
+          🌳
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: '#2E7D32' }}>
+          まなびの木を そだてています...
+        </div>
+      </div>
+    );
+  }
 
   // 画面ルーティング
   switch (screen) {
