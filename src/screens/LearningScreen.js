@@ -1,7 +1,7 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
 // 1回5問、選択肢式、正解で木が育つ
-// v0.3.0: まめ🐕リアクション追加！
+// v0.4.0: 教科別レベル設定に対応
 // ============================================
 
 import React, { useState } from 'react';
@@ -9,7 +9,7 @@ import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
 import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
-import { getTodayQuestions, getQuestionsByCategory } from '../data/questions';
+import { getTodayQuestions, getQuestionsByCategory } from '../data/levelQuestions';
 import { getMameMessage } from '../constants/mameMessages';
 
 // モード名の表示テキスト
@@ -19,11 +19,11 @@ const MODE_LABELS = {
   clock: 'とけい れんしゅう',
 };
 
-const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
+const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack }) => {
   const [questions] = useState(() => {
-    if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5);
-    if (mode === 'clock') return getQuestionsByCategory('clock', 5);
-    return getTodayQuestions(5);
+    if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5, subjectLevels);
+    if (mode === 'clock') return getQuestionsByCategory('clock', 5, subjectLevels);
+    return getTodayQuestions(5, subjectLevels);
   });
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -36,7 +36,32 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
   const [mameMsg, setMameMsg] = useState(getMameMessage('question'));
 
   const q = questions[currentQ];
-  if (!q) return null;
+
+  if (!q) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: COLORS.bg,
+        fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        color: COLORS.text,
+      }}>
+        <div style={{ background: 'white', borderRadius: 20, padding: 24, textAlign: 'center' }}>
+          <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>問題を じゅんび中です</div>
+          <div style={{ color: COLORS.textLight, lineHeight: 1.6, marginBottom: 16 }}>
+            このレベルの問題が まだ少ないみたい。<br />
+            レベルを変えるか、問題を追加してね。
+          </div>
+          <button onClick={onBack} style={{
+            background: COLORS.green, color: 'white', border: 'none', borderRadius: 14,
+            padding: '12px 20px', fontWeight: 800, cursor: 'pointer',
+            fontFamily: "'Rounded Mplus 1c', sans-serif",
+          }}>
+            ホームへ もどる
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSelect = (idx) => {
     if (showResult) return;
@@ -123,7 +148,7 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
           fontSize: 14, fontWeight: 700, color: COLORS.orange,
           marginBottom: 16,
         }}>
-          {q.subjectEmoji} {q.subject}
+          {q.subjectEmoji} {q.subject} <span style={{ color: COLORS.textLight }}>レベル{q.gradeLevel || 1}</span>
         </div>
 
         {/* 問題文 */}
