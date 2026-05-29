@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.2.0
-// 最終更新: 2026/05/28
+// バージョン: 0.3.0
+// 最終更新: 2026/05/29
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -13,10 +13,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
+import UpdateBanner from './components/UpdateBanner';
 import { loadProgress, saveProgress, recordSession, DEFAULT_PROGRESS } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -111,32 +112,41 @@ function App() {
   }
 
   // 画面ルーティング
-  switch (screen) {
-    case 'learning':
-      return (
-        <LearningScreen
-          mode={learningMode}
-          onComplete={handleLearningComplete}
-          onBack={() => setScreen('home')}
-        />
-      );
-    case 'mimamori':
-      return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} />;
-    default:
-      return (
-        <HomeScreen
-          leaves={leaves}
-          flowers={flowers}
-          fruits={fruits}
-          streak={streak}
-          todayDone={todayDone}
-          onStartLearning={() => startLearning('mission')}
-          onStartOkurigana={() => startLearning('okurigana')}
-          onStartClock={() => startLearning('clock')}
-          onOpenMimamori={() => setScreen('mimamori')}
-        />
-      );
-  }
+  const renderScreen = () => {
+    switch (screen) {
+      case 'learning':
+        return (
+          <LearningScreen
+            mode={learningMode}
+            onComplete={handleLearningComplete}
+            onBack={() => setScreen('home')}
+          />
+        );
+      case 'mimamori':
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} />;
+      default:
+        return (
+          <HomeScreen
+            leaves={leaves}
+            flowers={flowers}
+            fruits={fruits}
+            streak={streak}
+            todayDone={todayDone}
+            onStartLearning={() => startLearning('mission')}
+            onStartOkurigana={() => startLearning('okurigana')}
+            onStartClock={() => startLearning('clock')}
+            onOpenMimamori={() => setScreen('mimamori')}
+          />
+        );
+    }
+  };
+
+  return (
+    <>
+      <UpdateBanner currentVersion={APP_VERSION} />
+      {renderScreen()}
+    </>
+  );
 }
 
 export default App;
