@@ -1,7 +1,7 @@
 // ============================================
 // 🏠 HomeScreen - メインホーム画面
 // まなびの木 + まめ🐕 + ミッションボタン + ナビ
-// v0.3.0: まめキャラ登場！
+// v0.4.0: 教科別レベル設定への導線追加
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -9,10 +9,11 @@ import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
 import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
+import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
-const HomeScreen = ({ 
-  leaves, flowers, fruits, streak, todayDone,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock
+const HomeScreen = ({
+  leaves, flowers, fruits, streak, todayDone, subjectLevels,
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -26,6 +27,10 @@ const HomeScreen = ({
       setMameMessage(getMameMessage('home'));
     }
   }, [todayDone, streak]);
+
+  const levelSummary = SUBJECT_LEVELS
+    .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
+    .join(' ');
 
   return (
     <div style={{
@@ -143,9 +148,30 @@ const HomeScreen = ({
           <div style={{
             fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 6,
           }}>
-            {todayDone ? 'あしたも いっしょに がんばろうね' : '5もんだけ！ 5ふんで おわるよ'}
+            {todayDone ? 'あしたも いっしょに がんばろうね' : 'その子にあわせた レベルで 5もん！'}
           </div>
         </button>
+      </div>
+
+      {/* レベル設定カード */}
+      <div style={{ padding: '0 20px 12px' }}>
+        <div onClick={onOpenLevelSettings} style={{
+          background: 'white', borderRadius: 18, padding: '14px 16px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #FFF3E0',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.text }}>
+                🎚️ 教科ごとの レベル設定
+              </div>
+              <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 4, lineHeight: 1.5 }}>
+                {levelSummary}
+              </div>
+            </div>
+            <div style={{ fontSize: 22, color: COLORS.orange }}>›</div>
+          </div>
+        </div>
       </div>
 
       {/* 下部カード */}
