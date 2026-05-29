@@ -99,7 +99,7 @@ function App() {
         fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
       }}>
         <img
-          src="/images/mame/mame_run.png"
+          src="/public/images/mame/mame_run.png"
           alt="まめ"
           style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 16, animation: 'mame-bounce 0.6s ease-in-out infinite' }}
         />
