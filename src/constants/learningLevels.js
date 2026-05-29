@@ -4,7 +4,7 @@
 // ============================================
 
 export const MIN_LEARNING_LEVEL = 1;
-export const MAX_LEARNING_LEVEL = 4;
+export const MAX_LEARNING_LEVEL = 6;
 
 export const SUBJECT_LEVELS = [
   {
@@ -43,6 +43,7 @@ export const SUBJECT_LEVELS = [
 
 // お母さんフィードバック反映の初期値
 // 算数は1年生レベル、国語は4年生レベルから始める
+// 上限は興味・得意の伸びに合わせて6年生相当まで広げる
 export const DEFAULT_SUBJECT_LEVELS = {
   さんすう: 1,
   こくご: 4,
