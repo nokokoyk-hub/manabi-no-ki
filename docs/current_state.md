@@ -15,7 +15,7 @@
 | 対象ユーザー | 小学4年生（実質小2レベル）、知的グレー（約2歳の遅れ） |
 | 発達特性 | ADHD + LD 複合（推定） |
 | 学習状況 | 不登校・自宅学習中。進研ゼミ小2教材がフィット |
-| 学習教科 | 全教科（さんすう・こくご・せいかつ 他、順次拡張予定） |
+| 学習教科 | 全教科（さんすう・こくご・せいかつ・とけい、順次拡張予定） |
 | 使用端末 | スマホ（メイン）、iPad（サブ） |
 | 依頼元 | のんの親戚のお母さん |
 | 開発体制 | のん × ちゃぴ |
@@ -27,11 +27,11 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.2.0** |
-| version.json | `public/version.json` → `"version": "0.2.0"` ✅同期済み |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.2.0'` ✅同期済み |
-| package.json | `"version": "0.2.0"` ✅同期済み |
-| 最終更新日 | 2026年5月28日（水） |
+| 現在のバージョン | **v0.3.0** |
+| version.json | `public/version.json` → `"version": "0.3.0"` ✅ |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.3.0'` ✅ |
+| package.json | `"version": "0.2.0"` ⚠️ **未同期（0.3.0に合わせること）** |
+| 最終更新日 | 2026年5月29日（木） |
 
 > ⚠️ version.json と App.js の APP_VERSION と package.json は常に同期させること
 
@@ -68,9 +68,8 @@
 | 本番URL | https://manabi-no-ki-kannari-norikos-projects.vercel.app |
 | フレームワーク | Create React App（自動検出） |
 | デプロイ方式 | GitHub連携（mainプッシュで自動デプロイ） |
-| Deployment Protection | OFF（お母さんのスマホでアクセス可能にするため） |
+| Deployment Protection | OFF |
 | 環境変数 | `REACT_APP_SUPABASE_URL`, `REACT_APP_SUPABASE_ANON_KEY` 設定済み |
-| デプロイ状態 | ✅ READY |
 
 ### Supabase
 | 項目 | 値 |
@@ -79,7 +78,6 @@
 | プロジェクトID | `ndqbtfahtjaafroevgwq` |
 | リージョン | `ap-northeast-1`（東京） |
 | URL | `https://ndqbtfahtjaafroevgwq.supabase.co` |
-| ステータス | ✅ ACTIVE_HEALTHY |
 
 #### テーブル構成
 | テーブル | 用途 | RLS |
@@ -87,69 +85,82 @@
 | `user_progress` | 木の成長状態・ストリーク・最終学習日 | ✅有効 |
 | `learning_sessions` | 学習セッション記録（モード・スコア・日時） | ✅有効 |
 
-#### user_progress カラム
-| カラム | 型 | 説明 |
-|--------|-----|------|
-| id | UUID | 主キー |
-| device_id | TEXT (UNIQUE) | 端末識別子 |
-| leaves | INT (0-10) | 葉の数 |
-| flowers | INT (0-5) | 花の数 |
-| fruits | INT (0-3) | 実の数 |
-| streak | INT | 連続日数 |
-| last_study_date | DATE | 最終学習日 |
-| today_done | BOOLEAN | 今日のミッション完了フラグ |
-| updated_at | TIMESTAMPTZ | 自動更新トリガー付き |
-
-#### learning_sessions カラム
-| カラム | 型 | 説明 |
-|--------|-----|------|
-| id | UUID | 主キー |
-| device_id | TEXT | 端末識別子 |
-| mode | TEXT | mission/okurigana/clock |
-| score | INT | 正解数 |
-| total_questions | INT | 出題数 |
-| completed_at | TIMESTAMPTZ | 完了日時 |
-
 ---
 
-## 📁 ファイル構成（v0.2.0時点）
+## 📁 ファイル構成（v0.3.0時点）
 
 ```
 manabi-no-ki/
 ├── public/
-│   ├── index.html          # PWA対応、lang="ja"
-│   ├── manifest.json        # アプリ名・テーマカラー設定
-│   ├── version.json         # バージョン管理（0.2.0）
+│   ├── index.html
+│   ├── manifest.json
+│   ├── version.json         # バージョン管理（0.3.0）+ 更新通知用
 │   ├── favicon.ico
-│   └── robots.txt
+│   ├── robots.txt
+│   └── public/images/mame/  # ⚠️ パスが二重！（後述）
+│       ├── mame_happy.png   # 🙌 バンザイ・正解時
+│       ├── mame_heart.png   # 💖 ミッション完了
+│       ├── mame_question.png # ❓ 首かしげ・出題中
+│       ├── mame_run.png     # 🏃 走る・ローディング
+│       └── mame_sleep.png   # 💤 おやすみ
 ├── src/
-│   ├── App.js               # メインルーター + Supabase連携
-│   ├── index.js              # エントリーポイント
-│   ├── index.css             # グローバルCSS・アニメーション定義
-│   ├── lib/                  # 🆕 v0.2.0追加
+│   ├── App.js               # メインルーター + Supabase連携 + 更新通知
+│   ├── index.js
+│   ├── index.css             # グローバルCSS + まめアニメーション
+│   ├── lib/
 │   │   ├── supabase.js       # Supabaseクライアント初期化
-│   │   └── storage.js        # データアクセスレイヤー（読み書き）
+│   │   └── storage.js        # データアクセスレイヤー
 │   ├── constants/
-│   │   └── colors.js         # カラー定数・教科別カラー
+│   │   ├── colors.js         # カラー定数
+│   │   └── mameMessages.js   # 🐕 まめのセリフ集
 │   ├── components/
-│   │   ├── TreeSVG.js        # 🌳 木のSVGビジュアル
+│   │   ├── TreeSVG.js        # 🌳 木のSVG
 │   │   ├── ClockSVG.js       # ⏰ アナログ時計SVG
-│   │   └── StarBurst.js      # 🌟 正解演出オーバーレイ
+│   │   ├── StarBurst.js      # 🌟 正解演出
+│   │   ├── MameCharacter.js  # 🐕 まめコンポーネント
+│   │   └── UpdateBanner.js   # 🔄 更新通知バナー
 │   ├── screens/
-│   │   ├── HomeScreen.js     # ホーム画面
-│   │   ├── LearningScreen.js # 学習画面
-│   │   └── MimamoriScreen.js # みまもり画面
+│   │   ├── HomeScreen.js     # ホーム画面（まめ付き）
+│   │   ├── LearningScreen.js # 学習画面（まめリアクション付き）
+│   │   └── MimamoriScreen.js # みまもり画面（実データ）
 │   └── data/
-│       └── questions.js      # 問題データ（19問）
+│       └── questions.js      # 問題データ（57問）
 ├── docs/
 │   ├── current_state.md      # ← このファイル（北極星）
-│   └── changelog.html        # 変更履歴
-├── .env.example              # 🆕 環境変数テンプレート
+│   └── changelog.html
 ├── .gitignore
 ├── README.md
 ├── package.json
 └── package-lock.json
 ```
+
+### ⚠️ 画像パスの二重問題（既知）
+まめ画像が `public/public/images/mame/` に配置されている（publicが二重）。
+コード側で `/public/images/mame/` として参照することで回避中。
+将来的に `public/images/mame/` に正規化推奨。
+
+---
+
+## 🐕 キャラクター「まめ」
+
+| 項目 | 内容 |
+|------|------|
+| 名前 | まめ |
+| 種類 | 柴犬 |
+| 由来 | 「まめにがんばる」の掛け言葉 |
+| ポーズ数 | 5種類（happy/heart/question/run/sleep） |
+| 使用場所 | ホーム画面、学習画面、ローディング |
+| アニメーション | CSS（float/bounce/jump/tilt/pulse/breathe） |
+| セリフ | mameMessages.js（シーン別ランダム） |
+
+### まめの使用シーン
+| シーン | ポーズ | アニメーション | セリフ |
+|--------|--------|--------------|--------|
+| ホーム画面 | happy（通常）/ heart（完了後） | ゆらゆら | ランダム応援 |
+| ローディング | run | ぴょこぴょこ | - |
+| 問題出題中 | question | 首かしげ | 「どれかな〜？」等 |
+| 正解！ | happy | ジャンプ | 「すごーい！」等 |
+| 不正解 | question | 首かしげ | 「おしい！」等 |
 
 ---
 
@@ -159,27 +170,31 @@ manabi-no-ki/
 
 | 機能 | 説明 | ファイル |
 |------|------|----------|
-| ホーム画面 | まなびの木 + ストリーク + ミッションボタン | HomeScreen.js |
-| 学習画面（ミッション） | 5問ランダム出題、選択肢式 | LearningScreen.js |
-| 送り仮名れんしゅう | 漢字の送り仮名を選ぶ（6問） | questions.js, LearningScreen.js |
-| 時計れんしゅう | アナログ時計SVG + 読み取り問題（5問） | ClockSVG.js, questions.js |
-| みまもり画面 | 週間カレンダー + 教科別進捗 + 励まし | MimamoriScreen.js |
-| 正解演出 | 🌟ポップアップ + 木の成長フィードバック | StarBurst.js |
-| 木の成長 | 正答で葉/花/実が増えるビジュアル | TreeSVG.js |
-| ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな中心 | 全体 |
-| **Supabaseデータ永続化** | **🆕 学習データがリロードしても残る** | **lib/storage.js** |
-| **ローディング画面** | **🆕 起動時にデータ読み込み中の表示** | **App.js** |
-| **セッション記録** | **🆕 毎回の学習結果をDBに保存** | **lib/storage.js** |
+| ホーム画面 | まなびの木 + まめ🐕 + ストリーク + ボタン群 | HomeScreen.js |
+| 学習画面（ミッション） | 5問ランダム出題 + まめリアクション | LearningScreen.js |
+| 送り仮名れんしゅう | 漢字の送り仮名（12問） | questions.js |
+| 時計れんしゅう | アナログ時計SVG + 読み取り（10問） | ClockSVG.js |
+| みまもり画面 | 週間カレンダー + 教科別進捗（**実データ**） | MimamoriScreen.js |
+| 正解演出 | 🌟ポップアップ + 木の成長 | StarBurst.js |
+| 木の成長 | 正答で葉/花/実が増える | TreeSVG.js |
+| ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな | 全体 |
+| Supabaseデータ永続化 | リロードしても学習データが残る | lib/storage.js |
+| セッション記録 | 毎回の学習結果をDBに保存 | lib/storage.js |
+| まめ🐕キャラ | 5ポーズ + CSSアニメーション + 吹き出し | MameCharacter.js |
+| 更新通知バナー | 新バージョン検知で自動通知 | UpdateBanner.js |
 
-### 🔲 未実装（今後の予定）
+### 🔲 未実装（ハリボテ・ボタンあり機能なし）
+
+| 機能 | 現状 | 優先度 | 備考 |
+|------|------|--------|------|
+| **ごほうび画面** | ボタンあり・「じゅんびちゅう」表示 | 高 | バッジ/スタンプ/まめの着せ替え等 |
+| **ふくしゅう画面** | ボタンあり・「じゅんびちゅう」表示 | 高 | 苦手分野の自動検出→復習出題 |
+
+### 🔲 未実装（ボタンもまだない）
 
 | 機能 | 優先度 | 備考 |
 |------|--------|------|
 | Claude API問題自動生成 | 高 | 学年レベル指定で無限に問題生成 |
-| みまもり画面の実データ化 | 高 | learning_sessionsから実データ表示 |
-| 問題数追加 | 中 | 19問では足りない |
-| ごほうび画面 | 中 | バッジ・スタンプ一覧 |
-| ふくしゅう画面 | 中 | 苦手分野の自動検出と復習 |
 | 音声読み上げ | 中 | LD対応強化 |
 | UDフォント切替 | 低 | BIZ UDゴシック等 |
 | 理科・社会の問題追加 | 中 | 教科拡張 |
@@ -189,16 +204,16 @@ manabi-no-ki/
 
 ---
 
-## 📊 問題データ構成（v0.2.0時点）
+## 📊 問題データ構成（v0.3.0時点 / 57問）
 
-| 教科 | 問題数 | カテゴリ | type |
-|------|--------|----------|------|
-| さんすう | 4問 | 九九、二桁計算 | text |
-| こくご（読み・理解） | 3問 | 主語読取、漢字読み | text |
-| こくご（送りがな） | 6問 | 走/読/書/聞/歩/食 | text |
-| とけい | 5問 | 時計の読み方 | clock |
-| せいかつ | 1問 | 単位（メートル） | text |
-| **合計** | **19問** | | |
+| 教科 | 問題数 | 内容 | type | category |
+|------|--------|------|------|----------|
+| 🔢 さんすう | 15問 | 九九(5)・足し算(3)・引き算(3)・文章題(4) | text | - |
+| 📖 こくご（読み） | 10問 | 漢字読み・主語述語・季節 | text | - |
+| ✏️ こくご（送りがな） | 12問 | 走/読/書/聞/歩/食/思/話/買/泳/作/遊 | text | okurigana |
+| ⏰ とけい | 10問 | ちょうど・5分刻み・難問 | clock | - |
+| 🌱 せいかつ | 10問 | 単位・時間・方角・生き物・季節 | text | - |
+| **合計** | **57問** | | | |
 
 ---
 
@@ -208,22 +223,56 @@ manabi-no-ki/
 |----------|------|------|------|
 | Phase 0 | プロトタイプ作成・GitHub構築 | ✅ 完了 | 5/27 |
 | Phase 0.5 | Vercelデプロイ・お母さんプレゼン | ✅ 完了 | 5/28 |
-| Phase 1 | Supabase連携（学習データ保存） | ✅ **完了** | **5/28** |
-| Phase 2 | Claude API問題自動生成 | 🔲 次 | - |
-| Phase 3 | ごほうび・ふくしゅう画面 | 🔲 | - |
+| Phase 1 | Supabase連携（データ永続化） | ✅ 完了 | 5/28 |
+| Phase 1.5 | みまもり実データ化・まめ🐕実装・問題57問・更新通知 | ✅ **完了** | **5/29** |
+| Phase 2 | ごほうび画面・ふくしゅう画面 | 🔲 **次ここ** | - |
+| Phase 3 | Claude API問題自動生成 | 🔲 | - |
 | Phase 4 | お母さんフィードバック反映（随時） | 🔄 進行中 | - |
 | Phase 5 | 有料化検討（Stripe連携） | 🔲 | - |
 
 ---
 
+## 🔜 次スレッドでやること（優先順）
+
+### 🔴 高優先
+1. **ごほうび画面の実装**
+   - 新規: `src/screens/GohoubiScreen.js`
+   - 内容: バッジ一覧、スタンプ帳、まめの着せ替え等
+   - App.jsに画面遷移追加、HomeScreenのボタンにonClick設定
+   - Supabaseにバッジ/スタンプ用テーブル追加の可能性あり
+
+2. **ふくしゅう画面の実装**
+   - 新規: `src/screens/FukushuScreen.js`
+   - 内容: learning_sessionsから苦手分野を検出 → その分野の問題を出題
+   - 不正解率の高いモード/問題を優先表示
+   - App.jsに画面遷移追加、HomeScreenのボタンにonClick設定
+
+3. **Claude API問題自動生成**
+   - 新規: `src/lib/questionGenerator.js`
+   - Claude APIキーをVercel環境変数に設定
+   - 学年レベル・教科を指定して動的に問題生成
+   - Supabaseに生成問題キャッシュ用テーブル追加
+
+### 🟡 中優先
+4. **package.json version同期** → `0.3.0`に合わせる（軽微）
+5. **画像パス正規化** → `public/public/images/mame/` → `public/images/mame/`
+6. **音声読み上げ** → Web Speech APIでLD対応強化
+7. **教科追加**（理科・社会）
+
+### 🟢 低優先
+8. **PWA対応**
+9. **カスタムドメイン**
+10. **有料化検討**
+
+---
+
 ## 🐛 既知の課題・注意事項
 
-1. **みまもり画面はまだデモデータ**: learning_sessionsからの実データ表示は未実装
-2. **問題数が少ない**: 19問のみ。Claude API連携で無限生成が必要
-3. **ごほうび・ふくしゅうは見た目のみ**: ボタンはあるが遷移先なし
-4. **ストリーク管理**: ミッションモードでのみストリークが増える設計。時計・送り仮名では増えない
-5. **デバイスID方式**: 同じブラウザでのみデータ共有。別ブラウザ/端末では別データ
-6. **anon keyの安全性**: Supabaseのanon keyは公開前提。RLS設定済み。service_role keyは絶対にコードに書かないこと
+1. **画像パス二重**: `public/public/images/mame/` → コード側で `/public/images/mame/` 参照で回避中
+2. **package.json version未同期**: `0.2.0` のまま（v0.3.0に合わせること）
+3. **ごほうび・ふくしゅうはハリボテ**: ボタンあるが「じゅんびちゅう」表示のみ
+4. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
+5. **anon keyの安全性**: Supabase anon keyは公開前提。RLS設定済み。service_role keyは絶対にコードに書かないこと
 
 ---
 
@@ -232,8 +281,9 @@ manabi-no-ki/
 | 日付 | 内容 | 対応状況 |
 |------|------|----------|
 | 5/27 | 「かわいい！」 | ✅ 好反応 |
-| 5/27 | 漢字の送り仮名も作ってほしい | ✅ v0.1.1で実装 |
-| 5/27 | 時計の見方も作ってほしい | ✅ v0.1.1で実装（アナログ時計SVG付き） |
+| 5/27 | 漢字の送り仮名も作ってほしい | ✅ 実装済み |
+| 5/27 | 時計の見方も作ってほしい | ✅ 実装済み |
+| - | （追加フィードバック待ち） | 🔲 |
 
 ---
 
@@ -241,39 +291,28 @@ manabi-no-ki/
 
 ### バージョン管理
 - `public/version.json` と `src/App.js` の `APP_VERSION` と `package.json` の `version` を必ず同時更新
-- コミットメッセージに絵文字＋バージョン番号を含める
-- 修正は該当ファイルのみ変更（全書き換え禁止）
+- version.json を更新すると、古いキャッシュのユーザーに更新通知バナーが表示される
 
 ### ファイル修正ルール
-- 修正前に必ず影響範囲を確認（5ステップ確認）
+- 修正前に必ず影響範囲を5ステップで確認
 - コードの修正はちゃぴが担当（のんは触らない）
 - ファイル分割を維持し、App.js肥大化を防ぐ
+- 新画面追加時: Screen作成 → App.jsにimport+ルーティング → HomeScreenにボタン
 
 ### 環境変数ルール
-- APIキーはVercel環境変数で管理、コードに直接書かない
-- `.env`ファイルは`.gitignore`で除外（GitHubにプッシュされない）
-- anon keyは公開前提だが、service_role keyは絶対非公開
+- APIキーはVercel環境変数で管理
+- `.env`は`.gitignore`で除外
+- anon keyは公開前提、service_role keyは絶対非公開
+
+### GitHub操作（のん向け）
+- 新規ファイル: 「Add file」→「Create new file」→ パスを入力（/でフォルダ自動作成）
+- 上書き: ファイルを開いて✏️ → 全選択して貼り替え → Commit
+- 画像: フォルダに移動してから「Upload files」
+- ⚠️ `src/components/` と `src/constants/` を間違えないこと！
 
 ### スレッド引き継ぎ
 - スレッド終了時に必ずこのファイルを更新
-- 作業ダイジェストを作成
-- changelog.htmlに追記内容を作成
-- 次回開始時の引き継ぎメモを作成
-
----
-
-## 🔑 スレッド引き継ぎ用呼び出しテンプレート
-
-```
-GitHub docs/current_state.md を正本とし、
-これに沿って進めていくことを基本とします。
-
-過去の開発ダイジェストはGoogle Driveまなびの木開発アーカイブに保管されています。
-必要な場合のみ参照し、最新状態としては扱わないでください。
-最新状態は必ず GitHub の docs/current_state.md を優先してください。
-
-ファイル参照のうえ、よりよい提案、製作を進めること。
-```
+- 作業ダイジェスト・changelog・引き継ぎメモを作成
 
 ---
 
@@ -286,6 +325,6 @@ GitHub docs/current_state.md を正本とし、
 
 ---
 
-> 最終更新: 2026年5月28日（水）16:00 JST
+> 最終更新: 2026年5月29日（木）19:00 JST
 > 更新者: ちゃぴ
-> バージョン: v0.2.0（Supabase連携完了）
+> バージョン: v0.3.0（まめ🐕キャラ実装・問題57問・更新通知バナー搭載）
