@@ -7,12 +7,12 @@ import React from 'react';
 
 // ポーズ → 画像ファイルのマッピング
 const POSE_IMAGES = {
-  normal: '/images/mame/mame_happy.png',     // 通常（バンザイ）
-  run: '/images/mame/mame_run.png',           // 走る/ジャンプ
-  happy: '/images/mame/mame_happy.png',       // 正解！バンザイ
-  question: '/images/mame/mame_question.png', // 問題出題/不正解
-  heart: '/images/mame/mame_heart.png',       // ミッション完了
-  sleep: '/images/mame/mame_sleep.png',       // おやすみ
+  normal: '/public/images/mame/mame_happy.png',     // 通常（バンザイ）
+  run: '/public/images/mame/mame_run.png',           // 走る/ジャンプ
+  happy: '/public/images/mame/mame_happy.png',       // 正解！バンザイ
+  question: '/public/images/mame/mame_question.png', // 問題出題/不正解
+  heart: '/public/images/mame/mame_heart.png',       // ミッション完了
+  sleep: '/public/images/mame/mame_sleep.png',       // おやすみ
 };
 
 // ポーズ → アニメーション名のマッピング
