@@ -1,16 +1,32 @@
 // ============================================
 // 🏠 HomeScreen - メインホーム画面
-// まなびの木 + ミッションボタン + ナビゲーション
+// まなびの木 + まめ🐕 + ミッションボタン + ナビ
+// v0.3.0: まめキャラ登場！
 // ============================================
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TreeSVG from '../components/TreeSVG';
+import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
+import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
 
 const HomeScreen = ({ 
   leaves, flowers, fruits, streak, todayDone,
   onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock
 }) => {
+  const [mameMessage, setMameMessage] = useState('');
+
+  // 画面表示時にまめのメッセージをセット
+  useEffect(() => {
+    if (todayDone) {
+      setMameMessage('きょうの ミッション クリア！えらいね！🎉');
+    } else if (streak >= 3) {
+      setMameMessage(getStreakMessage(streak));
+    } else {
+      setMameMessage(getMameMessage('home'));
+    }
+  }, [todayDone, streak]);
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -43,7 +59,7 @@ const HomeScreen = ({
             🌳 まなびの木
           </div>
           <div style={{ fontSize: 13, color: COLORS.textLight, marginTop: 2 }}>
-            きょうも いっしょに がんばろう！
+            まめと いっしょに がんばろう！
           </div>
         </div>
         <button
@@ -73,12 +89,22 @@ const HomeScreen = ({
         </div>
       )}
 
-      {/* 木エリア */}
+      {/* 木 + まめエリア */}
       <div style={{
-        display: 'flex', justifyContent: 'center',
-        padding: '0 20px', marginTop: 8,
+        display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        padding: '0 20px', marginTop: 8, position: 'relative',
       }}>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
+        {/* まめは木の横に立つ */}
+        <div style={{
+          position: 'absolute', right: 20, bottom: 0,
+        }}>
+          <MameCharacter
+            pose={todayDone ? 'heart' : 'normal'}
+            message={mameMessage}
+            size={80}
+          />
+        </div>
       </div>
 
       {/* 木のステータス */}
@@ -159,23 +185,23 @@ const HomeScreen = ({
         <div style={{
           background: 'white', borderRadius: 16, padding: 16,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer',
+          cursor: 'pointer', opacity: 0.6,
         }}>
           <div style={{ fontSize: 28, marginBottom: 4 }}>🎁</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>ごほうび</div>
           <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
-            バッジ 3こ あつめたよ
+            じゅんび ちゅう...
           </div>
         </div>
         <div style={{
           background: 'white', borderRadius: 16, padding: 16,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer',
+          cursor: 'pointer', opacity: 0.6,
         }}>
           <div style={{ fontSize: 28, marginBottom: 4 }}>📚</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>ふくしゅう</div>
           <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
-            にがてを れんしゅう
+            じゅんび ちゅう...
           </div>
         </div>
       </div>
