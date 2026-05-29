@@ -1,13 +1,16 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
 // 1回5問、選択肢式、正解で木が育つ
+// v0.3.0: まめ🐕リアクション追加！
 // ============================================
 
 import React, { useState } from 'react';
 import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
+import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory } from '../data/questions';
+import { getMameMessage } from '../constants/mameMessages';
 
 // モード名の表示テキスト
 const MODE_LABELS = {
@@ -28,6 +31,10 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
   const [showStar, setShowStar] = useState(false);
   const [score, setScore] = useState(0);
 
+  // まめの状態
+  const [mamePose, setMamePose] = useState('question');
+  const [mameMsg, setMameMsg] = useState(getMameMessage('question'));
+
   const q = questions[currentQ];
   if (!q) return null;
 
@@ -39,6 +46,8 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
     if (idx === q.correct) {
       const newScore = score + 1;
       setScore(newScore);
+      setMamePose('happy');
+      setMameMsg(getMameMessage('correct'));
       setTimeout(() => {
         setShowStar(true);
         setTimeout(() => {
@@ -47,16 +56,21 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
             setCurrentQ(c => c + 1);
             setSelected(null);
             setShowResult(false);
+            setMamePose('question');
+            setMameMsg(getMameMessage('question'));
           } else {
             onComplete(newScore, questions.length);
           }
         }, 1500);
       }, 500);
     } else {
-      // 不正解: 少し待ってリセット（再挑戦可能）
+      // 不正解
+      setMamePose('question');
+      setMameMsg(getMameMessage('wrong'));
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
+        setMameMsg(getMameMessage('question'));
       }, 1800);
     }
   };
@@ -116,7 +130,7 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
         <div style={{
           background: 'white', borderRadius: 20, padding: '28px 24px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          marginBottom: 20,
+          marginBottom: 20, position: 'relative',
         }}>
           {/* 時計タイプの場合はアナログ時計を表示 */}
           {q.type === 'clock' && q.clockTime && (
@@ -138,6 +152,18 @@ const LearningScreen = ({ mode = 'mission', onComplete, onBack }) => {
           }}>
             💡 {q.hint}
           </div>
+        </div>
+
+        {/* まめリアクション */}
+        <div style={{
+          display: 'flex', justifyContent: 'center',
+          marginBottom: 16,
+        }}>
+          <MameCharacter
+            pose={mamePose}
+            message={mameMsg}
+            size={70}
+          />
         </div>
 
         {/* 選択肢 */}
