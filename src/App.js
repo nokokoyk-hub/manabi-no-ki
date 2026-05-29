@@ -98,11 +98,13 @@ function App() {
         background: 'linear-gradient(180deg, #E3F2FD 0%, #F1F8E9 40%, #FFFFFF 100%)',
         fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
       }}>
-        <div style={{ fontSize: 48, marginBottom: 16, animation: 'pulse 1.5s ease-in-out infinite' }}>
-          🌳
-        </div>
+        <img
+          src="/images/mame/mame_run.png"
+          alt="まめ"
+          style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 16, animation: 'mame-bounce 0.6s ease-in-out infinite' }}
+        />
         <div style={{ fontSize: 18, fontWeight: 700, color: '#2E7D32' }}>
-          まなびの木を そだてています...
+          まめが じゅんび しています...
         </div>
       </div>
     );
