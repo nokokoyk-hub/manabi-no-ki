@@ -1,16 +1,18 @@
 // ============================================
 // 💾 storage.js - データアクセスレイヤー
-// Supabaseへの読み書きを一元管理
+// Supabaseへの読み書き + 端末ごとの設定を一元管理
 // Supabase未設定時はローカルstateで動作（フォールバック）
 // ============================================
 
 import { supabase } from './supabase';
+import { DEFAULT_SUBJECT_LEVELS, normalizeSubjectLevels } from '../constants/learningLevels';
 
 // ------------------------------------------
 // デバイスID管理
 // ブラウザのlocalStorageに保存して端末を識別
 // ------------------------------------------
 const DEVICE_ID_KEY = 'manabi_device_id';
+const SUBJECT_LEVELS_KEY = 'manabi_subject_levels';
 
 export const getDeviceId = () => {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
@@ -19,6 +21,32 @@ export const getDeviceId = () => {
     localStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
   return deviceId;
+};
+
+// ------------------------------------------
+// 教科別レベル設定
+// まずは端末localStorageで保存。DBスキーマ変更なしで安全に導入する。
+// ------------------------------------------
+export const loadSubjectLevels = () => {
+  try {
+    const raw = localStorage.getItem(SUBJECT_LEVELS_KEY);
+    if (!raw) return DEFAULT_SUBJECT_LEVELS;
+    return normalizeSubjectLevels(JSON.parse(raw));
+  } catch (err) {
+    console.error('❌ レベル設定読み込みエラー:', err);
+    return DEFAULT_SUBJECT_LEVELS;
+  }
+};
+
+export const saveSubjectLevels = (levels) => {
+  try {
+    const normalized = normalizeSubjectLevels(levels);
+    localStorage.setItem(SUBJECT_LEVELS_KEY, JSON.stringify(normalized));
+    return normalized;
+  } catch (err) {
+    console.error('❌ レベル設定保存エラー:', err);
+    return DEFAULT_SUBJECT_LEVELS;
+  }
 };
 
 // ------------------------------------------
