@@ -13,7 +13,7 @@
 - **デプロイ**: Vercel（予定）
 - **AI問題生成**: Claude API（予定）
 
-## セットアップ
+## セットアップ♪
 ```bash
 npm install
 npm start
