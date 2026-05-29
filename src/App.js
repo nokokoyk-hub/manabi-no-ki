@@ -1,6 +1,6 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.3.0
+// バージョン: 0.4.0
 // 最終更新: 2026/05/29
 // ============================================
 // ⚠️ 修正時の注意:
@@ -13,15 +13,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
+import LevelSettingsScreen from './screens/LevelSettingsScreen';
 import UpdateBanner from './components/UpdateBanner';
-import { loadProgress, saveProgress, recordSession, DEFAULT_PROGRESS } from './lib/storage';
+import {
+  loadProgress,
+  saveProgress,
+  recordSession,
+  DEFAULT_PROGRESS,
+  loadSubjectLevels,
+  saveSubjectLevels,
+} from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
   const [learningMode, setLearningMode] = useState('mission');
+  const [subjectLevels, setSubjectLevels] = useState(() => loadSubjectLevels());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -50,6 +59,11 @@ function App() {
       }
     };
     init();
+  }, []);
+
+  const handleSubjectLevelsChange = useCallback((nextLevels) => {
+    const savedLevels = saveSubjectLevels(nextLevels);
+    setSubjectLevels(savedLevels);
   }, []);
 
   // 学習完了時のハンドラ
@@ -118,12 +132,21 @@ function App() {
         return (
           <LearningScreen
             mode={learningMode}
+            subjectLevels={subjectLevels}
             onComplete={handleLearningComplete}
             onBack={() => setScreen('home')}
           />
         );
       case 'mimamori':
         return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} />;
+      case 'level-settings':
+        return (
+          <LevelSettingsScreen
+            levels={subjectLevels}
+            onChange={handleSubjectLevelsChange}
+            onBack={() => setScreen('home')}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -132,10 +155,12 @@ function App() {
             fruits={fruits}
             streak={streak}
             todayDone={todayDone}
+            subjectLevels={subjectLevels}
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
             onOpenMimamori={() => setScreen('mimamori')}
+            onOpenLevelSettings={() => setScreen('level-settings')}
           />
         );
     }
