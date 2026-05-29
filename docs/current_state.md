@@ -27,12 +27,13 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.1.1** |
-| version.json | `public/version.json` → `"version": "0.1.0"` ※次回更新時に0.1.1に合わせる |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.1.0'` ※同上 |
+| 現在のバージョン | **v0.2.0** |
+| version.json | `public/version.json` → `"version": "0.2.0"` ✅同期済み |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.2.0'` ✅同期済み |
+| package.json | `"version": "0.2.0"` ✅同期済み |
 | 最終更新日 | 2026年5月28日（水） |
 
-> ⚠️ version.json と App.js の APP_VERSION は常に同期させること
+> ⚠️ version.json と App.js の APP_VERSION と package.json は常に同期させること
 
 ---
 
@@ -41,11 +42,11 @@
 | レイヤー | 技術 | 状態 |
 |----------|------|------|
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
-| バックエンド | Supabase | 🔲 未着手 |
+| バックエンド | Supabase | ✅ 稼働中（v0.2.0〜） |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
 | AI問題生成 | Claude API | 🔲 未着手 |
 | 決済 | Stripe | 🔲 未着手（将来の有料化時） |
-| バージョン管理 | GitHub | ✅ 稼働中 |
+| バージョン管理 | GitHub | ✅ 稼働中（Public） |
 | フォント | Rounded Mplus 1c（Google Fonts） | ✅ 稼働中 |
 
 ---
@@ -55,10 +56,9 @@
 ### GitHub
 | 項目 | 値 |
 |------|-----|
-| リポジトリ | `nokokoyk-hub/manabi-no-ki`（Private） |
+| リポジトリ | `nokokoyk-hub/manabi-no-ki`（**Public**） |
 | URL | https://github.com/nokokoyk-hub/manabi-no-ki |
 | ブランチ | `main`（本番） |
-| 最新コミット | `d10cfd2` - APP_VERSION未使用警告修正 |
 
 ### Vercel
 | 項目 | 値 |
@@ -69,45 +69,86 @@
 | フレームワーク | Create React App（自動検出） |
 | デプロイ方式 | GitHub連携（mainプッシュで自動デプロイ） |
 | Deployment Protection | OFF（お母さんのスマホでアクセス可能にするため） |
+| 環境変数 | `REACT_APP_SUPABASE_URL`, `REACT_APP_SUPABASE_ANON_KEY` 設定済み |
 | デプロイ状態 | ✅ READY |
 
-### Supabase（未着手）
-- プロジェクト未作成
-- 学習データ永続化、ユーザー管理に使用予定
+### Supabase
+| 項目 | 値 |
+|------|-----|
+| プロジェクト名 | `manabi-no-ki` |
+| プロジェクトID | `ndqbtfahtjaafroevgwq` |
+| リージョン | `ap-northeast-1`（東京） |
+| URL | `https://ndqbtfahtjaafroevgwq.supabase.co` |
+| ステータス | ✅ ACTIVE_HEALTHY |
+
+#### テーブル構成
+| テーブル | 用途 | RLS |
+|----------|------|-----|
+| `user_progress` | 木の成長状態・ストリーク・最終学習日 | ✅有効 |
+| `learning_sessions` | 学習セッション記録（モード・スコア・日時） | ✅有効 |
+
+#### user_progress カラム
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | 主キー |
+| device_id | TEXT (UNIQUE) | 端末識別子 |
+| leaves | INT (0-10) | 葉の数 |
+| flowers | INT (0-5) | 花の数 |
+| fruits | INT (0-3) | 実の数 |
+| streak | INT | 連続日数 |
+| last_study_date | DATE | 最終学習日 |
+| today_done | BOOLEAN | 今日のミッション完了フラグ |
+| updated_at | TIMESTAMPTZ | 自動更新トリガー付き |
+
+#### learning_sessions カラム
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | UUID | 主キー |
+| device_id | TEXT | 端末識別子 |
+| mode | TEXT | mission/okurigana/clock |
+| score | INT | 正解数 |
+| total_questions | INT | 出題数 |
+| completed_at | TIMESTAMPTZ | 完了日時 |
 
 ---
 
-## 📁 ファイル構成（v0.1.1時点）
+## 📁 ファイル構成（v0.2.0時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── index.html          # PWA対応、lang="ja"
 │   ├── manifest.json        # アプリ名・テーマカラー設定
-│   ├── version.json         # バージョン管理
+│   ├── version.json         # バージョン管理（0.2.0）
 │   ├── favicon.ico
 │   └── robots.txt
 ├── src/
-│   ├── App.js               # メインルーター（画面遷移管理）
+│   ├── App.js               # メインルーター + Supabase連携
 │   ├── index.js              # エントリーポイント
 │   ├── index.css             # グローバルCSS・アニメーション定義
+│   ├── lib/                  # 🆕 v0.2.0追加
+│   │   ├── supabase.js       # Supabaseクライアント初期化
+│   │   └── storage.js        # データアクセスレイヤー（読み書き）
 │   ├── constants/
-│   │   └── colors.js         # カラー定数・教科別カラー（一括管理）
+│   │   └── colors.js         # カラー定数・教科別カラー
 │   ├── components/
-│   │   ├── TreeSVG.js        # 🌳 木のSVGビジュアル（葉/花/実）
-│   │   ├── ClockSVG.js       # ⏰ アナログ時計SVG（時計問題用）
+│   │   ├── TreeSVG.js        # 🌳 木のSVGビジュアル
+│   │   ├── ClockSVG.js       # ⏰ アナログ時計SVG
 │   │   └── StarBurst.js      # 🌟 正解演出オーバーレイ
 │   ├── screens/
-│   │   ├── HomeScreen.js     # ホーム画面（木・ミッション・練習ボタン）
-│   │   ├── LearningScreen.js # 学習画面（モード対応: mission/okurigana/clock）
-│   │   └── MimamoriScreen.js # みまもり画面（保護者用・週間記録）
+│   │   ├── HomeScreen.js     # ホーム画面
+│   │   ├── LearningScreen.js # 学習画面
+│   │   └── MimamoriScreen.js # みまもり画面
 │   └── data/
-│       └── questions.js      # 問題データ（19問）+ 取得関数
+│       └── questions.js      # 問題データ（19問）
 ├── docs/
-│   └── current_state.md      # ← このファイル（北極星）
+│   ├── current_state.md      # ← このファイル（北極星）
+│   └── changelog.html        # 変更履歴
+├── .env.example              # 🆕 環境変数テンプレート
 ├── .gitignore
 ├── README.md
-└── package.json
+├── package.json
+└── package-lock.json
 ```
 
 ---
@@ -126,13 +167,17 @@ manabi-no-ki/
 | 正解演出 | 🌟ポップアップ + 木の成長フィードバック | StarBurst.js |
 | 木の成長 | 正答で葉/花/実が増えるビジュアル | TreeSVG.js |
 | ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな中心 | 全体 |
+| **Supabaseデータ永続化** | **🆕 学習データがリロードしても残る** | **lib/storage.js** |
+| **ローディング画面** | **🆕 起動時にデータ読み込み中の表示** | **App.js** |
+| **セッション記録** | **🆕 毎回の学習結果をDBに保存** | **lib/storage.js** |
 
 ### 🔲 未実装（今後の予定）
 
 | 機能 | 優先度 | 備考 |
 |------|--------|------|
-| Supabase連携（データ永続化） | 高 | 学習記録の保存、ストリーク維持 |
 | Claude API問題自動生成 | 高 | 学年レベル指定で無限に問題生成 |
+| みまもり画面の実データ化 | 高 | learning_sessionsから実データ表示 |
+| 問題数追加 | 中 | 19問では足りない |
 | ごほうび画面 | 中 | バッジ・スタンプ一覧 |
 | ふくしゅう画面 | 中 | 苦手分野の自動検出と復習 |
 | 音声読み上げ | 中 | LD対応強化 |
@@ -144,7 +189,7 @@ manabi-no-ki/
 
 ---
 
-## 📊 問題データ構成（v0.1.1時点）
+## 📊 問題データ構成（v0.2.0時点）
 
 | 教科 | 問題数 | カテゴリ | type |
 |------|--------|----------|------|
@@ -163,8 +208,8 @@ manabi-no-ki/
 |----------|------|------|------|
 | Phase 0 | プロトタイプ作成・GitHub構築 | ✅ 完了 | 5/27 |
 | Phase 0.5 | Vercelデプロイ・お母さんプレゼン | ✅ 完了 | 5/28 |
-| Phase 1 | Supabase連携（学習データ保存） | 🔲 次 | - |
-| Phase 2 | Claude API問題自動生成 | 🔲 | - |
+| Phase 1 | Supabase連携（学習データ保存） | ✅ **完了** | **5/28** |
+| Phase 2 | Claude API問題自動生成 | 🔲 次 | - |
 | Phase 3 | ごほうび・ふくしゅう画面 | 🔲 | - |
 | Phase 4 | お母さんフィードバック反映（随時） | 🔄 進行中 | - |
 | Phase 5 | 有料化検討（Stripe連携） | 🔲 | - |
@@ -173,11 +218,12 @@ manabi-no-ki/
 
 ## 🐛 既知の課題・注意事項
 
-1. **version.json と APP_VERSION のズレ**: 現在 version.json は `0.1.0` のまま。次回更新時に `0.1.1` に合わせる
-2. **データは揮発性**: 現在はReact stateのみ。ブラウザリロードで学習データが消える。Supabase連携が急務
-3. **問題数が少ない**: 19問のみ。Claude API連携で無限生成が必要
-4. **みまもり画面はデモデータ**: 実データではなくハードコードされたサンプル
-5. **ごほうび・ふくしゅうは見た目のみ**: ボタンはあるが遷移先なし
+1. **みまもり画面はまだデモデータ**: learning_sessionsからの実データ表示は未実装
+2. **問題数が少ない**: 19問のみ。Claude API連携で無限生成が必要
+3. **ごほうび・ふくしゅうは見た目のみ**: ボタンはあるが遷移先なし
+4. **ストリーク管理**: ミッションモードでのみストリークが増える設計。時計・送り仮名では増えない
+5. **デバイスID方式**: 同じブラウザでのみデータ共有。別ブラウザ/端末では別データ
+6. **anon keyの安全性**: Supabaseのanon keyは公開前提。RLS設定済み。service_role keyは絶対にコードに書かないこと
 
 ---
 
@@ -194,7 +240,7 @@ manabi-no-ki/
 ## 🔧 開発ルール
 
 ### バージョン管理
-- `public/version.json` と `src/App.js` の `APP_VERSION` を必ず同時更新
+- `public/version.json` と `src/App.js` の `APP_VERSION` と `package.json` の `version` を必ず同時更新
 - コミットメッセージに絵文字＋バージョン番号を含める
 - 修正は該当ファイルのみ変更（全書き換え禁止）
 
@@ -202,6 +248,11 @@ manabi-no-ki/
 - 修正前に必ず影響範囲を確認（5ステップ確認）
 - コードの修正はちゃぴが担当（のんは触らない）
 - ファイル分割を維持し、App.js肥大化を防ぐ
+
+### 環境変数ルール
+- APIキーはVercel環境変数で管理、コードに直接書かない
+- `.env`ファイルは`.gitignore`で除外（GitHubにプッシュされない）
+- anon keyは公開前提だが、service_role keyは絶対非公開
 
 ### スレッド引き継ぎ
 - スレッド終了時に必ずこのファイルを更新
@@ -217,7 +268,7 @@ manabi-no-ki/
 GitHub docs/current_state.md を正本とし、
 これに沿って進めていくことを基本とします。
 
-過去の開発ダイジェストはGoogle Driveに保管されています。
+過去の開発ダイジェストはGoogle Driveまなびの木開発アーカイブに保管されています。
 必要な場合のみ参照し、最新状態としては扱わないでください。
 最新状態は必ず GitHub の docs/current_state.md を優先してください。
 
@@ -231,8 +282,10 @@ GitHub docs/current_state.md を正本とし、
 - GitHub: https://github.com/nokokoyk-hub/manabi-no-ki
 - Vercel: https://manabi-no-ki-kannari-norikos-projects.vercel.app
 - Vercelダッシュボード: https://vercel.com/kannari-norikos-projects/manabi-no-ki
+- Supabaseダッシュボード: https://supabase.com/dashboard/project/ndqbtfahtjaafroevgwq
 
 ---
 
-> 最終更新: 2026年5月28日（水）10:10 JST
+> 最終更新: 2026年5月28日（水）16:00 JST
 > 更新者: ちゃぴ
+> バージョン: v0.2.0（Supabase連携完了）
