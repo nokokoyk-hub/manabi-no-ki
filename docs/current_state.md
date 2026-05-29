@@ -12,10 +12,10 @@
 |------|------|
 | アプリ名 | まなびの木 |
 | コンセプト | 学ぶほどに木が育つ、発達障害児向け自宅学習アプリ |
-| 対象ユーザー | 小学4年生（実質小2レベル）、知的グレー（約2歳の遅れ） |
+| 対象ユーザー | 小学4年生（教科ごとに得意・苦手の凸凹あり） |
 | 発達特性 | ADHD + LD 複合（推定） |
 | 学習状況 | 不登校・自宅学習中。進研ゼミ小2教材がフィット |
-| 学習教科 | 全教科（さんすう・こくご・せいかつ・とけい、順次拡張予定） |
+| 学習教科 | さんすう・こくご・せいかつ・とけい、順次拡張予定 |
 | 使用端末 | スマホ（メイン）、iPad（サブ） |
 | 依頼元 | のんの親戚のお母さん |
 | 開発体制 | のん × ちゃぴ |
@@ -27,13 +27,14 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.3.0** |
-| version.json | `public/version.json` → `"version": "0.3.0"` ✅ |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.3.0'` ✅ |
-| package.json | `"version": "0.2.0"` ⚠️ **未同期（0.3.0に合わせること）** |
-| 最終更新日 | 2026年5月29日（木） |
+| 現在のバージョン | **v0.4.0** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.4.0'` ✅ |
+| package.json | `"version": "0.4.0"` ✅ |
+| version.json | `public/version.json` → `0.3.0` ⚠️ 更新ツールがブロックされたため未反映。手動で `0.4.0` へ更新すること |
+| package-lock.json | `0.2.0` ⚠️ 依存関係更新なし。次回npm install時に同期推奨 |
+| 最終更新日 | 2026年5月29日（金） |
 
-> ⚠️ version.json と App.js の APP_VERSION と package.json は常に同期させること
+> ⚠️ version.json と App.js の APP_VERSION と package.json は常に同期させること。今回は `public/version.json` 更新のみツール側でブロックされたため、要手動確認。
 
 ---
 
@@ -56,8 +57,7 @@
 ### GitHub
 | 項目 | 値 |
 |------|-----|
-| リポジトリ | `nokokoyk-hub/manabi-no-ki`（**Public**） |
-| URL | https://github.com/nokokoyk-hub/manabi-no-ki |
+| リポジトリ | `nokokoyk-hub/manabi-no-ki`（Public） |
 | ブランチ | `main`（本番） |
 
 ### Vercel
@@ -65,7 +65,7 @@
 |------|-----|
 | プロジェクトID | `prj_NC6rJ3LFMakVQ9cXLCb3zl53xaYm` |
 | チームID | `team_wLDUprmHVwDKbqydwaFCl5k7` |
-| 本番URL | https://manabi-no-ki-kannari-norikos-projects.vercel.app |
+| 本番URL | `manabi-no-ki-kannari-norikos-projects.vercel.app` |
 | フレームワーク | Create React App（自動検出） |
 | デプロイ方式 | GitHub連携（mainプッシュで自動デプロイ） |
 | Deployment Protection | OFF |
@@ -85,59 +85,56 @@
 | `user_progress` | 木の成長状態・ストリーク・最終学習日 | ✅有効 |
 | `learning_sessions` | 学習セッション記録（モード・スコア・日時） | ✅有効 |
 
+> v0.4.0の教科別レベル設定は、DBスキーマ変更を避けるため端末localStorage保存で導入。将来、端末またぎ対応が必要になったらSupabaseへ移行検討。
+
 ---
 
-## 📁 ファイル構成（v0.3.0時点）
+## 📁 ファイル構成（v0.4.0時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── index.html
 │   ├── manifest.json
-│   ├── version.json         # バージョン管理（0.3.0）+ 更新通知用
+│   ├── version.json         # ⚠️ 現在0.3.0。手動で0.4.0へ更新必要
 │   ├── favicon.ico
 │   ├── robots.txt
-│   └── public/images/mame/  # ⚠️ パスが二重！（後述）
-│       ├── mame_happy.png   # 🙌 バンザイ・正解時
-│       ├── mame_heart.png   # 💖 ミッション完了
-│       ├── mame_question.png # ❓ 首かしげ・出題中
-│       ├── mame_run.png     # 🏃 走る・ローディング
-│       └── mame_sleep.png   # 💤 おやすみ
+│   └── public/images/mame/  # ⚠️ パスが二重
 ├── src/
-│   ├── App.js               # メインルーター + Supabase連携 + 更新通知
+│   ├── App.js               # メインルーター + Supabase連携 + レベル設定 + 更新通知
 │   ├── index.js
-│   ├── index.css             # グローバルCSS + まめアニメーション
+│   ├── index.css
 │   ├── lib/
-│   │   ├── supabase.js       # Supabaseクライアント初期化
-│   │   └── storage.js        # データアクセスレイヤー
+│   │   ├── supabase.js
+│   │   └── storage.js        # データアクセス + localStorage設定
 │   ├── constants/
-│   │   ├── colors.js         # カラー定数
-│   │   └── mameMessages.js   # 🐕 まめのセリフ集
+│   │   ├── colors.js
+│   │   ├── learningLevels.js # 🎚️ 教科別レベル定義
+│   │   └── mameMessages.js
 │   ├── components/
-│   │   ├── TreeSVG.js        # 🌳 木のSVG
-│   │   ├── ClockSVG.js       # ⏰ アナログ時計SVG
-│   │   ├── StarBurst.js      # 🌟 正解演出
-│   │   ├── MameCharacter.js  # 🐕 まめコンポーネント
-│   │   └── UpdateBanner.js   # 🔄 更新通知バナー
+│   │   ├── TreeSVG.js
+│   │   ├── ClockSVG.js
+│   │   ├── StarBurst.js
+│   │   ├── MameCharacter.js
+│   │   └── UpdateBanner.js
 │   ├── screens/
-│   │   ├── HomeScreen.js     # ホーム画面（まめ付き）
-│   │   ├── LearningScreen.js # 学習画面（まめリアクション付き）
-│   │   └── MimamoriScreen.js # みまもり画面（実データ）
+│   │   ├── HomeScreen.js          # ホーム画面（まめ + レベル設定導線）
+│   │   ├── LearningScreen.js      # 学習画面（教科別レベル反映）
+│   │   ├── LevelSettingsScreen.js # 🎚️ 教科別レベル設定画面
+│   │   └── MimamoriScreen.js
 │   └── data/
-│       └── questions.js      # 問題データ（57問）
+│       ├── questions.js      # 既存問題データ（57問）
+│       └── levelQuestions.js # 🎚️ レベル対応追加問題 + 出題セレクター
 ├── docs/
-│   ├── current_state.md      # ← このファイル（北極星）
-│   └── changelog.html
-├── .gitignore
-├── README.md
+│   ├── current_state.md
+│   ├── changelog.html
+│   └── handoff_2026-05-29-v0.4.0.md
 ├── package.json
 └── package-lock.json
 ```
 
 ### ⚠️ 画像パスの二重問題（既知）
-まめ画像が `public/public/images/mame/` に配置されている（publicが二重）。
-コード側で `/public/images/mame/` として参照することで回避中。
-将来的に `public/images/mame/` に正規化推奨。
+まめ画像が `public/public/images/mame/` に配置されている。コード側で `/public/images/mame/` として参照することで回避中。将来的に `public/images/mame/` に正規化推奨。
 
 ---
 
@@ -149,18 +146,9 @@ manabi-no-ki/
 | 種類 | 柴犬 |
 | 由来 | 「まめにがんばる」の掛け言葉 |
 | ポーズ数 | 5種類（happy/heart/question/run/sleep） |
-| 使用場所 | ホーム画面、学習画面、ローディング |
+| 使用場所 | ホーム画面、学習画面、ローディング、レベル設定画面 |
 | アニメーション | CSS（float/bounce/jump/tilt/pulse/breathe） |
 | セリフ | mameMessages.js（シーン別ランダム） |
-
-### まめの使用シーン
-| シーン | ポーズ | アニメーション | セリフ |
-|--------|--------|--------------|--------|
-| ホーム画面 | happy（通常）/ heart（完了後） | ゆらゆら | ランダム応援 |
-| ローディング | run | ぴょこぴょこ | - |
-| 問題出題中 | question | 首かしげ | 「どれかな〜？」等 |
-| 正解！ | happy | ジャンプ | 「すごーい！」等 |
-| 不正解 | question | 首かしげ | 「おしい！」等 |
 
 ---
 
@@ -170,50 +158,44 @@ manabi-no-ki/
 
 | 機能 | 説明 | ファイル |
 |------|------|----------|
-| ホーム画面 | まなびの木 + まめ🐕 + ストリーク + ボタン群 | HomeScreen.js |
+| ホーム画面 | まなびの木 + まめ + ストリーク + ボタン群 | HomeScreen.js |
 | 学習画面（ミッション） | 5問ランダム出題 + まめリアクション | LearningScreen.js |
-| 送り仮名れんしゅう | 漢字の送り仮名（12問） | questions.js |
-| 時計れんしゅう | アナログ時計SVG + 読み取り（10問） | ClockSVG.js |
-| みまもり画面 | 週間カレンダー + 教科別進捗（**実データ**） | MimamoriScreen.js |
-| 正解演出 | 🌟ポップアップ + 木の成長 | StarBurst.js |
+| 教科別レベル設定 | さんすう/こくご/とけい/せいかつをレベル1〜4で個別設定 | LevelSettingsScreen.js, learningLevels.js |
+| レベル別問題出題 | 選択レベル以下の問題から出題。算数Lv1・国語Lv4などに対応 | levelQuestions.js |
+| 送り仮名れんしゅう | 漢字の送り仮名 | questions.js, levelQuestions.js |
+| 時計れんしゅう | アナログ時計SVG + 読み取り | ClockSVG.js |
+| みまもり画面 | 週間カレンダー + 教科別進捗（実データ） | MimamoriScreen.js |
+| 正解演出 | 星ポップアップ + 木の成長 | StarBurst.js |
 | 木の成長 | 正答で葉/花/実が増える | TreeSVG.js |
 | ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな | 全体 |
 | Supabaseデータ永続化 | リロードしても学習データが残る | lib/storage.js |
 | セッション記録 | 毎回の学習結果をDBに保存 | lib/storage.js |
-| まめ🐕キャラ | 5ポーズ + CSSアニメーション + 吹き出し | MameCharacter.js |
 | 更新通知バナー | 新バージョン検知で自動通知 | UpdateBanner.js |
 
-### 🔲 未実装（ハリボテ・ボタンあり機能なし）
+### 🔲 未実装
 
 | 機能 | 現状 | 優先度 | 備考 |
 |------|------|--------|------|
-| **ごほうび画面** | ボタンあり・「じゅんびちゅう」表示 | 高 | バッジ/スタンプ/まめの着せ替え等 |
-| **ふくしゅう画面** | ボタンあり・「じゅんびちゅう」表示 | 高 | 苦手分野の自動検出→復習出題 |
-
-### 🔲 未実装（ボタンもまだない）
-
-| 機能 | 優先度 | 備考 |
-|------|--------|------|
-| Claude API問題自動生成 | 高 | 学年レベル指定で無限に問題生成 |
-| 音声読み上げ | 中 | LD対応強化 |
-| UDフォント切替 | 低 | BIZ UDゴシック等 |
-| 理科・社会の問題追加 | 中 | 教科拡張 |
-| 有料化（Stripe） | 低 | みまもり強化版でサブスク検討 |
-| PWA対応（オフライン） | 低 | Service Worker設定 |
-| カスタムドメイン | 低 | manabi-no-ki.com 等 |
+| ごほうび画面 | ボタンあり・準備中表示 | 高 | バッジ/スタンプ/まめの着せ替え等 |
+| ふくしゅう画面 | ボタンあり・準備中表示 | 高 | 苦手分野の自動検出→復習出題 |
+| Claude API問題自動生成 | 未着手 | 高 | 教科別レベル設定をプロンプトへ渡す |
+| 音声読み上げ | 未着手 | 中 | LD対応強化 |
+| UDフォント切替 | 未着手 | 低 | BIZ UDゴシック等 |
+| 理科・社会の問題追加 | 未着手 | 中 | 教科拡張 |
+| 有料化（Stripe） | 未着手 | 低 | みまもり強化版でサブスク検討 |
 
 ---
 
-## 📊 問題データ構成（v0.3.0時点 / 57問）
+## 📊 問題データ
 
-| 教科 | 問題数 | 内容 | type | category |
-|------|--------|------|------|----------|
-| 🔢 さんすう | 15問 | 九九(5)・足し算(3)・引き算(3)・文章題(4) | text | - |
-| 📖 こくご（読み） | 10問 | 漢字読み・主語述語・季節 | text | - |
-| ✏️ こくご（送りがな） | 12問 | 走/読/書/聞/歩/食/思/話/買/泳/作/遊 | text | okurigana |
-| ⏰ とけい | 10問 | ちょうど・5分刻み・難問 | clock | - |
-| 🌱 せいかつ | 10問 | 単位・時間・方角・生き物・季節 | text | - |
-| **合計** | **57問** | | | |
+既存の `questions.js` は温存し、v0.4.0では `levelQuestions.js` でgradeLevel付与・追加問題・出題フィルターを担当する。
+
+| 教科 | 内容 | レベル |
+|------|------|--------|
+| さんすう | 既存小2相当問題 + Lv1用1桁くり上がり/くり下がり問題 | 1〜2 |
+| こくご | 既存読み取り/送り仮名 + Lv4漢字読み問題 | 2・4 |
+| とけい | ちょうど・5分刻み・難問 | 1〜3 |
+| せいかつ | 単位・時間・方角・生き物・季節 | 1〜2 |
 
 ---
 
@@ -224,8 +206,9 @@ manabi-no-ki/
 | Phase 0 | プロトタイプ作成・GitHub構築 | ✅ 完了 | 5/27 |
 | Phase 0.5 | Vercelデプロイ・お母さんプレゼン | ✅ 完了 | 5/28 |
 | Phase 1 | Supabase連携（データ永続化） | ✅ 完了 | 5/28 |
-| Phase 1.5 | みまもり実データ化・まめ🐕実装・問題57問・更新通知 | ✅ **完了** | **5/29** |
-| Phase 2 | ごほうび画面・ふくしゅう画面 | 🔲 **次ここ** | - |
+| Phase 1.5 | みまもり実データ化・まめ実装・問題57問・更新通知 | ✅ 完了 | 5/29 |
+| Phase 1.6 | 教科別レベル設定・算数Lv1/国語Lv4対応 | ✅ 完了 | 5/29 |
+| Phase 2 | ごほうび画面・ふくしゅう画面 | 🔲 次ここ | - |
 | Phase 3 | Claude API問題自動生成 | 🔲 | - |
 | Phase 4 | お母さんフィードバック反映（随時） | 🔄 進行中 | - |
 | Phase 5 | 有料化検討（Stripe連携） | 🔲 | - |
@@ -235,44 +218,34 @@ manabi-no-ki/
 ## 🔜 次スレッドでやること（優先順）
 
 ### 🔴 高優先
-1. **ごほうび画面の実装**
-   - 新規: `src/screens/GohoubiScreen.js`
-   - 内容: バッジ一覧、スタンプ帳、まめの着せ替え等
-   - App.jsに画面遷移追加、HomeScreenのボタンにonClick設定
-   - Supabaseにバッジ/スタンプ用テーブル追加の可能性あり
-
-2. **ふくしゅう画面の実装**
-   - 新規: `src/screens/FukushuScreen.js`
-   - 内容: learning_sessionsから苦手分野を検出 → その分野の問題を出題
-   - 不正解率の高いモード/問題を優先表示
-   - App.jsに画面遷移追加、HomeScreenのボタンにonClick設定
-
-3. **Claude API問題自動生成**
-   - 新規: `src/lib/questionGenerator.js`
-   - Claude APIキーをVercel環境変数に設定
-   - 学年レベル・教科を指定して動的に問題生成
-   - Supabaseに生成問題キャッシュ用テーブル追加
+1. **v0.4.0動作確認**
+   - ホームに「教科ごとのレベル設定」カードが出るか
+   - 初期値が さんすうLv1 / こくごLv4 / とけいLv2 / せいかつLv2 になっているか
+   - ミッションで算数Lv1の1桁たし算・ひき算が出るか
+   - 国語Lv4の漢字読みが混ざるか
+   - レベル変更がリロード後も残るか
+2. **public/version.json の手動同期**
+   - ツール更新がブロックされたため `0.4.0` へ手動更新する
+3. **Vercelデプロイ確認**
+4. **ごほうび画面 / ふくしゅう画面**
 
 ### 🟡 中優先
-4. **package.json version同期** → `0.3.0`に合わせる（軽微）
-5. **画像パス正規化** → `public/public/images/mame/` → `public/images/mame/`
-6. **音声読み上げ** → Web Speech APIでLD対応強化
-7. **教科追加**（理科・社会）
-
-### 🟢 低優先
-8. **PWA対応**
-9. **カスタムドメイン**
-10. **有料化検討**
+- package-lock.json version同期
+- 画像パス正規化
+- 音声読み上げ
+- 理科・社会の問題追加
 
 ---
 
 ## 🐛 既知の課題・注意事項
 
-1. **画像パス二重**: `public/public/images/mame/` → コード側で `/public/images/mame/` 参照で回避中
-2. **package.json version未同期**: `0.2.0` のまま（v0.3.0に合わせること）
-3. **ごほうび・ふくしゅうはハリボテ**: ボタンあるが「じゅんびちゅう」表示のみ
-4. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
-5. **anon keyの安全性**: Supabase anon keyは公開前提。RLS設定済み。service_role keyは絶対にコードに書かないこと
+1. **version.json未同期**: `public/version.json` が0.3.0のまま。手動で0.4.0へ更新必要
+2. **画像パス二重**: `public/public/images/mame/` → コード側で `/public/images/mame/` 参照で回避中
+3. **package-lock.json version未同期**: 依存関係更新なしのため未更新。次回npm install時に同期推奨
+4. **ごほうび・ふくしゅうはハリボテ**
+5. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
+6. **教科別レベル設定も端末localStorage保存**: 別端末共有は未対応
+7. **anon keyの安全性**: Supabase anon keyは公開前提。RLS設定済み。service_role keyは絶対にコードに書かないこと
 
 ---
 
@@ -283,7 +256,7 @@ manabi-no-ki/
 | 5/27 | 「かわいい！」 | ✅ 好反応 |
 | 5/27 | 漢字の送り仮名も作ってほしい | ✅ 実装済み |
 | 5/27 | 時計の見方も作ってほしい | ✅ 実装済み |
-| - | （追加フィードバック待ち） | 🔲 |
+| 5/29 | 「凸凹ちゃんだから、漢字の読みは学年超えてるが、算数は一桁の足し算からつまづく。算数はレベル1、国語はレベル4のように自由設定したい」 | ✅ v0.4.0で実装 |
 
 ---
 
@@ -304,27 +277,12 @@ manabi-no-ki/
 - `.env`は`.gitignore`で除外
 - anon keyは公開前提、service_role keyは絶対非公開
 
-### GitHub操作（のん向け）
-- 新規ファイル: 「Add file」→「Create new file」→ パスを入力（/でフォルダ自動作成）
-- 上書き: ファイルを開いて✏️ → 全選択して貼り替え → Commit
-- 画像: フォルダに移動してから「Upload files」
-- ⚠️ `src/components/` と `src/constants/` を間違えないこと！
-
 ### スレッド引き継ぎ
 - スレッド終了時に必ずこのファイルを更新
 - 作業ダイジェスト・changelog・引き継ぎメモを作成
 
 ---
 
-## 📎 関連リンク
-
-- GitHub: https://github.com/nokokoyk-hub/manabi-no-ki
-- Vercel: https://manabi-no-ki-kannari-norikos-projects.vercel.app
-- Vercelダッシュボード: https://vercel.com/kannari-norikos-projects/manabi-no-ki
-- Supabaseダッシュボード: https://supabase.com/dashboard/project/ndqbtfahtjaafroevgwq
-
----
-
-> 最終更新: 2026年5月29日（木）19:00 JST
+> 最終更新: 2026年5月29日（金）JST
 > 更新者: ちゃぴ
-> バージョン: v0.3.0（まめ🐕キャラ実装・問題57問・更新通知バナー搭載）
+> バージョン: v0.4.0（教科別レベル設定・算数Lv1/国語Lv4対応）
