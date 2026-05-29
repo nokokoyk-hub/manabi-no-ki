@@ -119,7 +119,7 @@ function App() {
         />
       );
     case 'mimamori':
-      return <MimamoriScreen onBack={() => setScreen('home')} />;
+      return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} />;
     default:
       return (
         <HomeScreen
