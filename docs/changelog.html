@@ -20,6 +20,55 @@
 </head>
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
+<!-- 
+  ============================================
+  v0.2.0 の追記内容
+  既存の changelog.html の適切な位置に追加してください
+  ============================================
+-->
+
+<section>
+  <h2>🎉 v0.2.0 — Supabase連携（データ永続化）</h2>
+  <p><strong>リリース日:</strong> 2026年5月28日（水）</p>
+  
+  <h3>✨ 新機能</h3>
+  <ul>
+    <li>📦 <strong>Supabase連携</strong>: 学習データがブラウザを閉じても保存されるようになりました</li>
+    <li>🌳 <strong>木の成長データ永続化</strong>: はっぱ・おはな・みのりの数がリロードしても残ります</li>
+    <li>📝 <strong>学習セッション記録</strong>: 毎回の学習結果（モード・スコア・日時）をデータベースに保存</li>
+    <li>⏳ <strong>ローディング画面</strong>: 起動時にデータ読み込み中の表示を追加</li>
+    <li>🔥 <strong>ストリーク管理強化</strong>: 日付チェックによる自動リセット機能</li>
+  </ul>
+
+  <h3>🔧 技術的変更</h3>
+  <ul>
+    <li>Supabaseプロジェクト作成（東京リージョン）</li>
+    <li>user_progress テーブル: 木の状態・ストリーク管理</li>
+    <li>learning_sessions テーブル: 学習セッション記録</li>
+    <li>src/lib/supabase.js 追加: Supabaseクライアント初期化</li>
+    <li>src/lib/storage.js 追加: データアクセスレイヤー</li>
+    <li>App.js をSupabase連携版に更新</li>
+    <li>LearningScreen.js: onCompleteにtotalQuestions引数追加</li>
+    <li>index.css: pulseアニメーション追加</li>
+    <li>@supabase/supabase-js パッケージ追加</li>
+    <li>Vercel環境変数設定（REACT_APP_SUPABASE_URL, REACT_APP_SUPABASE_ANON_KEY）</li>
+    <li>GitHubリポジトリをPublicに変更</li>
+  </ul>
+
+  <h3>📁 ファイル変更</h3>
+  <ul>
+    <li>🆕 src/lib/supabase.js（新規）</li>
+    <li>🆕 src/lib/storage.js（新規）</li>
+    <li>🆕 .env.example（新規）</li>
+    <li>✏️ src/App.js（Supabase連携追加）</li>
+    <li>✏️ src/screens/LearningScreen.js（onComplete引数追加）</li>
+    <li>✏️ src/index.css（pulseアニメーション追加）</li>
+    <li>✏️ package.json（@supabase/supabase-js追加、version更新）</li>
+    <li>✏️ public/version.json（0.2.0に更新）</li>
+    <li>✏️ package-lock.json（自動更新）</li>
+  </ul>
+</section>
+  
 
   <div class="version">
     <h2>v0.1.1</h2>
