@@ -39,40 +39,127 @@ button:active {
   50% { transform: scale(1.15); opacity: 0.8; }
 }
 
-/* 🐕 まめアニメーション */
+/* ============================== */
+/* 🐕 キャラアニメーション       */
+/* ============================== */
+
+/* 基本：ふわふわ浮遊 */
 @keyframes mame-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
 
+/* ローディング：ぴょんぴょん跳ね */
 @keyframes mame-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
 }
 
+/* 正解：ジャンプ！ */
 @keyframes mame-jump {
   0% { transform: translateY(0) scale(1); }
   40% { transform: translateY(-20px) scale(1.1); }
   100% { transform: translateY(0) scale(1); }
 }
 
+/* 出題中：首かしげ */
 @keyframes mame-tilt {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-8deg); }
   75% { transform: rotate(8deg); }
 }
 
+/* ハート：脈動 */
 @keyframes mame-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }
 }
 
+/* おやすみ：すぅすぅ呼吸 */
 @keyframes mame-breathe {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.03); opacity: 0.9; }
 }
 
+/* フェードイン */
 @keyframes mame-fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- v0.6.1 新アニメーション ---- */
+
+/* 🔴 不正解：ぶるぶる震え */
+@keyframes mame-shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-6px) rotate(-2deg); }
+  20% { transform: translateX(6px) rotate(2deg); }
+  30% { transform: translateX(-5px) rotate(-1deg); }
+  40% { transform: translateX(5px) rotate(1deg); }
+  50% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
+  70% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+  90% { transform: translateX(-1px); }
+}
+
+/* 🌟 連続正解：くるくる回転ジャンプ */
+@keyframes mame-spin {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  30% { transform: translateY(-24px) rotate(180deg) scale(1.15); }
+  60% { transform: translateY(-12px) rotate(360deg) scale(1.1); }
+  100% { transform: translateY(0) rotate(360deg) scale(1); }
+}
+
+/* ✨ きらきらエフェクト（キャラの周り） */
+@keyframes mame-sparkle {
+  0% { transform: scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+  25% { filter: drop-shadow(0 0 12px rgba(255,215,0,0.6)) drop-shadow(0 0 24px rgba(255,183,0,0.3)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(255,215,0,0.8)) drop-shadow(0 0 32px rgba(255,183,0,0.4)); }
+  75% { filter: drop-shadow(0 0 12px rgba(255,215,0,0.6)) drop-shadow(0 0 24px rgba(255,183,0,0.3)); }
+  100% { transform: scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+}
+
+/* ⬆️ ぴょこっと登場（下から） */
+@keyframes mame-slideUp {
+  0% { transform: translateY(40px); opacity: 0; }
+  60% { transform: translateY(-8px); opacity: 1; }
+  80% { transform: translateY(3px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 🎵 わくわく揺れ（小刻み左右） */
+@keyframes mame-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg) translateX(-2px); }
+  30% { transform: rotate(4deg) translateX(2px); }
+  45% { transform: rotate(-3deg) translateX(-1px); }
+  60% { transform: rotate(3deg) translateX(1px); }
+  75% { transform: rotate(-2deg); }
+  90% { transform: rotate(1deg); }
+}
+
+/* 🙇 ぺこり（お辞儀） */
+@keyframes mame-bow {
+  0% { transform: rotate(0deg) scale(1); }
+  30% { transform: rotate(15deg) scale(0.95) translateY(4px); }
+  60% { transform: rotate(15deg) scale(0.95) translateY(4px); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* 👆 タップ反応（ぽよん） */
+@keyframes mame-tap {
+  0% { transform: scale(1); }
+  20% { transform: scale(0.85); }
+  40% { transform: scale(1.15); }
+  60% { transform: scale(0.95); }
+  80% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* 🎊 キラキラパーティクル（正解コンボ用） */
+@keyframes sparkle-particle {
+  0% { transform: translate(0, 0) scale(0); opacity: 1; }
+  50% { opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
 }
