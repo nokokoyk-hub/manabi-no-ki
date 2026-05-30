@@ -1,7 +1,7 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
 // 1回5問、選択肢式、正解で木が育つ
-// v0.4.0: 教科別レベル設定に対応
+// v0.5.0: ふくしゅう用の教科別モードに対応
 // ============================================
 
 import React, { useState } from 'react';
@@ -9,7 +9,7 @@ import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
 import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
-import { getTodayQuestions, getQuestionsByCategory } from '../data/levelQuestions';
+import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../data/levelQuestions';
 import { getMameMessage } from '../constants/mameMessages';
 
 // モード名の表示テキスト
@@ -17,12 +17,16 @@ const MODE_LABELS = {
   mission: 'きょうの ミッション',
   okurigana: 'おくりがな れんしゅう',
   clock: 'とけい れんしゅう',
+  math: 'さんすう ふくしゅう',
+  kokugo: 'こくご ふくしゅう',
 };
 
 const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack }) => {
   const [questions] = useState(() => {
     if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5, subjectLevels);
     if (mode === 'clock') return getQuestionsByCategory('clock', 5, subjectLevels);
+    if (mode === 'math') return getQuestionsBySubject('さんすう', 5, subjectLevels);
+    if (mode === 'kokugo') return getQuestionsBySubject('こくご', 5, subjectLevels);
     return getTodayQuestions(5, subjectLevels);
   });
   const [currentQ, setCurrentQ] = useState(0);
