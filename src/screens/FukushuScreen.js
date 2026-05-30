@@ -1,7 +1,7 @@
 // ============================================
 // 📚 FukushuScreen - ふくしゅう画面
 // 最近の学習セッションから、やさしく復習メニューをすすめる
-// v0.5.0: 初回実装
+// v0.6.0: petName対応
 // ============================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -121,7 +121,7 @@ const buildRecommendations = (analysis) => {
   return recommendations.slice(0, 4);
 };
 
-const FukushuScreen = ({ onBack, onStartReview }) => {
+const FukushuScreen = ({ onBack, onStartReview, petName }) => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -143,6 +143,8 @@ const FukushuScreen = ({ onBack, onStartReview }) => {
   const analysis = useMemo(() => analyzeSessions(sessions), [sessions]);
   const recommendations = useMemo(() => buildRecommendations(analysis), [analysis]);
   const hasStudyData = sessions.length > 0;
+
+  const displayName = petName || 'まめ';
 
   return (
     <div style={{
@@ -182,10 +184,11 @@ const FukushuScreen = ({ onBack, onStartReview }) => {
             pose={hasStudyData ? 'question' : 'heart'}
             message={hasStudyData ? 'にがてを そっと 見つけるよ' : 'まずは できるところから！'}
             size={72}
+            petName={displayName}
           />
           <div style={{ fontSize: 13, lineHeight: 1.7, color: COLORS.textLight, fontWeight: 700 }}>
             {isLoading ? (
-              <>まめが ふくしゅうを さがしています...</>
+              <>{displayName}が ふくしゅうを さがしています...</>
             ) : hasStudyData ? (
               <>さいきんの がくしゅうから、<br />やさしく もういちど やるものを えらぶよ。</>
             ) : (
@@ -206,7 +209,7 @@ const FukushuScreen = ({ onBack, onStartReview }) => {
         )}
 
         <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.greenDark, margin: '4px 0 10px' }}>
-          まめの おすすめ
+          {displayName}の おすすめ
         </div>
 
         {recommendations.map((item) => {

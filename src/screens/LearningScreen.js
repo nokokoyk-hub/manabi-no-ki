@@ -1,7 +1,7 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
 // 1回5問、選択肢式、正解で木が育つ
-// v0.5.0: ふくしゅう用の教科別モードに対応
+// v0.6.0: petName対応
 // ============================================
 
 import React, { useState } from 'react';
@@ -21,7 +21,7 @@ const MODE_LABELS = {
   kokugo: 'こくご ふくしゅう',
 };
 
-const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack }) => {
+const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
   const [questions] = useState(() => {
     if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5, subjectLevels);
     if (mode === 'clock') return getQuestionsByCategory('clock', 5, subjectLevels);
@@ -35,9 +35,11 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
   const [showStar, setShowStar] = useState(false);
   const [score, setScore] = useState(0);
 
-  // まめの状態
+  const displayName = petName || 'まめ';
+
+  // キャラの状態
   const [mamePose, setMamePose] = useState('question');
-  const [mameMsg, setMameMsg] = useState(getMameMessage('question'));
+  const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
 
   const q = questions[currentQ];
 
@@ -76,7 +78,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
       const newScore = score + 1;
       setScore(newScore);
       setMamePose('happy');
-      setMameMsg(getMameMessage('correct'));
+      setMameMsg(getMameMessage('correct', displayName));
       setTimeout(() => {
         setShowStar(true);
         setTimeout(() => {
@@ -86,7 +88,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
             setSelected(null);
             setShowResult(false);
             setMamePose('question');
-            setMameMsg(getMameMessage('question'));
+            setMameMsg(getMameMessage('question', displayName));
           } else {
             onComplete(newScore, questions.length);
           }
@@ -95,11 +97,11 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
     } else {
       // 不正解
       setMamePose('question');
-      setMameMsg(getMameMessage('wrong'));
+      setMameMsg(getMameMessage('wrong', displayName));
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
-        setMameMsg(getMameMessage('question'));
+        setMameMsg(getMameMessage('question', displayName));
       }, 1800);
     }
   };
@@ -183,7 +185,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
           </div>
         </div>
 
-        {/* まめリアクション */}
+        {/* キャラリアクション */}
         <div style={{
           display: 'flex', justifyContent: 'center',
           marginBottom: 16,
@@ -192,6 +194,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, onComplete, onBack })
             pose={mamePose}
             message={mameMsg}
             size={70}
+            petName={displayName}
           />
         </div>
 

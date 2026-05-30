@@ -1,7 +1,7 @@
 // ============================================
 // 🏠 HomeScreen - メインホーム画面
-// まなびの木 + まめ🐕 + ミッションボタン + ナビ
-// v0.5.0: ふくしゅう画面への導線追加
+// まなびの木 + キャラ🐕 + ミッションボタン + ナビ
+// v0.6.0: petName対応（キャラ名カスタマイズ）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -12,21 +12,21 @@ import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels,
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName,
   onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings, onOpenFukushu
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
-  // 画面表示時にまめのメッセージをセット
+  // 画面表示時にキャラのメッセージをセット
   useEffect(() => {
     if (todayDone) {
       setMameMessage('きょうの ミッション クリア！えらいね！🎉');
     } else if (streak >= 3) {
       setMameMessage(getStreakMessage(streak));
     } else {
-      setMameMessage(getMameMessage('home'));
+      setMameMessage(getMameMessage('home', petName));
     }
-  }, [todayDone, streak]);
+  }, [todayDone, streak, petName]);
 
   const levelSummary = SUBJECT_LEVELS
     .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
@@ -64,7 +64,7 @@ const HomeScreen = ({
             🌳 まなびの木
           </div>
           <div style={{ fontSize: 13, color: COLORS.textLight, marginTop: 2 }}>
-            まめと いっしょに がんばろう！
+            {petName}と いっしょに がんばろう！
           </div>
         </div>
         <button
@@ -94,13 +94,13 @@ const HomeScreen = ({
         </div>
       )}
 
-      {/* 木 + まめエリア */}
+      {/* 木 + キャラエリア */}
       <div style={{
         display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
         padding: '0 20px', marginTop: 8, position: 'relative',
       }}>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
-        {/* まめは木の横に立つ */}
+        {/* キャラは木の横に立つ */}
         <div style={{
           position: 'absolute', right: 20, bottom: 0,
         }}>
@@ -108,6 +108,7 @@ const HomeScreen = ({
             pose={todayDone ? 'heart' : 'normal'}
             message={mameMessage}
             size={80}
+            petName={petName}
           />
         </div>
       </div>
