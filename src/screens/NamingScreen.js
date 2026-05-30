@@ -2,6 +2,7 @@
 // 🐕 NamingScreen - なかまに なまえをつけよう！
 // 初回起動時にキャラクターの名前を子供がつける画面
 // v0.6.0: 新規作成
+// v0.6.1: アニメーション強化（slideUp登場、bowお辞儀、sparkle演出）
 // ============================================
 
 import React, { useState } from 'react';
@@ -10,22 +11,19 @@ import { COLORS } from '../constants/colors';
 
 const NamingScreen = ({ onNameDecided }) => {
   const [name, setName] = useState('');
-  const [phase, setPhase] = useState('greeting'); // greeting → input → done
+  const [phase, setPhase] = useState('greeting');
 
-  // 「はじめまして」→ 入力画面へ
   const handleStartNaming = () => {
     setPhase('input');
   };
 
-  // 名前決定
   const handleDecide = () => {
     const trimmed = (name || '').trim();
     if (!trimmed) return;
     setPhase('done');
-    // 少し演出を見せてからホームへ
     setTimeout(() => {
       onNameDecided(trimmed);
-    }, 2500);
+    }, 3000);
   };
 
   return (
@@ -46,9 +44,10 @@ const NamingScreen = ({ onNameDecided }) => {
           animation: 'mame-fadeIn 0.8s ease-out',
         }}>
           <MameCharacter
-            pose="happy"
+            pose="slideUp"
             message=""
             size={140}
+            enableTap={true}
           />
           <div style={{
             background: 'white',
@@ -113,9 +112,10 @@ const NamingScreen = ({ onNameDecided }) => {
           maxWidth: 360,
         }}>
           <MameCharacter
-            pose="question"
+            pose="wiggle"
             message="どんな なまえに する？"
             size={120}
+            enableTap={true}
           />
           <div style={{
             background: 'white',
@@ -204,10 +204,11 @@ const NamingScreen = ({ onNameDecided }) => {
           animation: 'mame-fadeIn 0.5s ease-out',
         }}>
           <MameCharacter
-            pose="heart"
+            pose="sparkle"
             petName={name.trim()}
             message=""
             size={150}
+            enableTap={false}
           />
           <div style={{
             marginTop: 20,

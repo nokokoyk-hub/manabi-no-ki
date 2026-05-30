@@ -2,6 +2,11 @@
 // 📝 LearningScreen - 学習（問題回答）画面
 // 1回5問、選択肢式、正解で木が育つ
 // v0.6.0: petName対応
+// v0.6.1: アニメーション強化
+//   - 連続正解コンボ判定（2連続→spin、3連続→sparkle）
+//   - 不正解→shake（ぶるぶる）
+//   - 全問正解→パーフェクト演出
+//   - 出題時→wiggle（わくわく）
 // ============================================
 
 import React, { useState } from 'react';
@@ -21,6 +26,14 @@ const MODE_LABELS = {
   kokugo: 'こくご ふくしゅう',
 };
 
+// コンボメッセージ
+const getComboMessage = (combo, petName) => {
+  if (combo >= 4) return `${combo}れんぞく！！てんさいだ！！🔥🔥`;
+  if (combo >= 3) return `${combo}れんぞく！${petName} おどってる！💃✨`;
+  if (combo >= 2) return `${combo}れんぞく せいかい！すごーい！🌟`;
+  return getMameMessage('correct', petName);
+};
+
 const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
   const [questions] = useState(() => {
     if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5, subjectLevels);
@@ -34,11 +47,12 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
   const [showResult, setShowResult] = useState(false);
   const [showStar, setShowStar] = useState(false);
   const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0); // 連続正解カウント
 
   const displayName = petName || 'まめ';
 
   // キャラの状態
-  const [mamePose, setMamePose] = useState('question');
+  const [mamePose, setMamePose] = useState('wiggle'); // 最初はわくわく
   const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
 
   const q = questions[currentQ];
@@ -75,10 +89,22 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
     setShowResult(true);
 
     if (idx === q.correct) {
+      // ===== 正解！ =====
       const newScore = score + 1;
+      const newCombo = combo + 1;
       setScore(newScore);
-      setMamePose('happy');
-      setMameMsg(getMameMessage('correct', displayName));
+      setCombo(newCombo);
+
+      // コンボに応じたポーズ
+      if (newCombo >= 3) {
+        setMamePose('sparkle'); // 3連続以上: きらきら
+      } else if (newCombo >= 2) {
+        setMamePose('spin');    // 2連続: くるくる
+      } else {
+        setMamePose('happy');   // 通常正解: ジャンプ
+      }
+      setMameMsg(getComboMessage(newCombo, displayName));
+
       setTimeout(() => {
         setShowStar(true);
         setTimeout(() => {
@@ -87,20 +113,30 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             setCurrentQ(c => c + 1);
             setSelected(null);
             setShowResult(false);
-            setMamePose('question');
+            setMamePose('wiggle'); // 次の問題→わくわく
             setMameMsg(getMameMessage('question', displayName));
           } else {
-            onComplete(newScore, questions.length);
+            // 最終問題完了
+            if (newScore === questions.length) {
+              // パーフェクト！
+              setMamePose('sparkle');
+              setMameMsg(`ぜんもん せいかい！！${displayName} かんどう！！😭💖🎉`);
+              setTimeout(() => onComplete(newScore, questions.length), 2500);
+            } else {
+              onComplete(newScore, questions.length);
+            }
           }
         }, 1500);
       }, 500);
     } else {
-      // 不正解
-      setMamePose('question');
+      // ===== 不正解 =====
+      setCombo(0); // コンボリセット
+      setMamePose('shake'); // ぶるぶる震え
       setMameMsg(getMameMessage('wrong', displayName));
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
+        setMamePose('wiggle'); // 再チャレンジ→わくわく
         setMameMsg(getMameMessage('question', displayName));
       }, 1800);
     }
@@ -145,6 +181,25 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
       </div>
 
+      {/* コンボバッジ */}
+      {combo >= 2 && (
+        <div style={{
+          display: 'flex', justifyContent: 'center', padding: '8px 0 0',
+          animation: 'popIn 0.3s ease-out',
+        }}>
+          <div style={{
+            background: combo >= 3
+              ? 'linear-gradient(135deg, #FF6F00, #FF1744)'
+              : 'linear-gradient(135deg, #FF9800, #FF5722)',
+            color: 'white', borderRadius: 20, padding: '5px 16px',
+            fontSize: 13, fontWeight: 800,
+            boxShadow: '0 3px 12px rgba(255,87,34,0.4)',
+          }}>
+            🔥 {combo}コンボ！
+          </div>
+        </div>
+      )}
+
       {/* 問題カード */}
       <div style={{ padding: 20 }}>
         {/* 教科バッジ */}
@@ -163,7 +218,6 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
           marginBottom: 20, position: 'relative',
         }}>
-          {/* 時計タイプの場合はアナログ時計を表示 */}
           {q.type === 'clock' && q.clockTime && (
             <div style={{ marginBottom: 16 }}>
               <ClockSVG hour={q.clockTime.hour} minute={q.clockTime.minute} />
