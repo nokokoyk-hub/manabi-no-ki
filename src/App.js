@@ -1,6 +1,6 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.5.0
+// バージョン: 0.6.0
 // 最終更新: 2026/05/30
 // ============================================
 // ⚠️ 修正時の注意:
@@ -15,6 +15,7 @@ import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
 import LevelSettingsScreen from './screens/LevelSettingsScreen';
 import FukushuScreen from './screens/FukushuScreen';
+import NamingScreen from './screens/NamingScreen';
 import UpdateBanner from './components/UpdateBanner';
 import {
   loadProgress,
@@ -23,15 +24,21 @@ import {
   DEFAULT_PROGRESS,
   loadSubjectLevels,
   saveSubjectLevels,
+  loadPetName,
+  savePetName,
+  DEFAULT_PET_NAME,
 } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.5.0';
+export const APP_VERSION = '0.6.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
   const [learningMode, setLearningMode] = useState('mission');
   const [subjectLevels, setSubjectLevels] = useState(() => loadSubjectLevels());
+
+  // 🐕 ペット名（キャラ名カスタマイズ）
+  const [petName, setPetName] = useState(() => loadPetName());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -60,6 +67,12 @@ function App() {
       }
     };
     init();
+  }, []);
+
+  // ペット名決定ハンドラ
+  const handleNameDecided = useCallback((name) => {
+    const saved = savePetName(name);
+    setPetName(saved);
   }, []);
 
   const handleSubjectLevelsChange = useCallback((nextLevels) => {
@@ -102,6 +115,9 @@ function App() {
     setScreen('learning');
   };
 
+  // 表示用のペット名（未設定時のフォールバック）
+  const displayName = petName || DEFAULT_PET_NAME;
+
   // ローディング画面
   if (isLoading) {
     return (
@@ -116,14 +132,19 @@ function App() {
       }}>
         <img
           src="/public/images/mame/mame_run.png"
-          alt="まめ"
+          alt={displayName}
           style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 16, animation: 'mame-bounce 0.6s ease-in-out infinite' }}
         />
         <div style={{ fontSize: 18, fontWeight: 700, color: '#2E7D32' }}>
-          まめが じゅんび しています...
+          {displayName}が じゅんび しています...
         </div>
       </div>
     );
+  }
+
+  // ペット名未設定 → NamingScreen表示
+  if (petName === null) {
+    return <NamingScreen onNameDecided={handleNameDecided} />;
   }
 
   // 画面ルーティング
@@ -134,6 +155,7 @@ function App() {
           <LearningScreen
             mode={learningMode}
             subjectLevels={subjectLevels}
+            petName={displayName}
             onComplete={handleLearningComplete}
             onBack={() => setScreen('home')}
           />
@@ -153,6 +175,7 @@ function App() {
           <FukushuScreen
             onBack={() => setScreen('home')}
             onStartReview={startLearning}
+            petName={displayName}
           />
         );
       default:
@@ -164,6 +187,7 @@ function App() {
             streak={streak}
             todayDone={todayDone}
             subjectLevels={subjectLevels}
+            petName={displayName}
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
