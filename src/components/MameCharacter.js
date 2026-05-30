@@ -1,6 +1,7 @@
 // ============================================
-// 🐕 MameCharacter - まめキャラクターコンポーネント
+// 🐕 MameCharacter - キャラクターコンポーネント
 // ポーズ切替 + CSSアニメーション + 吹き出しメッセージ
+// v0.6.0: petName対応（alt属性に反映）
 // ============================================
 
 import React from 'react';
@@ -29,6 +30,7 @@ const MameCharacter = ({
   pose = 'normal',
   message = '',
   size = 100,
+  petName = 'まめ',
   style = {},
 }) => {
   const imageSrc = POSE_IMAGES[pose] || POSE_IMAGES.normal;
@@ -74,10 +76,10 @@ const MameCharacter = ({
         </div>
       )}
 
-      {/* まめ画像 */}
+      {/* キャラ画像 */}
       <img
         src={imageSrc}
-        alt="まめ"
+        alt={petName}
         style={{
           width: size,
           height: size,
