@@ -1,7 +1,7 @@
 // ============================================
 // 🏠 HomeScreen - メインホーム画面
 // まなびの木 + まめ🐕 + ミッションボタン + ナビ
-// v0.4.0: 教科別レベル設定への導線追加
+// v0.5.0: ふくしゅう画面への導線追加
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +13,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings, onOpenFukushu
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -219,15 +219,15 @@ const HomeScreen = ({
             じゅんび ちゅう...
           </div>
         </div>
-        <div style={{
+        <div onClick={onOpenFukushu} style={{
           background: 'white', borderRadius: 16, padding: 16,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', opacity: 0.6,
+          cursor: 'pointer', border: '2px solid #E8F5E9',
         }}>
           <div style={{ fontSize: 28, marginBottom: 4 }}>📚</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>ふくしゅう</div>
           <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
-            じゅんび ちゅう...
+            にがてを そっと れんしゅう
           </div>
         </div>
       </div>
