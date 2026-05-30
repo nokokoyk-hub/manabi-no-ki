@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.4.1
-// 最終更新: 2026/05/29
+// バージョン: 0.5.0
+// 最終更新: 2026/05/30
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -14,6 +14,7 @@ import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
 import LevelSettingsScreen from './screens/LevelSettingsScreen';
+import FukushuScreen from './screens/FukushuScreen';
 import UpdateBanner from './components/UpdateBanner';
 import {
   loadProgress,
@@ -25,7 +26,7 @@ import {
 } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.4.1';
+export const APP_VERSION = '0.5.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -147,6 +148,13 @@ function App() {
             onBack={() => setScreen('home')}
           />
         );
+      case 'fukushu':
+        return (
+          <FukushuScreen
+            onBack={() => setScreen('home')}
+            onStartReview={startLearning}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -161,6 +169,7 @@ function App() {
             onStartClock={() => startLearning('clock')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
+            onOpenFukushu={() => setScreen('fukushu')}
           />
         );
     }
