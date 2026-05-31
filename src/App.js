@@ -1,6 +1,6 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.6.3
+// バージョン: 0.6.4
 // 最終更新: 2026/05/30
 // ============================================
 // ⚠️ 修正時の注意:
@@ -30,7 +30,7 @@ import {
 } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.6.3';
+export const APP_VERSION = '0.6.4';
 
 function App() {
   const [screen, setScreen] = useState('home');
