@@ -3,6 +3,7 @@
 // Supabaseへの読み書き + 端末ごとの設定を一元管理
 // Supabase未設定時はローカルstateで動作（フォールバック）
 // v0.6.0: ペット名（キャラ名カスタマイズ）追加
+// v0.6.3: 更新時の名前復元バックアップに対応
 // ============================================
 
 import { supabase } from './supabase';
@@ -15,6 +16,7 @@ import { DEFAULT_SUBJECT_LEVELS, normalizeSubjectLevels } from '../constants/lea
 const DEVICE_ID_KEY = 'manabi_device_id';
 const SUBJECT_LEVELS_KEY = 'manabi_subject_levels';
 const PET_NAME_KEY = 'manabi_pet_name';
+const PET_NAME_BACKUP_KEY = 'manabi_pet_name_backup';
 
 export const getDeviceId = () => {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
@@ -61,7 +63,17 @@ export const DEFAULT_PET_NAME = 'まめ';
 export const loadPetName = () => {
   try {
     const name = localStorage.getItem(PET_NAME_KEY);
-    return name || null; // null = 未設定（NamingScreen表示の判定に使う）
+    if (name) return name;
+
+    // 更新直前にsessionStorageへ退避した名前があれば復元する
+    const backupName = sessionStorage.getItem(PET_NAME_BACKUP_KEY);
+    if (backupName) {
+      localStorage.setItem(PET_NAME_KEY, backupName);
+      sessionStorage.removeItem(PET_NAME_BACKUP_KEY);
+      return backupName;
+    }
+
+    return null; // null = 未設定（NamingScreen表示の判定に使う）
   } catch (err) {
     console.error('❌ ペット名読み込みエラー:', err);
     return null;
