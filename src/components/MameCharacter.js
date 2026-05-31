@@ -3,46 +3,70 @@
 // ポーズ切替 + CSSアニメーション + 吹き出しメッセージ
 // v0.6.0: petName対応
 // v0.6.1: アニメーション大幅強化
-// v0.6.4: 実在する画像だけを参照し、画像切れを防止
+// v0.6.4: 実在画像のみ参照 + fallback追加
+// v0.7.0: 新画像10枚追加！全15ポーズ対応
 // ============================================
 
 import React, { useState, useCallback } from 'react';
 
 const FALLBACK_IMAGE = '/public/images/mame/mame_happy.png';
 
-// ポーズ → 画像ファイルのマッピング
-// 実在確認済みの画像だけを使うこと
+// ポーズ → 画像ファイルのマッピング（全15枚実在確認済み）
 const POSE_IMAGES = {
-  normal: '/public/images/mame/mame_happy.png',
-  run: '/public/images/mame/mame_run.png',
-  happy: '/public/images/mame/mame_happy.png',
-  question: '/public/images/mame/mame_question.png',
-  heart: '/public/images/mame/mame_heart.png',
-  sleep: '/public/images/mame/mame_sleep.png',
-  // v0.6.1: 新ポーズ（実在する既存画像を使い回し）
-  shake: '/public/images/mame/mame_question.png',
-  spin: '/public/images/mame/mame_happy.png',
-  sparkle: '/public/images/mame/mame_heart.png',
-  slideUp: '/public/images/mame/mame_run.png',
-  wiggle: '/public/images/mame/mame_question.png',
-  bow: '/public/images/mame/mame_heart.png',
+  // --- 既存5枚 ---
+  normal:    '/public/images/mame/mame_happy.png',
+  happy:     '/public/images/mame/mame_happy.png',
+  run:       '/public/images/mame/mame_run.png',
+  question:  '/public/images/mame/mame_question.png',
+  heart:     '/public/images/mame/mame_heart.png',
+  sleep:     '/public/images/mame/mame_sleep.png',
+  // --- 新規10枚（v0.7.0） ---
+  cheer:     '/public/images/mame/mame_cheer.png',
+  flag:      '/public/images/mame/mame_flag.png',
+  cry_happy: '/public/images/mame/mame_cry_happy.png',
+  touched:   '/public/images/mame/mame_touched.png',
+  medal:     '/public/images/mame/mame_medal.png',
+  jump:      '/public/images/mame/mame_jump.png',
+  eat:       '/public/images/mame/mame_eat.png',
+  sad:       '/public/images/mame/mame_sad.png',
+  relax:     '/public/images/mame/mame_relax.png',
+  dash:      '/public/images/mame/mame_dash.png',
+  // --- アニメ専用ポーズ（既存画像にアニメーションを組み合わせ）---
+  shake:     '/public/images/mame/mame_sad.png',
+  spin:      '/public/images/mame/mame_jump.png',
+  sparkle:   '/public/images/mame/mame_medal.png',
+  slideUp:   '/public/images/mame/mame_dash.png',
+  wiggle:    '/public/images/mame/mame_cheer.png',
+  bow:       '/public/images/mame/mame_touched.png',
 };
 
 // ポーズ → アニメーション名のマッピング
 const POSE_ANIMATIONS = {
-  normal: 'mame-float 2s ease-in-out infinite',
-  run: 'mame-bounce 0.6s ease-in-out infinite',
-  happy: 'mame-jump 0.5s ease-out',
-  question: 'mame-tilt 1.5s ease-in-out infinite',
-  heart: 'mame-pulse 1s ease-in-out infinite',
-  sleep: 'mame-breathe 3s ease-in-out infinite',
-  // v0.6.1: 新アニメーション
-  shake: 'mame-shake 0.6s ease-out',
-  spin: 'mame-spin 0.8s ease-out',
-  sparkle: 'mame-sparkle 1.5s ease-in-out infinite',
-  slideUp: 'mame-slideUp 0.6s ease-out',
-  wiggle: 'mame-wiggle 0.8s ease-in-out infinite',
-  bow: 'mame-bow 1s ease-in-out',
+  // --- 既存 ---
+  normal:    'mame-float 2s ease-in-out infinite',
+  happy:     'mame-jump 0.5s ease-out',
+  run:       'mame-bounce 0.6s ease-in-out infinite',
+  question:  'mame-tilt 1.5s ease-in-out infinite',
+  heart:     'mame-pulse 1s ease-in-out infinite',
+  sleep:     'mame-breathe 3s ease-in-out infinite',
+  // --- 新画像用 ---
+  cheer:     'mame-wiggle 0.8s ease-in-out infinite',
+  flag:      'mame-wiggle 1s ease-in-out infinite',
+  cry_happy: 'mame-pulse 1.2s ease-in-out infinite',
+  touched:   'mame-pulse 1.5s ease-in-out infinite',
+  medal:     'mame-jump 0.6s ease-out',
+  jump:      'mame-spin 0.8s ease-out',
+  eat:       'mame-breathe 2s ease-in-out infinite',
+  sad:       'mame-shake 0.6s ease-out',
+  relax:     'mame-breathe 3s ease-in-out infinite',
+  dash:      'mame-bounce 0.5s ease-in-out infinite',
+  // --- アニメ専用ポーズ ---
+  shake:     'mame-shake 0.6s ease-out',
+  spin:      'mame-spin 0.8s ease-out',
+  sparkle:   'mame-sparkle 1.5s ease-in-out infinite',
+  slideUp:   'mame-slideUp 0.6s ease-out',
+  wiggle:    'mame-wiggle 0.8s ease-in-out infinite',
+  bow:       'mame-bow 1s ease-in-out',
 };
 
 // きらきらパーティクルの生成データ
@@ -64,28 +88,19 @@ const MameCharacter = ({
   style = {},
 }) => {
   const [isTapped, setIsTapped] = useState(false);
-  const [imageSrc, setImageSrc] = useState(POSE_IMAGES[pose] || FALLBACK_IMAGE);
 
-  React.useEffect(() => {
-    setImageSrc(POSE_IMAGES[pose] || FALLBACK_IMAGE);
-  }, [pose]);
-
+  const imageSrc = POSE_IMAGES[pose] || FALLBACK_IMAGE;
   const animation = isTapped
     ? 'mame-tap 0.5s ease-out'
     : (POSE_ANIMATIONS[pose] || POSE_ANIMATIONS.normal);
 
-  // タップ反応
   const handleTap = useCallback(() => {
     if (!enableTap || isTapped) return;
     setIsTapped(true);
     setTimeout(() => setIsTapped(false), 500);
   }, [enableTap, isTapped]);
 
-  const handleImageError = useCallback(() => {
-    setImageSrc(FALLBACK_IMAGE);
-  }, []);
-
-  const showSparkles = pose === 'sparkle' || pose === 'spin';
+  const showSparkles = pose === 'sparkle' || pose === 'medal';
 
   return (
     <div style={{
@@ -95,7 +110,6 @@ const MameCharacter = ({
       gap: 8,
       ...style,
     }}>
-      {/* 吹き出しメッセージ */}
       {message && (
         <div style={{
           background: 'white',
@@ -126,7 +140,6 @@ const MameCharacter = ({
         </div>
       )}
 
-      {/* キャラ画像 + きらきら */}
       <div
         onClick={handleTap}
         style={{
@@ -135,7 +148,6 @@ const MameCharacter = ({
           WebkitTapHighlightColor: 'transparent',
         }}
       >
-        {/* きらきらパーティクル */}
         {showSparkles && SPARKLE_PARTICLES.map((p, i) => (
           <span
             key={i}
@@ -158,7 +170,7 @@ const MameCharacter = ({
         <img
           src={imageSrc}
           alt={petName}
-          onError={handleImageError}
+          onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
           style={{
             width: size,
             height: size,
