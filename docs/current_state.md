@@ -39,10 +39,10 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.6.1** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.1'` ✅ |
-| package.json | `"version": "0.6.1"` ✅ |
-| version.json | `public/version.json` → `"version": "0.6.1"` ✅ |
+| 現在のバージョン | **v0.6.2** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.2'` ✅ |
+| package.json | `"version": "0.6.2"` ✅ |
+| version.json | `public/version.json` → `"version": "0.6.2"` ✅ |
 | package-lock.json | `0.2.0` ⚠️ 依存関係更新なし。次回npm install時に同期推奨 |
 | 最終更新日 | 2026年5月30日（土） |
 
@@ -101,14 +101,14 @@
 
 ---
 
-## 📁 ファイル構成（v0.6.1時点）
+## 📁 ファイル構成（v0.6.2時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── index.html
 │   ├── manifest.json
-│   ├── version.json         # 0.6.1
+│   ├── version.json         # 0.6.2
 │   ├── favicon.ico
 │   ├── robots.txt
 │   └── public/images/mame/  # ⚠️ パスが二重
@@ -126,13 +126,13 @@ manabi-no-ki/
 │   ├── components/
 │   │   ├── TreeSVG.js
 │   │   ├── ClockSVG.js
-│   │   ├── StarBurst.js
+│   │   ├── StarBurst.js      # 正解演出。v0.6.2で上部トースト化
 │   │   ├── MameCharacter.js  # 🐕 キャラコンポ（petName prop対応）
 │   │   └── UpdateBanner.js
 │   ├── screens/
-│   │   ├── NamingScreen.js        # 🐕 なまえ入力画面（v0.6.1新規）
+│   │   ├── NamingScreen.js        # 🐕 なまえ入力画面
 │   │   ├── HomeScreen.js          # ホーム画面（petName対応）
-│   │   ├── LearningScreen.js      # 学習画面（petName対応）
+│   │   ├── LearningScreen.js      # 学習画面（petName/コンボ演出対応）
 │   │   ├── LevelSettingsScreen.js # 教科別レベル設定画面
 │   │   ├── FukushuScreen.js       # 復習画面（petName対応）
 │   │   └── MimamoriScreen.js
@@ -191,7 +191,7 @@ manabi-no-ki/
 | 送り仮名れんしゅう | 漢字の送り仮名 | questions.js |
 | 時計れんしゅう | アナログ時計SVG + 読み取り | ClockSVG.js |
 | みまもり画面 | 週間カレンダー + 教科別進捗（実データ） | MimamoriScreen.js |
-| 正解演出 | 星ポップアップ + 木の成長 | StarBurst.js |
+| 正解演出 | 上部トースト型の「せいかい！」演出。キャラ吹き出しを隠さない | StarBurst.js |
 | 木の成長 | 正答で葉/花/実が増える | TreeSVG.js |
 | ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな | 全体 |
 | Supabaseデータ永続化 | リロードしても学習データが残る | storage.js |
@@ -238,6 +238,20 @@ manabi-no-ki/
 
 ---
 
+## 🎉 正解演出（v0.6.2）
+
+### 変更内容
+- 以前の正解演出は画面中央に大きな白いカードを出す方式だった
+- お母さんから「正解表示がキャラのセリフを隠していてもったいない」というフィードバックあり
+- `StarBurst.js` を中央オーバーレイから、画面上部の軽いトースト表示へ変更
+- 背景の暗転をなくし、キャラの吹き出しとコンボ演出を見やすくした
+- クリックや回答ボタン操作を邪魔しないよう `pointerEvents: 'none'` を設定
+
+### ねらい
+正解の喜びは残しつつ、子どもに語りかけるキャラのセリフを主役として見せる。
+
+---
+
 ## 🗓️ 開発ロードマップ
 
 | フェーズ | 内容 | 状態 | 日付 |
@@ -249,8 +263,9 @@ manabi-no-ki/
 | Phase 1.6 | 教科別レベル設定 | ✅ 完了 | 5/29 |
 | Phase 1.7 | 教科別レベル上限を6へ拡張 | ✅ 完了 | 5/29 |
 | Phase 2.0 | ふくしゅう画面 初回実装 | ✅ 完了 | 5/30 |
-| Phase 2.1 | ペット名カスタマイズ（NamingScreen） | ✅ **完了** | **5/30** |
-| Phase 2.1.1 | アニメーション強化＋画像透過 | ✅ **完了** | **5/30** |
+| Phase 2.1 | ペット名カスタマイズ（NamingScreen） | ✅ 完了 | 5/30 |
+| Phase 2.1.1 | アニメーション強化＋画像透過 | ✅ 完了 | 5/30 |
+| Phase 2.1.2 | 正解演出を上部トースト化 | ✅ 完了 | 5/30 |
 | Phase 2.2 | ごほうび画面 | 🔲 次候補 | - |
 | Phase 2.3 | 問題ごとの誤答記録・精密復習 | 🔲 | - |
 | Phase 3 | Claude API問題自動生成 | 🔲 | - |
@@ -262,16 +277,19 @@ manabi-no-ki/
 ## 🔜 次スレッドでやること（優先順）
 
 ### 🔴 高優先
-1. **ごほうび画面の実装**
+1. **v0.6.2動作確認**
+   - 正解時の「せいかい！」が画面上部に出るか
+   - キャラの吹き出しが隠れないか
+   - コンボバッジと競合しないか
+   - 回答ボタン操作を邪魔しないか
+2. **ごほうび画面の実装**
    - 新規: `src/screens/GohoubiScreen.js`
    - バッジ・スタンプ・キャラ着せ替え等
    - App.jsに画面遷移追加、HomeScreenのボタン接続
-
-2. **問題ごとの誤答記録**
+3. **問題ごとの誤答記録**
    - Supabaseに回答履歴テーブル追加の検討
    - 復習精度向上
-
-3. **Claude API問題自動生成**
+4. **Claude API問題自動生成**
    - `src/lib/questionGenerator.js` 新規
    - Vercel環境変数にAPIキー設定
 
@@ -290,7 +308,7 @@ manabi-no-ki/
 
 ## 🐛 既知の課題・注意事項
 
-1. **画像パス二重: `public/public/images/mame/` → コード側で回避中。画像は透過PNG化済み(v0.6.1)
+1. **画像パス二重**: `public/public/images/mame/` → コード側で回避中。画像は透過PNG化済み（v0.6.1）
 2. **package-lock.json version未同期**: 次回npm install時に同期推奨
 3. **ごほうびはハリボテ**: ボタンあるが準備中表示
 4. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
@@ -312,7 +330,8 @@ manabi-no-ki/
 | 5/29 | 学年レベルは6年くらいまで欲しい | ✅ v0.4.1で拡張 |
 | 5/29 | 得意を伸ばして自己肯定感を育てることが大事 | ✅ 設計思想に反映 |
 | 5/30 | ふくしゅうが準備中なので使えるようにしてほしい | ✅ v0.5.0で実装 |
-| 5/30 | キャラの名前を子供自身がつけられないか | ✅ **v0.6.1で実装** |
+| 5/30 | キャラの名前を子供自身がつけられないか | ✅ v0.6.1で実装 |
+| 5/30 | 正解表示がキャラのセリフを隠していてもったいない | ✅ v0.6.2で正解演出を上部トースト化 |
 
 ---
 
@@ -346,6 +365,6 @@ manabi-no-ki/
 
 ---
 
-> 最終更新: 2026年5月30日（土）18:00 JST
+> 最終更新: 2026年5月30日（土）JST
 > 更新者: ちゃぴ
-> バージョン: v0.6.1（ペット名カスタマイズ・NamingScreen実装）
+> バージョン: v0.6.2（正解演出を上部トースト化し、キャラのセリフを隠さないよう改善）
