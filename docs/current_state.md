@@ -39,10 +39,10 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.6.3** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.3'` ✅ |
-| package.json | `"version": "0.6.3"` ✅ |
-| version.json | `public/version.json` → `"version": "0.6.3"` ✅ |
+| 現在のバージョン | **v0.6.4** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.4'` ✅ |
+| package.json | `"version": "0.6.4"` ✅ |
+| version.json | `public/version.json` → `"version": "0.6.4"` ✅ |
 | package-lock.json | `0.2.0` ⚠️ 依存関係更新なし。次回npm install時に同期推奨 |
 | 最終更新日 | 2026年5月30日（土） |
 
@@ -101,17 +101,17 @@
 
 ---
 
-## 📁 ファイル構成（v0.6.3時点）
+## 📁 ファイル構成（v0.6.4時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── index.html
 │   ├── manifest.json
-│   ├── version.json         # 0.6.3
+│   ├── version.json         # 0.6.4
 │   ├── favicon.ico
 │   ├── robots.txt
-│   └── public/images/mame/  # ⚠️ パスが二重
+│   └── public/images/mame/  # ⚠️ パスが二重。実体は public/public/images/mame/
 ├── src/
 │   ├── App.js               # メインルーター + petName管理 + NamingScreen制御
 │   ├── index.js
@@ -127,7 +127,7 @@ manabi-no-ki/
 │   │   ├── TreeSVG.js
 │   │   ├── ClockSVG.js
 │   │   ├── StarBurst.js      # 正解演出。v0.6.2で上部トースト化
-│   │   ├── MameCharacter.js  # 🐕 キャラコンポ。v0.6.3で画像割り当て分散
+│   │   ├── MameCharacter.js  # 🐕 v0.6.4で実在画像のみ参照 + fallback追加
 │   │   └── UpdateBanner.js   # 更新通知。v0.6.3で名前バックアップ対応
 │   ├── screens/
 │   │   ├── NamingScreen.js        # 🐕 なまえ入力画面
@@ -162,8 +162,9 @@ manabi-no-ki/
 | 既存ユーザー保護 | ✅ 端末IDやレベル設定がある端末は、名前未保存でも再命名を求めずデフォルト名で継続 |
 | 種類 | 柴犬 |
 | 由来 | 「まめにがんばる」の掛け言葉（デフォルト名） |
-| ポーズ数 | 5画像 × 12アニメーション（v0.6.1で6種追加） |
-| 画像割り当て | ✅ v0.6.3で normal/pencil/thumbsup 等へ分散 |
+| 使用画像 | `mame_happy.png` / `mame_run.png` / `mame_question.png` / `mame_heart.png` / `mame_sleep.png` |
+| 注意 | `mame_normal.png` / `mame_pencil.png` / `mame_thumbsup.png` は現時点で未配置。参照禁止 |
+| fallback | ✅ 画像読込失敗時は `mame_happy.png` へ戻す |
 | 使用場所 | 全画面（ホーム/学習/復習/レベル設定/ローディング/NamingScreen） |
 | セリフ | mameMessages.js（`{name}`プレースホルダーで名前差し替え） |
 
@@ -195,7 +196,7 @@ manabi-no-ki/
 | 時計れんしゅう | アナログ時計SVG + 読み取り | ClockSVG.js |
 | みまもり画面 | 週間カレンダー + 教科別進捗（実データ） | MimamoriScreen.js |
 | 正解演出 | 上部トースト型の「せいかい！」演出。キャラ吹き出しを隠さない | StarBurst.js |
-| キャラ画像分散 | 寝姿/立ち上がり画像に偏りすぎないようポーズ画像を再割り当て | MameCharacter.js |
+| キャラ画像表示 | 実在画像だけを参照。画像切れ時はhappyへfallback | MameCharacter.js |
 | 更新時の名前保持 | 更新ボタン押下時に名前を退避し、再読込後も命名画面へ戻りにくくする | UpdateBanner.js, storage.js |
 | 木の成長 | 正答で葉/花/実が増える | TreeSVG.js |
 | ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな | 全体 |
@@ -210,6 +211,7 @@ manabi-no-ki/
 | 問題ごとの誤答記録 | 未実装 | 高 | 復習精度を上げるには必要 |
 | Claude API問題自動生成 | 未着手 | 高 | 教科別レベル設定をプロンプトへ渡す |
 | 名前変更機能 | 未実装 | 低 | 設定画面から名前を変更できるように |
+| 追加まめ画像 | 未配置 | 中 | normal/pencil/thumbsup等を追加するなら、先に画像実体を置くこと |
 | 音声読み上げ | 未着手 | 中 | LD対応強化 |
 | 理科・社会の問題追加 | 未着手 | 中 | 教科拡張 |
 | 有料化（Stripe） | 未着手 | 低 | みまもり強化版でサブスク検討 |
@@ -257,17 +259,20 @@ manabi-no-ki/
 
 ---
 
-## 🐕 画像・更新保持改善（v0.6.3）
+## 🐕 画像・更新保持改善
 
-### 画像頻出の偏り改善
-- `MameCharacter.js` の `POSE_IMAGES` を見直し
-- `normal` を `mame_normal.png` へ変更
-- `wiggle` を `mame_pencil.png` へ変更
-- `spin` を `mame_thumbsup.png` へ変更
-- `sleep` は sleep ポーズ専用にし、寝姿の頻出を避ける
-- 同じ立ち上がり系画像ばかり出る状態を軽減
+### v0.6.3 画像頻出の偏り改善で発生した問題
+- `MameCharacter.js` で `mame_normal.png` / `mame_pencil.png` / `mame_thumbsup.png` を参照したが、リポジトリ上に未配置だった
+- その結果、画像が表示されない不具合が発生
 
-### 更新時の名前再入力対策
+### v0.6.4 修正内容
+- 実在確認済みの `mame_happy.png` / `mame_run.png` / `mame_question.png` / `mame_heart.png` / `mame_sleep.png` のみ参照するよう修正
+- `normal` は `mame_happy.png` へ戻した
+- `wiggle` は `mame_question.png`、`slideUp` は `mame_run.png`、`spin` は `mame_happy.png` へ割り当て
+- 画像読み込み失敗時に `mame_happy.png` へ戻る fallback を追加
+- 今後、追加画像を使う場合は、先に `public/public/images/mame/` へ実体を置いてからコード参照すること
+
+### 更新時の名前再入力対策（v0.6.3〜）
 - `UpdateBanner.js` で更新前に `backupPetNameForUpdate()` を呼ぶ
 - `storage.js` で `sessionStorage` のバックアップから名前を復元
 - `window.location.reload(true)` をやめ、通常の `window.location.reload()` に変更
@@ -289,7 +294,8 @@ manabi-no-ki/
 | Phase 2.1 | ペット名カスタマイズ（NamingScreen） | ✅ 完了 | 5/30 |
 | Phase 2.1.1 | アニメーション強化＋画像透過 | ✅ 完了 | 5/30 |
 | Phase 2.1.2 | 正解演出を上部トースト化 | ✅ 完了 | 5/30 |
-| Phase 2.1.3 | 画像割り当て分散・更新時名前保持 | ✅ 完了 | 5/30 |
+| Phase 2.1.3 | 更新時名前保持 | ✅ 完了 | 5/30 |
+| Phase 2.1.4 | 画像切れ修正・実在画像のみ参照 | ✅ 完了 | 5/30 |
 | Phase 2.2 | ごほうび画面 | 🔲 次候補 | - |
 | Phase 2.3 | 問題ごとの誤答記録・精密復習 | 🔲 | - |
 | Phase 3 | Claude API問題自動生成 | 🔲 | - |
@@ -301,22 +307,24 @@ manabi-no-ki/
 ## 🔜 次スレッドでやること（優先順）
 
 ### 🔴 高優先
-1. **v0.6.3動作確認**
-   - 通常画面で寝姿/立ち上がり画像ばかりになっていないか
-   - 出題中に鉛筆画像が出るか
-   - 連続正解時にサムズアップ画像が出るか
+1. **v0.6.4動作確認**
+   - キャラ画像が表示されるか
+   - 画像切れアイコンにならないか
+   - 寝姿が sleep 専用に近くなっているか
+   - 正解/不正解/出題中でキャラが表示されるか
    - 更新バナーを押しても、再度名前入力画面にならないか
-   - 既存端末では名前未保存でも「まめ」でホームへ進むか
-2. **ごほうび画面の実装**
+2. **追加まめ画像を本当に使うなら画像実体を追加**
+   - `mame_normal.png`
+   - `mame_pencil.png`
+   - `mame_thumbsup.png`
+   - 追加後にMameCharacterの割り当てを再変更
+3. **ごほうび画面の実装**
    - 新規: `src/screens/GohoubiScreen.js`
    - バッジ・スタンプ・キャラ着せ替え等
    - App.jsに画面遷移追加、HomeScreenのボタン接続
-3. **問題ごとの誤答記録**
+4. **問題ごとの誤答記録**
    - Supabaseに回答履歴テーブル追加の検討
    - 復習精度向上
-4. **Claude API問題自動生成**
-   - `src/lib/questionGenerator.js` 新規
-   - Vercel環境変数にAPIキー設定
 
 ### 🟡 中優先
 - 画像パス正規化（public二重問題の解消）
@@ -334,13 +342,14 @@ manabi-no-ki/
 ## 🐛 既知の課題・注意事項
 
 1. **画像パス二重**: `public/public/images/mame/` → コード側で回避中。画像は透過PNG化済み（v0.6.1）
-2. **package-lock.json version未同期**: 次回npm install時に同期推奨
-3. **ごほうびはハリボテ**: ボタンあるが準備中表示
-4. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
-5. **ペット名・レベル設定はlocalStorage**: 別端末共有は未対応
-6. **レベル5〜6の問題は未整備**: 設定上は選べるが問題が少ない
-7. **復習はモード単位**: 問題ごとの誤答記録は未実装
-8. **名前変更機能なし**: 初回設定のみ。ブラウザデータ消去で再設定可能
+2. **使用可能な画像は5枚のみ**: `happy/run/question/heart/sleep`。未配置画像を参照しないこと
+3. **package-lock.json version未同期**: 次回npm install時に同期推奨
+4. **ごほうびはハリボテ**: ボタンあるが準備中表示
+5. **デバイスID方式**: 同ブラウザでのみデータ共有。別端末は別データ
+6. **ペット名・レベル設定はlocalStorage**: 別端末共有は未対応
+7. **レベル5〜6の問題は未整備**: 設定上は選べるが問題が少ない
+8. **復習はモード単位**: 問題ごとの誤答記録は未実装
+9. **名前変更機能なし**: 初回設定のみ。ブラウザデータ消去で再設定可能
 
 ---
 
@@ -357,7 +366,8 @@ manabi-no-ki/
 | 5/30 | ふくしゅうが準備中なので使えるようにしてほしい | ✅ v0.5.0で実装 |
 | 5/30 | キャラの名前を子供自身がつけられないか | ✅ v0.6.1で実装 |
 | 5/30 | 正解表示がキャラのセリフを隠していてもったいない | ✅ v0.6.2で正解演出を上部トースト化 |
-| 5/30 | 寝てる画像と立ち上がり画像の2種が頻出する | ✅ v0.6.3で画像割り当てを分散 |
+| 5/30 | 寝てる画像と立ち上がり画像の2種が頻出する | ⚠️ v0.6.3で一度対応したが未配置画像参照により不具合。v0.6.4で実在画像のみへ修正 |
+| 5/30 | 画像が表示されなくなった | ✅ v0.6.4で未配置画像参照を撤去しfallback追加 |
 | 5/30 | アプリ側で更新ボタンを押すと再度名前を付けないといけなくなる | ✅ v0.6.3で名前バックアップ・既存ユーザー保護を追加 |
 
 ---
@@ -366,6 +376,11 @@ manabi-no-ki/
 
 ### バージョン管理
 - `public/version.json` と `src/App.js` の `APP_VERSION` と `package.json` の `version` を必ず同時更新
+
+### 画像参照ルール
+- 新しい画像ファイル名をコードに書く前に、必ず GitHub 上の実体ファイルを確認すること
+- 現在実在確認済み: `mame_happy.png`, `mame_run.png`, `mame_question.png`, `mame_heart.png`, `mame_sleep.png`
+- 未配置画像: `mame_normal.png`, `mame_pencil.png`, `mame_thumbsup.png`
 
 ### ファイル修正ルール
 - 修正前に必ず影響範囲を5ステップで確認
@@ -394,4 +409,4 @@ manabi-no-ki/
 
 > 最終更新: 2026年5月30日（土）JST
 > 更新者: ちゃぴ
-> バージョン: v0.6.3（画像割り当て分散・更新時の名前保持改善）
+> バージョン: v0.6.4（未配置画像参照を撤去し、キャラ画像表示を復旧）
