@@ -2,9 +2,11 @@
 // 🔄 UpdateBanner - アプリ更新通知
 // version.jsonとAPP_VERSIONを比較し、
 // 新バージョンがあれば通知バナーを表示
+// v0.6.3: 更新前にペット名を退避し、通常リロードに変更
 // ============================================
 
 import React, { useState, useEffect } from 'react';
+import { backupPetNameForUpdate } from '../lib/storage';
 
 const UpdateBanner = ({ currentVersion }) => {
   const [newVersion, setNewVersion] = useState(null);
@@ -36,12 +38,18 @@ const UpdateBanner = ({ currentVersion }) => {
     return () => clearInterval(interval);
   }, [currentVersion]);
 
+  const handleUpdate = () => {
+    backupPetNameForUpdate();
+    // localStorageを消しやすい強制リロードではなく、通常リロードで更新する
+    window.location.reload();
+  };
+
   // 更新なし or 閉じた
   if (!newVersion || dismissed) return null;
 
   return (
     <div
-      onClick={() => window.location.reload(true)}
+      onClick={handleUpdate}
       style={{
         position: 'fixed',
         top: 0,
