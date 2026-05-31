@@ -39,10 +39,10 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.6.2** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.2'` ✅ |
-| package.json | `"version": "0.6.2"` ✅ |
-| version.json | `public/version.json` → `"version": "0.6.2"` ✅ |
+| 現在のバージョン | **v0.6.3** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.6.3'` ✅ |
+| package.json | `"version": "0.6.3"` ✅ |
+| version.json | `public/version.json` → `"version": "0.6.3"` ✅ |
 | package-lock.json | `0.2.0` ⚠️ 依存関係更新なし。次回npm install時に同期推奨 |
 | 最終更新日 | 2026年5月30日（土） |
 
@@ -101,14 +101,14 @@
 
 ---
 
-## 📁 ファイル構成（v0.6.2時点）
+## 📁 ファイル構成（v0.6.3時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── index.html
 │   ├── manifest.json
-│   ├── version.json         # 0.6.2
+│   ├── version.json         # 0.6.3
 │   ├── favicon.ico
 │   ├── robots.txt
 │   └── public/images/mame/  # ⚠️ パスが二重
@@ -118,7 +118,7 @@ manabi-no-ki/
 │   ├── index.css
 │   ├── lib/
 │   │   ├── supabase.js
-│   │   └── storage.js        # データアクセス + localStorage設定 + ペット名
+│   │   └── storage.js        # データアクセス + localStorage設定 + ペット名復元
 │   ├── constants/
 │   │   ├── colors.js
 │   │   ├── learningLevels.js
@@ -127,8 +127,8 @@ manabi-no-ki/
 │   │   ├── TreeSVG.js
 │   │   ├── ClockSVG.js
 │   │   ├── StarBurst.js      # 正解演出。v0.6.2で上部トースト化
-│   │   ├── MameCharacter.js  # 🐕 キャラコンポ（petName prop対応）
-│   │   └── UpdateBanner.js
+│   │   ├── MameCharacter.js  # 🐕 キャラコンポ。v0.6.3で画像割り当て分散
+│   │   └── UpdateBanner.js   # 更新通知。v0.6.3で名前バックアップ対応
 │   ├── screens/
 │   │   ├── NamingScreen.js        # 🐕 なまえ入力画面
 │   │   ├── HomeScreen.js          # ホーム画面（petName対応）
@@ -158,9 +158,12 @@ manabi-no-ki/
 | デフォルト名 | まめ |
 | 名前変更 | ✅ 初回起動時にNamingScreenで子供が命名 |
 | 保存方式 | localStorage（`manabi_pet_name` キー） |
+| 更新時保護 | ✅ UpdateBanner押下時にsessionStorageへ一時退避し、再読込後に復元 |
+| 既存ユーザー保護 | ✅ 端末IDやレベル設定がある端末は、名前未保存でも再命名を求めずデフォルト名で継続 |
 | 種類 | 柴犬 |
 | 由来 | 「まめにがんばる」の掛け言葉（デフォルト名） |
 | ポーズ数 | 5画像 × 12アニメーション（v0.6.1で6種追加） |
+| 画像割り当て | ✅ v0.6.3で normal/pencil/thumbsup 等へ分散 |
 | 使用場所 | 全画面（ホーム/学習/復習/レベル設定/ローディング/NamingScreen） |
 | セリフ | mameMessages.js（`{name}`プレースホルダーで名前差し替え） |
 
@@ -192,6 +195,8 @@ manabi-no-ki/
 | 時計れんしゅう | アナログ時計SVG + 読み取り | ClockSVG.js |
 | みまもり画面 | 週間カレンダー + 教科別進捗（実データ） | MimamoriScreen.js |
 | 正解演出 | 上部トースト型の「せいかい！」演出。キャラ吹き出しを隠さない | StarBurst.js |
+| キャラ画像分散 | 寝姿/立ち上がり画像に偏りすぎないようポーズ画像を再割り当て | MameCharacter.js |
+| 更新時の名前保持 | 更新ボタン押下時に名前を退避し、再読込後も命名画面へ戻りにくくする | UpdateBanner.js, storage.js |
 | 木の成長 | 正答で葉/花/実が増える | TreeSVG.js |
 | ADHD+LD対応UI | 丸文字フォント、大ボタン、ひらがな | 全体 |
 | Supabaseデータ永続化 | リロードしても学習データが残る | storage.js |
@@ -238,7 +243,7 @@ manabi-no-ki/
 
 ---
 
-## 🎉 正解演出（v0.6.2）
+## 🎉 正解演出（v0.6.2〜）
 
 ### 変更内容
 - 以前の正解演出は画面中央に大きな白いカードを出す方式だった
@@ -249,6 +254,24 @@ manabi-no-ki/
 
 ### ねらい
 正解の喜びは残しつつ、子どもに語りかけるキャラのセリフを主役として見せる。
+
+---
+
+## 🐕 画像・更新保持改善（v0.6.3）
+
+### 画像頻出の偏り改善
+- `MameCharacter.js` の `POSE_IMAGES` を見直し
+- `normal` を `mame_normal.png` へ変更
+- `wiggle` を `mame_pencil.png` へ変更
+- `spin` を `mame_thumbsup.png` へ変更
+- `sleep` は sleep ポーズ専用にし、寝姿の頻出を避ける
+- 同じ立ち上がり系画像ばかり出る状態を軽減
+
+### 更新時の名前再入力対策
+- `UpdateBanner.js` で更新前に `backupPetNameForUpdate()` を呼ぶ
+- `storage.js` で `sessionStorage` のバックアップから名前を復元
+- `window.location.reload(true)` をやめ、通常の `window.location.reload()` に変更
+- 既存端末データがある場合、名前が未保存でも再命名画面へ戻さず、デフォルト名「まめ」で継続
 
 ---
 
@@ -266,6 +289,7 @@ manabi-no-ki/
 | Phase 2.1 | ペット名カスタマイズ（NamingScreen） | ✅ 完了 | 5/30 |
 | Phase 2.1.1 | アニメーション強化＋画像透過 | ✅ 完了 | 5/30 |
 | Phase 2.1.2 | 正解演出を上部トースト化 | ✅ 完了 | 5/30 |
+| Phase 2.1.3 | 画像割り当て分散・更新時名前保持 | ✅ 完了 | 5/30 |
 | Phase 2.2 | ごほうび画面 | 🔲 次候補 | - |
 | Phase 2.3 | 問題ごとの誤答記録・精密復習 | 🔲 | - |
 | Phase 3 | Claude API問題自動生成 | 🔲 | - |
@@ -277,11 +301,12 @@ manabi-no-ki/
 ## 🔜 次スレッドでやること（優先順）
 
 ### 🔴 高優先
-1. **v0.6.2動作確認**
-   - 正解時の「せいかい！」が画面上部に出るか
-   - キャラの吹き出しが隠れないか
-   - コンボバッジと競合しないか
-   - 回答ボタン操作を邪魔しないか
+1. **v0.6.3動作確認**
+   - 通常画面で寝姿/立ち上がり画像ばかりになっていないか
+   - 出題中に鉛筆画像が出るか
+   - 連続正解時にサムズアップ画像が出るか
+   - 更新バナーを押しても、再度名前入力画面にならないか
+   - 既存端末では名前未保存でも「まめ」でホームへ進むか
 2. **ごほうび画面の実装**
    - 新規: `src/screens/GohoubiScreen.js`
    - バッジ・スタンプ・キャラ着せ替え等
@@ -332,6 +357,8 @@ manabi-no-ki/
 | 5/30 | ふくしゅうが準備中なので使えるようにしてほしい | ✅ v0.5.0で実装 |
 | 5/30 | キャラの名前を子供自身がつけられないか | ✅ v0.6.1で実装 |
 | 5/30 | 正解表示がキャラのセリフを隠していてもったいない | ✅ v0.6.2で正解演出を上部トースト化 |
+| 5/30 | 寝てる画像と立ち上がり画像の2種が頻出する | ✅ v0.6.3で画像割り当てを分散 |
+| 5/30 | アプリ側で更新ボタンを押すと再度名前を付けないといけなくなる | ✅ v0.6.3で名前バックアップ・既存ユーザー保護を追加 |
 
 ---
 
@@ -367,4 +394,4 @@ manabi-no-ki/
 
 > 最終更新: 2026年5月30日（土）JST
 > 更新者: ちゃぴ
-> バージョン: v0.6.2（正解演出を上部トースト化し、キャラのセリフを隠さないよう改善）
+> バージョン: v0.6.3（画像割り当て分散・更新時の名前保持改善）
