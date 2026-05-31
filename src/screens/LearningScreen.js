@@ -1,12 +1,11 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
-// 1回5問、選択肢式、正解で木が育つ
-// v0.6.0: petName対応
-// v0.6.1: アニメーション強化
-//   - 連続正解コンボ判定（2連続→spin、3連続→sparkle）
-//   - 不正解→shake（ぶるぶる）
-//   - 全問正解→パーフェクト演出
-//   - 出題時→wiggle（わくわく）
+// v0.7.0: 新画像10枚を活用した演出強化
+//   - 正解: happy→jump→medal（コンボ段階）
+//   - 不正解: sad（ぶるぶる）
+//   - 出題: cheer（わくわく）
+//   - パーフェクト: medal→cry_happy
+//   - コンボバッジ強化
 // ============================================
 
 import React, { useState } from 'react';
@@ -17,7 +16,6 @@ import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../data/levelQuestions';
 import { getMameMessage } from '../constants/mameMessages';
 
-// モード名の表示テキスト
 const MODE_LABELS = {
   mission: 'きょうの ミッション',
   okurigana: 'おくりがな れんしゅう',
@@ -26,12 +24,20 @@ const MODE_LABELS = {
   kokugo: 'こくご ふくしゅう',
 };
 
-// コンボメッセージ
 const getComboMessage = (combo, petName) => {
-  if (combo >= 4) return `${combo}れんぞく！！てんさいだ！！🔥🔥`;
+  if (combo >= 5) return `${combo}れんぞく！！もう てんさい！！🔥🔥🔥`;
+  if (combo >= 4) return `${combo}れんぞく！！${petName} かんどう！！🔥🔥`;
   if (combo >= 3) return `${combo}れんぞく！${petName} おどってる！💃✨`;
   if (combo >= 2) return `${combo}れんぞく せいかい！すごーい！🌟`;
   return getMameMessage('correct', petName);
+};
+
+// コンボに応じたポーズを返す
+const getComboPose = (combo) => {
+  if (combo >= 4) return 'medal';    // 4連続以上: メダルドヤ🏅
+  if (combo >= 3) return 'sparkle';  // 3連続: きらきら
+  if (combo >= 2) return 'jump';     // 2連続: ガッツジャンプ
+  return 'happy';                     // 通常正解: ジャンプ
 };
 
 const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
@@ -47,12 +53,11 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
   const [showResult, setShowResult] = useState(false);
   const [showStar, setShowStar] = useState(false);
   const [score, setScore] = useState(0);
-  const [combo, setCombo] = useState(0); // 連続正解カウント
+  const [combo, setCombo] = useState(0);
 
   const displayName = petName || 'まめ';
 
-  // キャラの状態
-  const [mamePose, setMamePose] = useState('wiggle'); // 最初はわくわく
+  const [mamePose, setMamePose] = useState('cheer');
   const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
 
   const q = questions[currentQ];
@@ -66,7 +71,8 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         color: COLORS.text,
       }}>
         <div style={{ background: 'white', borderRadius: 20, padding: 24, textAlign: 'center' }}>
-          <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>問題を じゅんび中です</div>
+          <MameCharacter pose="sad" message="もんだいが たりないよ…" size={80} petName={displayName} />
+          <div style={{ fontSize: 18, fontWeight: 800, marginTop: 12, marginBottom: 8 }}>問題を じゅんび中です</div>
           <div style={{ color: COLORS.textLight, lineHeight: 1.6, marginBottom: 16 }}>
             このレベルの問題が まだ少ないみたい。<br />
             レベルを変えるか、問題を追加してね。
@@ -89,20 +95,12 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
     setShowResult(true);
 
     if (idx === q.correct) {
-      // ===== 正解！ =====
       const newScore = score + 1;
       const newCombo = combo + 1;
       setScore(newScore);
       setCombo(newCombo);
 
-      // コンボに応じたポーズ
-      if (newCombo >= 3) {
-        setMamePose('sparkle'); // 3連続以上: きらきら
-      } else if (newCombo >= 2) {
-        setMamePose('spin');    // 2連続: くるくる
-      } else {
-        setMamePose('happy');   // 通常正解: ジャンプ
-      }
+      setMamePose(getComboPose(newCombo));
       setMameMsg(getComboMessage(newCombo, displayName));
 
       setTimeout(() => {
@@ -113,30 +111,31 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             setCurrentQ(c => c + 1);
             setSelected(null);
             setShowResult(false);
-            setMamePose('wiggle'); // 次の問題→わくわく
+            setMamePose('cheer');
             setMameMsg(getMameMessage('question', displayName));
           } else {
             // 最終問題完了
             if (newScore === questions.length) {
               // パーフェクト！
-              setMamePose('sparkle');
+              setMamePose('cry_happy');
               setMameMsg(`ぜんもん せいかい！！${displayName} かんどう！！😭💖🎉`);
               setTimeout(() => onComplete(newScore, questions.length), 2500);
             } else {
-              onComplete(newScore, questions.length);
+              setMamePose('flag');
+              setMameMsg(getMameMessage('complete', displayName));
+              setTimeout(() => onComplete(newScore, questions.length), 1500);
             }
           }
         }, 1500);
       }, 500);
     } else {
-      // ===== 不正解 =====
-      setCombo(0); // コンボリセット
-      setMamePose('shake'); // ぶるぶる震え
+      setCombo(0);
+      setMamePose('sad');
       setMameMsg(getMameMessage('wrong', displayName));
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
-        setMamePose('wiggle'); // 再チャレンジ→わくわく
+        setMamePose('cheer');
         setMameMsg(getMameMessage('question', displayName));
       }, 1800);
     }
@@ -151,7 +150,6 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
     }}>
       <StarBurst show={showStar} />
 
-      {/* ヘッダー */}
       <div style={{
         padding: '16px 20px', display: 'flex', alignItems: 'center',
         gap: 12, background: 'white', borderBottom: '2px solid #F5F5F5',
@@ -181,14 +179,15 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
       </div>
 
-      {/* コンボバッジ */}
       {combo >= 2 && (
         <div style={{
           display: 'flex', justifyContent: 'center', padding: '8px 0 0',
           animation: 'popIn 0.3s ease-out',
         }}>
           <div style={{
-            background: combo >= 3
+            background: combo >= 4
+              ? 'linear-gradient(135deg, #FF1744, #D500F9)'
+              : combo >= 3
               ? 'linear-gradient(135deg, #FF6F00, #FF1744)'
               : 'linear-gradient(135deg, #FF9800, #FF5722)',
             color: 'white', borderRadius: 20, padding: '5px 16px',
@@ -200,9 +199,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
       )}
 
-      {/* 問題カード */}
       <div style={{ padding: 20 }}>
-        {/* 教科バッジ */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: COLORS.cream, padding: '6px 14px', borderRadius: 20,
@@ -212,11 +209,10 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
           {q.subjectEmoji} {q.subject} <span style={{ color: COLORS.textLight }}>レベル{q.gradeLevel || 1}</span>
         </div>
 
-        {/* 問題文 */}
         <div style={{
           background: 'white', borderRadius: 20, padding: '28px 24px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          marginBottom: 20, position: 'relative',
+          marginBottom: 20,
         }}>
           {q.type === 'clock' && q.clockTime && (
             <div style={{ marginBottom: 16 }}>
@@ -226,8 +222,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
           <div style={{
             fontSize: 26, fontWeight: 800, color: COLORS.text,
             textAlign: 'center', lineHeight: 1.6,
-            letterSpacing: '0.05em',
-            whiteSpace: 'pre-line',
+            letterSpacing: '0.05em', whiteSpace: 'pre-line',
           }}>
             {q.question}
           </div>
@@ -239,48 +234,30 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
           </div>
         </div>
 
-        {/* キャラリアクション */}
-        <div style={{
-          display: 'flex', justifyContent: 'center',
-          marginBottom: 16,
-        }}>
-          <MameCharacter
-            pose={mamePose}
-            message={mameMsg}
-            size={70}
-            petName={displayName}
-          />
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <MameCharacter pose={mamePose} message={mameMsg} size={70} petName={displayName} />
         </div>
 
-        {/* 選択肢 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {q.options.map((opt, idx) => {
             let bg = 'white';
             let border = '2px solid #E0E0E0';
             let emoji = '';
             if (showResult && idx === q.correct) {
-              bg = '#E8F5E9';
-              border = `2px solid ${COLORS.green}`;
-              emoji = ' ⭕';
+              bg = '#E8F5E9'; border = `2px solid ${COLORS.green}`; emoji = ' ⭕';
             } else if (showResult && idx === selected && idx !== q.correct) {
-              bg = '#FFEBEE';
-              border = `2px solid ${COLORS.incorrect}`;
-              emoji = ' ❌';
+              bg = '#FFEBEE'; border = `2px solid ${COLORS.incorrect}`; emoji = ' ❌';
             }
             return (
-              <button
-                key={idx}
-                onClick={() => handleSelect(idx)}
-                style={{
-                  background: bg, border, borderRadius: 16,
-                  padding: '18px 20px', fontSize: 22, fontWeight: 700,
-                  color: COLORS.text, cursor: 'pointer',
-                  textAlign: 'center', transition: 'all 0.2s ease',
-                  fontFamily: "'Rounded Mplus 1c', sans-serif",
-                  letterSpacing: '0.05em',
-                  transform: selected === idx ? 'scale(0.97)' : 'scale(1)',
-                }}
-              >
+              <button key={idx} onClick={() => handleSelect(idx)} style={{
+                background: bg, border, borderRadius: 16,
+                padding: '18px 20px', fontSize: 22, fontWeight: 700,
+                color: COLORS.text, cursor: 'pointer',
+                textAlign: 'center', transition: 'all 0.2s ease',
+                fontFamily: "'Rounded Mplus 1c', sans-serif",
+                letterSpacing: '0.05em',
+                transform: selected === idx ? 'scale(0.97)' : 'scale(1)',
+              }}>
                 {opt}{emoji}
               </button>
             );

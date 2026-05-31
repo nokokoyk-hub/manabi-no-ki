@@ -105,7 +105,7 @@ const HomeScreen = ({
           position: 'absolute', right: 20, bottom: 0,
         }}>
           <MameCharacter
-            pose={todayDone ? 'heart' : 'normal'}
+            pose={todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal')}
             message={mameMessage}
             size={80}
             petName={petName}

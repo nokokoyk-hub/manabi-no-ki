@@ -44,7 +44,7 @@ const NamingScreen = ({ onNameDecided }) => {
           animation: 'mame-fadeIn 0.8s ease-out',
         }}>
           <MameCharacter
-            pose="slideUp"
+            pose="dash"
             message=""
             size={140}
             enableTap={true}
@@ -112,7 +112,7 @@ const NamingScreen = ({ onNameDecided }) => {
           maxWidth: 360,
         }}>
           <MameCharacter
-            pose="wiggle"
+            pose="cheer"
             message="どんな なまえに する？"
             size={120}
             enableTap={true}
@@ -204,7 +204,7 @@ const NamingScreen = ({ onNameDecided }) => {
           animation: 'mame-fadeIn 0.5s ease-out',
         }}>
           <MameCharacter
-            pose="sparkle"
+            pose="cry_happy"
             petName={name.trim()}
             message=""
             size={150}

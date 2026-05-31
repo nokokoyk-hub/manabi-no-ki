@@ -181,7 +181,7 @@ const FukushuScreen = ({ onBack, onStartReview, petName }) => {
           display: 'flex', alignItems: 'center', gap: 14,
         }}>
           <MameCharacter
-            pose={hasStudyData ? 'question' : 'heart'}
+            pose={hasStudyData ? 'touched' : 'cheer'}
             message={hasStudyData ? 'にがてを そっと 見つけるよ' : 'まずは できるところから！'}
             size={72}
             petName={displayName}
