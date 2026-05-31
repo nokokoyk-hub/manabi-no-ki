@@ -3,16 +3,15 @@
 // ポーズ切替 + CSSアニメーション + 吹き出しメッセージ
 // v0.6.0: petName対応
 // v0.6.1: アニメーション大幅強化
-//   - 新ポーズ: shake/spin/sparkle/slideUp/wiggle/bow
-//   - タップ反応: タップするとぽよんと跳ねる
-//   - きらきらパーティクル: sparkleポーズ時
+// v0.6.3: 画像割り当てを分散し、同じ画像の頻出を軽減
 // ============================================
 
 import React, { useState, useCallback } from 'react';
 
 // ポーズ → 画像ファイルのマッピング
+// 1枚の画像に集中しないよう、既存素材をできるだけ分散して使う
 const POSE_IMAGES = {
-  normal: '/public/images/mame/mame_happy.png',
+  normal: '/public/images/mame/mame_normal.png',
   run: '/public/images/mame/mame_run.png',
   happy: '/public/images/mame/mame_happy.png',
   question: '/public/images/mame/mame_question.png',
@@ -20,11 +19,11 @@ const POSE_IMAGES = {
   sleep: '/public/images/mame/mame_sleep.png',
   // v0.6.1: 新ポーズ（既存画像を使い回し）
   shake: '/public/images/mame/mame_question.png',
-  spin: '/public/images/mame/mame_happy.png',
+  spin: '/public/images/mame/mame_thumbsup.png',
   sparkle: '/public/images/mame/mame_heart.png',
-  slideUp: '/public/images/mame/mame_happy.png',
-  wiggle: '/public/images/mame/mame_run.png',
-  bow: '/public/images/mame/mame_happy.png',
+  slideUp: '/public/images/mame/mame_normal.png',
+  wiggle: '/public/images/mame/mame_pencil.png',
+  bow: '/public/images/mame/mame_normal.png',
 };
 
 // ポーズ → アニメーション名のマッピング
