@@ -30,7 +30,7 @@ import {
 } from './lib/storage';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.6.4';
+export const APP_VERSION = '0.7.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
