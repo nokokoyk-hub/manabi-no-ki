@@ -73,7 +73,15 @@ export const loadPetName = () => {
       return backupName;
     }
 
-    return null; // null = 未設定（NamingScreen表示の判定に使う）
+    // 既存ユーザー（端末IDやレベル設定がある）には、更新後に再命名を求めない
+    const hasExistingLocalData =
+      localStorage.getItem(DEVICE_ID_KEY) || localStorage.getItem(SUBJECT_LEVELS_KEY);
+    if (hasExistingLocalData) {
+      localStorage.setItem(PET_NAME_KEY, DEFAULT_PET_NAME);
+      return DEFAULT_PET_NAME;
+    }
+
+    return null; // null = 完全新規（NamingScreen表示の判定に使う）
   } catch (err) {
     console.error('❌ ペット名読み込みエラー:', err);
     return null;
@@ -89,6 +97,15 @@ export const savePetName = (name) => {
   } catch (err) {
     console.error('❌ ペット名保存エラー:', err);
     return DEFAULT_PET_NAME;
+  }
+};
+
+export const backupPetNameForUpdate = () => {
+  try {
+    const name = localStorage.getItem(PET_NAME_KEY);
+    if (name) sessionStorage.setItem(PET_NAME_BACKUP_KEY, name);
+  } catch (err) {
+    console.warn('ペット名バックアップをスキップしました');
   }
 };
 
