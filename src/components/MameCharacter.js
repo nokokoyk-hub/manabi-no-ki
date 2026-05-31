@@ -3,27 +3,29 @@
 // ポーズ切替 + CSSアニメーション + 吹き出しメッセージ
 // v0.6.0: petName対応
 // v0.6.1: アニメーション大幅強化
-// v0.6.3: 画像割り当てを分散し、同じ画像の頻出を軽減
+// v0.6.4: 実在する画像だけを参照し、画像切れを防止
 // ============================================
 
 import React, { useState, useCallback } from 'react';
 
+const FALLBACK_IMAGE = '/public/images/mame/mame_happy.png';
+
 // ポーズ → 画像ファイルのマッピング
-// 1枚の画像に集中しないよう、既存素材をできるだけ分散して使う
+// 実在確認済みの画像だけを使うこと
 const POSE_IMAGES = {
-  normal: '/public/images/mame/mame_normal.png',
+  normal: '/public/images/mame/mame_happy.png',
   run: '/public/images/mame/mame_run.png',
   happy: '/public/images/mame/mame_happy.png',
   question: '/public/images/mame/mame_question.png',
   heart: '/public/images/mame/mame_heart.png',
   sleep: '/public/images/mame/mame_sleep.png',
-  // v0.6.1: 新ポーズ（既存画像を使い回し）
+  // v0.6.1: 新ポーズ（実在する既存画像を使い回し）
   shake: '/public/images/mame/mame_question.png',
-  spin: '/public/images/mame/mame_thumbsup.png',
+  spin: '/public/images/mame/mame_happy.png',
   sparkle: '/public/images/mame/mame_heart.png',
-  slideUp: '/public/images/mame/mame_normal.png',
-  wiggle: '/public/images/mame/mame_pencil.png',
-  bow: '/public/images/mame/mame_normal.png',
+  slideUp: '/public/images/mame/mame_run.png',
+  wiggle: '/public/images/mame/mame_question.png',
+  bow: '/public/images/mame/mame_heart.png',
 };
 
 // ポーズ → アニメーション名のマッピング
@@ -62,8 +64,12 @@ const MameCharacter = ({
   style = {},
 }) => {
   const [isTapped, setIsTapped] = useState(false);
+  const [imageSrc, setImageSrc] = useState(POSE_IMAGES[pose] || FALLBACK_IMAGE);
 
-  const imageSrc = POSE_IMAGES[pose] || POSE_IMAGES.normal;
+  React.useEffect(() => {
+    setImageSrc(POSE_IMAGES[pose] || FALLBACK_IMAGE);
+  }, [pose]);
+
   const animation = isTapped
     ? 'mame-tap 0.5s ease-out'
     : (POSE_ANIMATIONS[pose] || POSE_ANIMATIONS.normal);
@@ -74,6 +80,10 @@ const MameCharacter = ({
     setIsTapped(true);
     setTimeout(() => setIsTapped(false), 500);
   }, [enableTap, isTapped]);
+
+  const handleImageError = useCallback(() => {
+    setImageSrc(FALLBACK_IMAGE);
+  }, []);
 
   const showSparkles = pose === 'sparkle' || pose === 'spin';
 
@@ -148,6 +158,7 @@ const MameCharacter = ({
         <img
           src={imageSrc}
           alt={petName}
+          onError={handleImageError}
           style={{
             width: size,
             height: size,
