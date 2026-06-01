@@ -12,8 +12,8 @@ import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings, onOpenFukushu
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData,
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -209,15 +209,15 @@ const HomeScreen = ({
         padding: '0 20px 100px',
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
       }}>
-        <div style={{
+        <div onClick={onOpenGohoubi} style={{
           background: 'white', borderRadius: 16, padding: 16,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', opacity: 0.6,
+          cursor: 'pointer', border: '2px solid #FFF3E0',
         }}>
           <div style={{ fontSize: 28, marginBottom: 4 }}>🎁</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>ごほうび</div>
           <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
-            じゅんび ちゅう...
+            🧩 {puzzleData?.collected || 0}/9 ピース
           </div>
         </div>
         <div onClick={onOpenFukushu} style={{
