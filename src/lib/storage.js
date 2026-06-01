@@ -321,3 +321,65 @@ export const getRecentSessions = async (days = 7) => {
     return [];
   }
 };
+
+// ------------------------------------------
+// 🧩 ごほうびパズル
+// ミッションクリアでピースを集めて絵を完成させる
+// v0.7.1: 新規追加
+// ------------------------------------------
+const PUZZLE_KEY = 'manabi_puzzle';
+
+const DEFAULT_PUZZLE_DATA = {
+  currentPuzzleId: null,  // 現在のパズルID（null=初期状態）
+  collected: 0,           // 収集済みピース数（0〜9）
+  completedIds: [],       // 完了済みパズルIDリスト（アーカイブ）
+};
+
+export const loadPuzzleData = () => {
+  try {
+    const raw = localStorage.getItem(PUZZLE_KEY);
+    if (!raw) return DEFAULT_PUZZLE_DATA;
+    const parsed = JSON.parse(raw);
+    return {
+      currentPuzzleId: parsed.currentPuzzleId || null,
+      collected: parsed.collected || 0,
+      completedIds: parsed.completedIds || [],
+    };
+  } catch (err) {
+    console.error('❌ パズルデータ読み込みエラー:', err);
+    return DEFAULT_PUZZLE_DATA;
+  }
+};
+
+export const savePuzzleData = (data) => {
+  try {
+    localStorage.setItem(PUZZLE_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.error('❌ パズルデータ保存エラー:', err);
+  }
+};
+
+// ピースを1つ追加（ミッションクリア時に呼ぶ）
+export const addPuzzlePiece = (puzzleId) => {
+  const data = loadPuzzleData();
+
+  // 初回 or パズルID不一致 → 新パズル開始
+  if (!data.currentPuzzleId || data.currentPuzzleId !== puzzleId) {
+    data.currentPuzzleId = puzzleId;
+    data.collected = 1;
+  } else {
+    data.collected = Math.min(9, data.collected + 1);
+  }
+
+  // 9ピース達成 → 完成！
+  let justCompleted = false;
+  if (data.collected >= 9) {
+    if (!data.completedIds.includes(puzzleId)) {
+      data.completedIds.push(puzzleId);
+    }
+    justCompleted = true;
+  }
+
+  savePuzzleData(data);
+  return { ...data, justCompleted };
+};
