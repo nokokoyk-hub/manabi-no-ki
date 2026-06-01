@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.6.4
-// 最終更新: 2026/05/30
+// バージョン: 0.7.1
+// 最終更新: 2026/06/01
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -16,6 +16,7 @@ import MimamoriScreen from './screens/MimamoriScreen';
 import LevelSettingsScreen from './screens/LevelSettingsScreen';
 import FukushuScreen from './screens/FukushuScreen';
 import NamingScreen from './screens/NamingScreen';
+import GohoubiScreen from './screens/GohoubiScreen';
 import UpdateBanner from './components/UpdateBanner';
 import {
   loadProgress,
@@ -27,10 +28,14 @@ import {
   loadPetName,
   savePetName,
   DEFAULT_PET_NAME,
+  loadPuzzleData,
+  addPuzzlePiece,
+  savePuzzleData,
 } from './lib/storage';
+import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.7.0';
+export const APP_VERSION = '0.7.1';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -39,6 +44,9 @@ function App() {
 
   // 🐕 ペット名（キャラ名カスタマイズ）
   const [petName, setPetName] = useState(() => loadPetName());
+
+  // 🧩 パズルデータ
+  const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -50,7 +58,7 @@ function App() {
   // ローディング状態
   const [isLoading, setIsLoading] = useState(true);
 
-  // 起動時にSupabaseからデータ読み込み
+  // 起動時にSupabaseからデータ読み込み + パズル初期化
   useEffect(() => {
     const init = async () => {
       try {
@@ -60,6 +68,15 @@ function App() {
         setFruits(progress.fruits);
         setStreak(progress.streak);
         setTodayDone(progress.todayDone);
+
+        // パズル初期化（currentPuzzleIdがなければ最初のパズルをセット）
+        const pd = loadPuzzleData();
+        if (!pd.currentPuzzleId) {
+          const first = getNextPuzzle(pd.completedIds);
+          pd.currentPuzzleId = first.id;
+          pd.collected = 0;
+        }
+        setPuzzleData(pd);
       } catch (err) {
         console.error('初期読み込みエラー:', err);
       } finally {
@@ -94,6 +111,24 @@ function App() {
     setFruits(newFruits);
     if (learningMode === 'mission') setTodayDone(true);
     if (learningMode === 'mission' && !todayDone) setStreak(newStreak);
+
+    // 🧩 ミッションクリア時にパズルピース追加
+    if (learningMode === 'mission' && !todayDone) {
+      const currentPd = loadPuzzleData();
+      const puzzleId = currentPd.currentPuzzleId || getNextPuzzle(currentPd.completedIds).id;
+      const result = addPuzzlePiece(puzzleId);
+
+      if (result.justCompleted) {
+        // パズル完成！次のパズルをセット
+        const next = getNextPuzzle(result.completedIds);
+        result.currentPuzzleId = next.id;
+        result.collected = 0;
+        result.justCompleted = false;
+        savePuzzleData(result);
+      }
+      setPuzzleData(loadPuzzleData());
+    }
+
     setScreen('home');
 
     // Supabaseに保存（非同期・UIブロックしない）
@@ -178,6 +213,14 @@ function App() {
             petName={displayName}
           />
         );
+      case 'gohoubi':
+        return (
+          <GohoubiScreen
+            onBack={() => setScreen('home')}
+            petName={displayName}
+            puzzleData={puzzleData}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -188,12 +231,14 @@ function App() {
             todayDone={todayDone}
             subjectLevels={subjectLevels}
             petName={displayName}
+            puzzleData={puzzleData}
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
             onOpenFukushu={() => setScreen('fukushu')}
+            onOpenGohoubi={() => setScreen('gohoubi')}
           />
         );
     }
