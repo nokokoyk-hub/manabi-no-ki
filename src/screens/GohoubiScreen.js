@@ -11,7 +11,7 @@ import { loadPuzzleData } from '../lib/storage';
 import { getPuzzleById } from '../data/puzzles';
 
 const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData }) => {
-  const [puzzleData, setPuzzleData] = useState(propsPuzzleData || loadPuzzleData());
+  const [puzzleData] = useState(propsPuzzleData || loadPuzzleData());
   const [showArchive, setShowArchive] = useState(false);
   const [imgError, setImgError] = useState(false);
 
