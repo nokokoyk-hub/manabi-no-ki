@@ -8,6 +8,7 @@
 
 import { supabase } from './supabase';
 import { DEFAULT_SUBJECT_LEVELS, normalizeSubjectLevels } from '../constants/learningLevels';
+import COSTUME_ITEMS_DATA from '../data/costumeItems';
 
 // ------------------------------------------
 // デバイスID管理
@@ -382,4 +383,109 @@ export const addPuzzlePiece = (puzzleId) => {
 
   savePuzzleData(data);
   return { ...data, justCompleted };
+};
+
+// ------------------------------------------
+// 👗 着せ替えアイテム
+// アンロック状態と装着中アイテムを管理
+// v0.7.2: 新規追加
+// ------------------------------------------
+const COSTUME_KEY = 'manabi_costume';
+
+const DEFAULT_COSTUME_DATA = {
+  unlockedItems: [],    // アンロック済みアイテムIDリスト
+  equippedItem: null,   // 現在装着中のアイテムID（null=なし）
+  missionCount: 0,      // 総ミッションクリア回数
+  perfectCount: 0,      // パーフェクト回数
+};
+
+export const loadCostumeData = () => {
+  try {
+    const raw = localStorage.getItem(COSTUME_KEY);
+    if (!raw) return DEFAULT_COSTUME_DATA;
+    const parsed = JSON.parse(raw);
+    return {
+      unlockedItems: parsed.unlockedItems || [],
+      equippedItem: parsed.equippedItem || null,
+      missionCount: parsed.missionCount || 0,
+      perfectCount: parsed.perfectCount || 0,
+    };
+  } catch (err) {
+    console.error('❌ 着せ替えデータ読み込みエラー:', err);
+    return DEFAULT_COSTUME_DATA;
+  }
+};
+
+export const saveCostumeData = (data) => {
+  try {
+    localStorage.setItem(COSTUME_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.error('❌ 着せ替えデータ保存エラー:', err);
+  }
+};
+
+// アイテム装着/解除
+export const equipItem = (itemId) => {
+  const data = loadCostumeData();
+  data.equippedItem = data.equippedItem === itemId ? null : itemId;
+  saveCostumeData(data);
+  return data;
+};
+
+// アイテムアンロック
+export const unlockItem = (itemId) => {
+  const data = loadCostumeData();
+  if (!data.unlockedItems.includes(itemId)) {
+    data.unlockedItems.push(itemId);
+    saveCostumeData(data);
+  }
+  return data;
+};
+
+// ミッション完了時のアンロック判定
+export const checkCostumeUnlocks = (streak, puzzleCompletedCount) => {
+  const data = loadCostumeData();
+  const ITEMS = COSTUME_ITEMS_DATA;
+  const newUnlocks = [];
+
+  ITEMS.forEach(item => {
+    if (data.unlockedItems.includes(item.id)) return;
+
+    let shouldUnlock = false;
+    switch (item.unlockType) {
+      case 'mission_count':
+        shouldUnlock = data.missionCount >= item.unlockValue;
+        break;
+      case 'streak':
+        shouldUnlock = streak >= item.unlockValue;
+        break;
+      case 'perfect':
+        shouldUnlock = data.perfectCount >= item.unlockValue;
+        break;
+      case 'puzzle':
+        shouldUnlock = puzzleCompletedCount >= item.unlockValue;
+        break;
+      default:
+        break;
+    }
+
+    if (shouldUnlock) {
+      data.unlockedItems.push(item.id);
+      newUnlocks.push(item);
+    }
+  });
+
+  if (newUnlocks.length > 0) {
+    saveCostumeData(data);
+  }
+  return { costumeData: data, newUnlocks };
+};
+
+// ミッションカウント・パーフェクトカウント更新
+export const incrementMissionCount = (isPerfect) => {
+  const data = loadCostumeData();
+  data.missionCount += 1;
+  if (isPerfect) data.perfectCount += 1;
+  saveCostumeData(data);
+  return data;
 };
