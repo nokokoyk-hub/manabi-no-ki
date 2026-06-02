@@ -8,6 +8,7 @@
 // ============================================
 
 import React, { useState, useCallback } from 'react';
+import { getItemById } from '../data/costumeItems';
 
 const FALLBACK_IMAGE = '/public/images/mame/mame_happy.png';
 
@@ -85,6 +86,7 @@ const MameCharacter = ({
   size = 100,
   petName = 'まめ',
   enableTap = true,
+  equippedItem = null,
   style = {},
 }) => {
   const [isTapped, setIsTapped] = useState(false);
@@ -182,6 +184,26 @@ const MameCharacter = ({
             transition: 'filter 0.3s ease',
           }}
         />
+
+        {/* 👗 着せ替えアイテムオーバーレイ */}
+        {equippedItem && (() => {
+          const item = getItemById(equippedItem);
+          if (!item) return null;
+          return (
+            <span style={{
+              position: 'absolute',
+              top: item.position.top,
+              left: item.position.left,
+              transform: 'translateX(-50%)',
+              fontSize: size * item.size,
+              pointerEvents: 'none',
+              filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))',
+              zIndex: 2,
+            }}>
+              {item.emoji}
+            </span>
+          );
+        })()}
       </div>
     </div>
   );
