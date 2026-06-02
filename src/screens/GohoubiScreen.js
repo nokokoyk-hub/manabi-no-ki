@@ -8,12 +8,15 @@ import React, { useState, useEffect } from 'react';
 import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
 import { loadPuzzleData } from '../lib/storage';
+import { loadCostumeData, equipItem } from '../lib/storage';
 import { getPuzzleById } from '../data/puzzles';
+import COSTUME_ITEMS from '../data/costumeItems';
 
-const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData }) => {
+const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeData: propsCostumeData, onEquipChange }) => {
   const [puzzleData] = useState(propsPuzzleData || loadPuzzleData());
   const [showArchive, setShowArchive] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [costumeData, setCostumeData] = useState(propsCostumeData || loadCostumeData());
 
   const displayName = petName || 'まめ';
   const puzzle = getPuzzleById(puzzleData.currentPuzzleId);
@@ -279,6 +282,97 @@ const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData }) => {
               transition: 'width 0.5s ease',
             }} />
           </div>
+        </div>
+
+        {/* 👗 きせかえコーナー */}
+        <div style={{
+          background: 'white', borderRadius: 20, padding: 16,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 16,
+        }}>
+          <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.text, marginBottom: 12 }}>
+            👗 きせかえコーナー
+          </div>
+
+          {/* 現在の装着プレビュー */}
+          <div style={{
+            display: 'flex', justifyContent: 'center', marginBottom: 14,
+            background: '#F1F8E9', borderRadius: 16, padding: 12,
+          }}>
+            <MameCharacter
+              pose="happy"
+              message={costumeData.equippedItem ? 'にあう？💖' : 'なにか つけてみて！'}
+              size={90}
+              petName={displayName}
+              equippedItem={costumeData.equippedItem}
+              enableTap={true}
+            />
+          </div>
+
+          {/* アイテム一覧 */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+          }}>
+            {COSTUME_ITEMS.map(item => {
+              const isUnlocked = costumeData.unlockedItems.includes(item.id);
+              const isEquipped = costumeData.equippedItem === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (!isUnlocked) return;
+                    const updated = equipItem(item.id);
+                    setCostumeData(updated);
+                    if (onEquipChange) onEquipChange(updated.equippedItem);
+                  }}
+                  style={{
+                    background: isEquipped ? '#E8F5E9' : isUnlocked ? 'white' : '#F5F5F5',
+                    border: isEquipped ? '2px solid #4CAF50' : '2px solid #E0E0E0',
+                    borderRadius: 14, padding: '10px 4px',
+                    cursor: isUnlocked ? 'pointer' : 'default',
+                    textAlign: 'center',
+                    opacity: isUnlocked ? 1 : 0.5,
+                    transition: 'all 0.2s ease',
+                    fontFamily: "'Rounded Mplus 1c', sans-serif",
+                  }}
+                >
+                  <div style={{ fontSize: 28 }}>
+                    {isUnlocked ? item.emoji : '❓'}
+                  </div>
+                  <div style={{
+                    fontSize: 9, fontWeight: 700, marginTop: 4,
+                    color: isEquipped ? '#2E7D32' : isUnlocked ? COLORS.text : COLORS.textLight,
+                    lineHeight: 1.3,
+                  }}>
+                    {isUnlocked ? item.name : item.category}
+                  </div>
+                  {isEquipped && (
+                    <div style={{ fontSize: 8, color: '#4CAF50', fontWeight: 800, marginTop: 2 }}>
+                      つけてる！
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* はずすボタン */}
+          {costumeData.equippedItem && (
+            <button
+              onClick={() => {
+                const updated = equipItem(costumeData.equippedItem);
+                setCostumeData(updated);
+                if (onEquipChange) onEquipChange(null);
+              }}
+              style={{
+                width: '100%', marginTop: 10, background: '#FFF3E0',
+                border: '2px solid #FFE0B2', borderRadius: 12, padding: '8px',
+                fontSize: 12, fontWeight: 700, color: COLORS.orange,
+                cursor: 'pointer', fontFamily: "'Rounded Mplus 1c', sans-serif",
+              }}
+            >
+              ぜんぶ はずす
+            </button>
+          )}
         </div>
 
         {/* ヒント */}
