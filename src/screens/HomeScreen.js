@@ -12,7 +12,7 @@ import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData,
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
   onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const [mameMessage, setMameMessage] = useState('');
@@ -109,6 +109,7 @@ const HomeScreen = ({
             message={mameMessage}
             size={80}
             petName={petName}
+            equippedItem={equippedItem}
           />
         </div>
       </div>
