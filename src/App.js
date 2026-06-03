@@ -35,7 +35,7 @@ import {
 import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.8.0';
+export const APP_VERSION = '0.9.0';
 
 function App() {
   const [screen, setScreen] = useState('home');
