@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌳 まなびの木 - 変更履歴</title>
+  <style>
+    body { font-family: 'Helvetica Neue', sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background: #FFF8F0; color: #4E342E; }
+    h1 { color: #2E7D32; }
+    .version { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .version h2 { color: #FF9800; margin-top: 0; }
+    .version .date { color: #8D6E63; font-size: 14px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; line-height: 1.6; }
+    .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-right: 4px; }
+    .new { background: #E8F5E9; color: #2E7D32; }
+    .fix { background: #FFF3E0; color: #E65100; }
+    .infra { background: #E3F2FD; color: #1565C0; }
+  </style>
+</head>
+<body>
+  <h1>🌳 まなびの木 — 変更履歴</h1>
+
+  <div class="version">
+    <h2>v0.8.0 — Supabase問題DB移行＋着せ替え 🐕👑</h2>
+    <div class="date">2026年6月3日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 問題データをSupabase questionsテーブルへ完全移行（99問DB管理）</li>
+      <li><span class="tag new">NEW</span> questionLoader.js: Supabase非同期取得＋ローカルフォールバック</li>
+      <li><span class="tag new">NEW</span> 着せ替え機能: 8アイテム（🎀👑🕶️🌸🎩🧣⭐💖）</li>
+      <li><span class="tag new">NEW</span> 着せ替えアンロック条件（実績連動）</li>
+      <li><span class="tag new">NEW</span> GohoubiScreenに着せ替えタブ追加</li>
+      <li><span class="tag new">NEW</span> costumeItems.js: 着せ替えアイテム定義</li>
+      <li><span class="tag new">NEW</span> MameCharacter.js: 着せ替えオーバーレイ対応</li>
+      <li><span class="tag infra">INFRA</span> Supabase questionsテーブル作成＋RLS設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.7.1 — ごほうびパズル 🧩✨</h2>
+    <div class="date">2026年6月1日（日）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> GohoubiScreen.js: パズル画面＋アーカイブ</li>
+      <li><span class="tag new">NEW</span> puzzles.js: パズル定義（3枚: spring/summer/night）</li>
+      <li><span class="tag new">NEW</span> 3×3パズルグリッド（9日で完成）</li>
+      <li><span class="tag new">NEW</span> ミッションクリアでピースGET</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.7.0 — 新画像10枚＋演出強化 🐕✨</h2>
+    <div class="date">2026年5月31日（土）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 新ポーズ10枚追加（全15ポーズ体制）</li>
+      <li><span class="tag new">NEW</span> 全画面で新画像を活用した演出</li>
+      <li><span class="tag fix">FIX</span> 新画像の背景透過処理</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.6.1 — キャラアニメーション強化 🐕✨</h2>
+    <div class="date">2026年5月30日（土）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 新アニメーション6種: shake/spin/sparkle/slideUp/wiggle/bow</li>
+      <li><span class="tag new">NEW</span> 正解コンボシステム: 2連続→くるくる回転、3連続→きらきらパーティクル</li>
+      <li><span class="tag new">NEW</span> コンボバッジ表示（🔥2コンボ！）</li>
+      <li><span class="tag new">NEW</span> パーフェクト演出: 全問正解で特別セリフ＋きらきら</li>
+      <li><span class="tag new">NEW</span> キャラタップ反応: タッチするとぽよんと跳ねる</li>
+      <li><span class="tag new">NEW</span> 不正解時ぶるぶる震え、出題時わくわく揺れ</li>
+      <li><span class="tag fix">FIX</span> 全キャラ画像の背景透過: JPEG偽装PNG → 本物の透過PNG</li>
+      <li><span class="tag fix">FIX</span> 画像サイズ最適化: 1254px → 400px（読み込み高速化）</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.6.0 — ペット名カスタマイズ 🐕💖</h2>
+    <div class="date">2026年5月30日（土）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> NamingScreen: 初回起動時にキャラの名前を子供がつけられる</li>
+      <li><span class="tag new">NEW</span> 「はじめまして！！きみが なまえを きめてくれる？」演出</li>
+      <li><span class="tag new">NEW</span> 全画面のセリフがつけた名前に動的差し替え</li>
+      <li><span class="tag fix">FIX</span> mameMessages.js: {name}プレースホルダー対応</li>
+      <li><span class="tag fix">FIX</span> MameCharacter.js: petName prop対応</li>
+      <li><span class="tag fix">FIX</span> HomeScreen/FukushuScreen/LearningScreen: petName配信</li>
+      <li><span class="tag infra">INFRA</span> storage.js: loadPetName/savePetName追加（localStorage）</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.2.0 — Supabase連携（データ永続化）🔗</h2>
+    <div class="date">2026年5月28日（水）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> Supabase連携: 学習データがブラウザを閉じても保存</li>
+      <li><span class="tag new">NEW</span> 木の成長データ永続化: はっぱ・おはな・みのりの数がリロードしても残る</li>
+      <li><span class="tag new">NEW</span> 学習セッション記録: 毎回の学習結果をデータベースに保存</li>
+      <li><span class="tag new">NEW</span> ローディング画面: 起動時にデータ読み込み中の表示</li>
+      <li><span class="tag new">NEW</span> ストリーク管理強化: 日付チェックによる自動リセット</li>
+      <li><span class="tag infra">INFRA</span> Supabaseプロジェクト作成（東京リージョン）</li>
+      <li><span class="tag infra">INFRA</span> user_progress / learning_sessions テーブル作成</li>
+      <li><span class="tag infra">INFRA</span> Vercel環境変数設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.1.1 — 送りがな＋時計問題追加 ⏰</h2>
+    <div class="date">2026年5月28日（水）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> アナログ時計SVGコンポーネント（ClockSVG.js）追加</li>
+      <li><span class="tag new">NEW</span> 送り仮名問題6問追加（走/読/書/聞/歩/食）</li>
+      <li><span class="tag new">NEW</span> 時計の読み方問題5問追加（ビジュアル付き）</li>
+      <li><span class="tag new">NEW</span> ホーム画面に「おくりがな」「とけい」専用れんしゅうボタン追加</li>
+      <li><span class="tag new">NEW</span> LearningScreenをモード対応（mission/okurigana/clock）</li>
+      <li><span class="tag new">NEW</span> 算数問題1問追加（6×9）</li>
+      <li><span class="tag new">NEW</span> 問題データにカテゴリ別・教科別取得関数追加</li>
+      <li><span class="tag fix">FIX</span> APP_VERSION未使用警告修正（Vercel CI対応）</li>
+      <li><span class="tag infra">INFRA</span> Vercelデプロイ完了・Deployment Protection OFF設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.1.0 — 初期リリース 🌱</h2>
+    <div class="date">2026年5月27日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> プロジェクト初期構築</li>
+      <li><span class="tag new">NEW</span> ホーム画面（まなびの木ビジュアル）</li>
+      <li><span class="tag new">NEW</span> 学習画面（小2レベル問題・選択肢式）</li>
+      <li><span class="tag new">NEW</span> みまもり画面（保護者向け学習状況）</li>
+      <li><span class="tag new">NEW</span> ADHD+LD対応UI（丸文字フォント・大ボタン・ふりがな）</li>
+      <li><span class="tag new">NEW</span> 木の成長システム（葉/花/実）</li>
+      <li><span class="tag new">NEW</span> 正解演出（StarBurst）</li>
+      <li><span class="tag infra">INFRA</span> GitHub リポジトリ作成（nokokoyk-hub/manabi-no-ki）</li>
+      <li><span class="tag infra">INFRA</span> ファイル分割済み（screens/components/data/constants）</li>
+    </ul>
+  </div>
+
+</body>
+</html>
