@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.7.2
-// 最終更新: 2026/06/02
+// バージョン: 0.7.1
+// 最終更新: 2026/06/01
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -31,14 +31,11 @@ import {
   loadPuzzleData,
   addPuzzlePiece,
   savePuzzleData,
-  loadCostumeData,
-  incrementMissionCount,
-  checkCostumeUnlocks,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.7.2';
+export const APP_VERSION = '0.7.1';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -50,9 +47,6 @@ function App() {
 
   // 🧩 パズルデータ
   const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
-
-  // 👗 着せ替えデータ
-  const [costumeData, setCostumeData] = useState(() => loadCostumeData());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -133,16 +127,6 @@ function App() {
         savePuzzleData(result);
       }
       setPuzzleData(loadPuzzleData());
-    }
-
-    // 👗 着せ替えアンロック判定
-    if (learningMode === 'mission') {
-      const isPerfect = score === (totalQuestions || 5);
-      incrementMissionCount(isPerfect);
-      const pd = loadPuzzleData();
-      const puzzleCompletedCount = (pd.completedIds || []).length;
-      const { costumeData: updatedCostume } = checkCostumeUnlocks(newStreak, puzzleCompletedCount);
-      setCostumeData(updatedCostume);
     }
 
     setScreen('home');
@@ -235,10 +219,6 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             puzzleData={puzzleData}
-            costumeData={costumeData}
-            onEquipChange={(itemId) => {
-              setCostumeData(loadCostumeData());
-            }}
           />
         );
       default:
@@ -252,7 +232,6 @@ function App() {
             subjectLevels={subjectLevels}
             petName={displayName}
             puzzleData={puzzleData}
-            equippedItem={costumeData.equippedItem}
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
