@@ -13,6 +13,7 @@ const MODE_LABELS = {
   mission: { name: 'ミッション', emoji: '📝' },
   okurigana: { name: 'かんじ', emoji: '✏️' },
   clock: { name: 'とけい', emoji: '⏰' },
+  kagaku: { name: 'かがく', emoji: '🧪' },
 };
 
 // 曜日名（日本語）
