@@ -18,7 +18,7 @@ const MODE_LABELS = {
 // 曜日名（日本語）
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
 
-const MimamoriScreen = ({ onBack, streak = 0 }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '' }) => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -320,6 +320,28 @@ const MimamoriScreen = ({ onBack, streak = 0 }) => {
           </div>
           <div style={{ fontSize: 13, color: COLORS.textLight, marginTop: 4 }}>
             {encouragement.sub}
+          </div>
+        </div>
+
+        {/* 更新履歴 + バージョン情報 */}
+        <div style={{
+          marginTop: 24, textAlign: 'center', paddingBottom: 20,
+        }}>
+          <button
+            onClick={() => window.open('/changelog.html', '_blank')}
+            style={{
+              background: 'none', border: '1px solid #E0E0E0',
+              borderRadius: 20, padding: '8px 20px',
+              fontSize: 13, color: COLORS.textLight,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            📋 こうしんりれき
+          </button>
+          <div style={{
+            fontSize: 11, color: '#BDBDBD', marginTop: 8,
+          }}>
+            まなびの木 v{appVersion}
           </div>
         </div>
       </div>
