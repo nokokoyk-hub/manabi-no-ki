@@ -2,10 +2,12 @@
 // 🗄️ questionLoader.js - Supabaseから問題取得
 // DB読み込み + フォールバック（既存ハードコード問題）
 // v0.8.0: 新規作成
+// v0.9.1: 誤答優先出題ロジック追加
 // ============================================
 
 import { supabase } from './supabase';
 import { DEFAULT_SUBJECT_LEVELS } from '../constants/learningLevels';
+import { getWeakQuestions } from './storage';
 import {
   getTodayQuestions as getTodayQuestionsLocal,
   getQuestionsByCategory as getQuestionsByCategoryLocal,
@@ -77,6 +79,45 @@ const takeBalanced = (questions, count) => {
 };
 
 // ------------------------------------------
+// 誤答優先出題ヘルパー
+// 間違えた問題を最大40%まで優先的に混ぜる
+// 誤答がゼロなら通常通りの動作（完全後方互換）
+// v0.9.1: 新規追加
+// ------------------------------------------
+const prioritizeWeak = (allQuestions, weakIds, count) => {
+  if (!weakIds || weakIds.length === 0) return null; // 誤答なし→通常ロジックに委譲
+
+  const weakSet = new Set(weakIds);
+  const weakOnes = shuffle(allQuestions.filter(q => weakSet.has(q.id)));
+  const normalOnes = shuffle(allQuestions.filter(q => !weakSet.has(q.id)));
+
+  if (weakOnes.length === 0) return null; // 該当レベルに誤答問題なし
+
+  // 誤答枠: 最大40%（少なくとも1問）
+  const weakSlots = Math.max(1, Math.min(weakOnes.length, Math.ceil(count * 0.4)));
+  const normalSlots = count - weakSlots;
+
+  const selected = [
+    ...weakOnes.slice(0, weakSlots),
+    ...normalOnes.slice(0, normalSlots),
+  ];
+
+  console.log(`🔄 誤答優先: ${weakSlots}問(苦手) + ${Math.min(normalOnes.length, normalSlots)}問(通常)`);
+  return shuffle(selected);
+};
+
+// 誤答IDリストを取得する（失敗しても空配列で続行）
+const fetchWeakIds = async () => {
+  try {
+    const weakData = await getWeakQuestions(30, 50);
+    return weakData.map(w => w.question_id);
+  } catch (err) {
+    console.warn('⚠️ 誤答データ取得失敗、通常出題に:', err.message);
+    return [];
+  }
+};
+
+// ------------------------------------------
 // Supabaseから問題を取得する関数群
 // すべてフォールバック付き！
 // ------------------------------------------
@@ -108,6 +149,14 @@ export const getTodayQuestions = async (count = 5, subjectLevels = DEFAULT_SUBJE
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
 
+    // 🔄 誤答優先出題を試みる
+    const weakIds = await fetchWeakIds();
+    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    if (weakResult) {
+      console.log(`✅ DB問題取得(誤答優先): ${filtered.length}問中${count}問を出題`);
+      return weakResult;
+    }
+
     console.log(`✅ DB問題取得: ${filtered.length}問中${count}問を出題`);
     return takeBalanced(filtered, count);
   } catch (err) {
@@ -137,6 +186,14 @@ export const getQuestionsByCategory = async (category, count = 5, subjectLevels 
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
 
+    // 🔄 誤答優先出題を試みる
+    const weakIds = await fetchWeakIds();
+    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    if (weakResult) {
+      console.log(`✅ DB問題取得(${category}/誤答優先): ${filtered.length}問`);
+      return weakResult;
+    }
+
     console.log(`✅ DB問題取得(${category}): ${filtered.length}問`);
     return shuffle(filtered).slice(0, count);
   } catch (err) {
@@ -165,6 +222,14 @@ export const getQuestionsBySubject = async (subject, count = 5, subjectLevels = 
     const filtered = filterByLevels(appQuestions, subjectLevels);
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
+
+    // 🔄 誤答優先出題を試みる
+    const weakIds = await fetchWeakIds();
+    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    if (weakResult) {
+      console.log(`✅ DB問題取得(${subject}/誤答優先): ${filtered.length}問`);
+      return weakResult;
+    }
 
     console.log(`✅ DB問題取得(${subject}): ${filtered.length}問`);
     return shuffle(filtered).slice(0, count);
