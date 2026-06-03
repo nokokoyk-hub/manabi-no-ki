@@ -17,6 +17,9 @@ import {
 // ------------------------------------------
 const shuffle = (items) => [...items].sort(() => Math.random() - 0.5);
 
+// 文字列中の \n を実際の改行に変換
+const unescapeNewlines = (str) => (str || '').replace(/\\n/g, '\n');
+
 // DBのレコードをアプリ内形式に変換
 const dbToAppFormat = (row) => ({
   id: row.question_id,
@@ -25,8 +28,8 @@ const dbToAppFormat = (row) => ({
   subjectEmoji: row.subject_emoji,
   category: row.category || undefined,
   gradeLevel: row.grade_level,
-  question: row.question,
-  hint: row.hint || '',
+  question: unescapeNewlines(row.question),
+  hint: unescapeNewlines(row.hint),
   options: typeof row.options === 'string' ? JSON.parse(row.options) : row.options,
   correct: row.correct,
   clockTime: row.clock_time
