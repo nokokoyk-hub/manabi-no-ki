@@ -39,6 +39,14 @@ export const SUBJECT_LEVELS = [
     lowHint: '身近な ことから',
     highHint: '少しずつ ひろげる',
   },
+  {
+    key: 'かがく',
+    emoji: '🧪',
+    label: 'かがく',
+    description: 'げんそ・しゅうきひょう・かがくのふしぎ',
+    lowHint: 'みぢかな ものから',
+    highHint: 'げんその せかいを たんけん',
+  },
 ];
 
 // お母さんフィードバック反映の初期値
@@ -49,6 +57,7 @@ export const DEFAULT_SUBJECT_LEVELS = {
   こくご: 4,
   とけい: 2,
   せいかつ: 2,
+  かがく: 1,
 };
 
 export const clampLearningLevel = (level) => {
