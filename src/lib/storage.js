@@ -324,6 +324,93 @@ export const getRecentSessions = async (days = 7) => {
 };
 
 // ------------------------------------------
+// 📊 誤答記録（answer_history）
+// 1問ごとに正誤を記録し、復習の精度を高める
+// v0.9.1: 新規追加
+// ------------------------------------------
+
+/**
+ * 1問の回答結果をanswer_historyに記録する
+ * fire-and-forget（呼び出し元でawaitしなくてOK）
+ */
+export const recordAnswer = async (questionId, isCorrect) => {
+  if (!supabase) {
+    console.log('📦 ローカルモード: 誤答記録スキップ');
+    return;
+  }
+
+  try {
+    const deviceId = getDeviceId();
+
+    const { error } = await supabase
+      .from('answer_history')
+      .insert({
+        device_id: deviceId,
+        question_id: questionId,
+        is_correct: isCorrect,
+      });
+
+    if (error) {
+      console.error('❌ 誤答記録エラー:', error);
+    }
+  } catch (err) {
+    console.error('❌ 誤答記録例外:', err);
+  }
+};
+
+/**
+ * 指定日数以内の誤答が多い問題IDを取得する
+ * 返り値: [{ question_id, wrong_count, total_count, wrong_rate }]
+ * wrong_rateが高い順にソート
+ */
+export const getWeakQuestions = async (days = 30, limit = 20) => {
+  if (!supabase) {
+    console.log('📦 ローカルモード: 誤答取得スキップ');
+    return [];
+  }
+
+  try {
+    const deviceId = getDeviceId();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data, error } = await supabase
+      .from('answer_history')
+      .select('question_id, is_correct')
+      .eq('device_id', deviceId)
+      .gte('answered_at', since.toISOString());
+
+    if (error) throw error;
+    if (!data || data.length === 0) return [];
+
+    // 問題ごとに集計
+    const stats = {};
+    data.forEach(row => {
+      if (!stats[row.question_id]) {
+        stats[row.question_id] = { question_id: row.question_id, wrong_count: 0, total_count: 0 };
+      }
+      stats[row.question_id].total_count += 1;
+      if (!row.is_correct) {
+        stats[row.question_id].wrong_count += 1;
+      }
+    });
+
+    // 誤答率を計算してソート
+    return Object.values(stats)
+      .map(s => ({
+        ...s,
+        wrong_rate: s.total_count > 0 ? s.wrong_count / s.total_count : 0,
+      }))
+      .filter(s => s.wrong_count > 0) // 1回でも間違えた問題だけ
+      .sort((a, b) => b.wrong_rate - a.wrong_rate || b.wrong_count - a.wrong_count)
+      .slice(0, limit);
+  } catch (err) {
+    console.error('❌ 誤答取得例外:', err);
+    return [];
+  }
+};
+
+// ------------------------------------------
 // 🧩 ごほうびパズル
 // ミッションクリアでピースを集めて絵を完成させる
 // v0.7.1: 新規追加
