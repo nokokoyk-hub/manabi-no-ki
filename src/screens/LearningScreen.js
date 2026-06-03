@@ -55,7 +55,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
         else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
         else if (mode === 'kagaku') qs = await getQuestionsBySubject('かがく', 5, subjectLevels);
-        else qs = await getTodayQuestions(5, subjectLevels);
+        else qs = await getTodayQuestions(8, subjectLevels);
         setQuestions(qs || []);
       } catch (err) {
         console.error('問題取得エラー:', err);
