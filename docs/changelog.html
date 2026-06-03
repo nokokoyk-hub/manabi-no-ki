@@ -21,47 +21,41 @@
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
 
-   <ul>
+  <div class="version">
+    <h2>v0.8.0 — Supabase問題DB移行＋着せ替え 🐕👑</h2>
+    <div class="date">2026年6月3日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 問題データをSupabase questionsテーブルへ完全移行（99問DB管理）</li>
+      <li><span class="tag new">NEW</span> questionLoader.js: Supabase非同期取得＋ローカルフォールバック</li>
+      <li><span class="tag new">NEW</span> 着せ替え機能: 8アイテム（🎀👑🕶️🌸🎩🧣⭐💖）</li>
+      <li><span class="tag new">NEW</span> 着せ替えアンロック条件（実績連動）</li>
+      <li><span class="tag new">NEW</span> GohoubiScreenに着せ替えタブ追加</li>
+      <li><span class="tag new">NEW</span> costumeItems.js: 着せ替えアイテム定義</li>
+      <li><span class="tag new">NEW</span> MameCharacter.js: 着せ替えオーバーレイ対応</li>
+      <li><span class="tag infra">INFRA</span> Supabase questionsテーブル作成＋RLS設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.7.1 — ごほうびパズル 🧩✨</h2>
+    <div class="date">2026年6月1日（日）</div>
+    <ul>
       <li><span class="tag new">NEW</span> GohoubiScreen.js: パズル画面＋アーカイブ</li>
       <li><span class="tag new">NEW</span> puzzles.js: パズル定義（3枚: spring/summer/night）</li>
       <li><span class="tag new">NEW</span> 3×3パズルグリッド（9日で完成）</li>
       <li><span class="tag new">NEW</span> ミッションクリアでピースGET</li>
     </ul>
   </div>
- 
+
   <div class="version">
     <h2>v0.7.0 — 新画像10枚＋演出強化 🐕✨</h2>
-    <div class="date">2026年5月31日</div>
+    <div class="date">2026年5月31日（土）</div>
     <ul>
       <li><span class="tag new">NEW</span> 新ポーズ10枚追加（全15ポーズ体制）</li>
       <li><span class="tag new">NEW</span> 全画面で新画像を活用した演出</li>
       <li><span class="tag fix">FIX</span> 新画像の背景透過処理</li>
     </ul>
   </div>
- 
-  <div class="version">
-    <h2>v0.6.1 — アニメーション強化 🐕✨</h2>
-    <div class="date">2026年5月30日</div>
-    <ul>
-      <li><span class="tag new">NEW</span> 新アニメーション6種（shake/spin/sparkle/slideUp/wiggle/bow）</li>
-      <li><span class="tag new">NEW</span> コンボ演出＋コンボバッジ</li>
-      <li><span class="tag new">NEW</span> パーフェクト演出＋タップ反応</li>
-      <li><span class="tag fix">FIX</span> 既存5画像の背景透過処理</li>
-    </ul>
-  </div>
- 
-  <div class="version">
-    <h2>v0.6.0 — ペット名カスタマイズ 🐕💖</h2>
-    <div class="date">2026年5月30日</div>
-    <ul>
-      <li><span class="tag new">NEW</span> NamingScreen: 初回起動時にキャラ命名</li>
-      <li><span class="tag new">NEW</span> 全セリフがつけた名前に動的差し替え</li>
-    </ul>
-  </div>
- 
-
-  <!-- v0.6.1 追記内容 -->
-<!-- docs/changelog.html の既存内容の一番上（v0.6.0の上）に追加 -->
 
   <div class="version">
     <h2>v0.6.1 — キャラアニメーション強化 🐕✨</h2>
@@ -77,9 +71,7 @@
       <li><span class="tag fix">FIX</span> 画像サイズ最適化: 1254px → 400px（読み込み高速化）</li>
     </ul>
   </div>
-  <!-- v0.6.0 追記内容 -->
-<!-- docs/changelog.html の既存内容の一番上（v0.5.0の上）に追加 -->
- 
+
   <div class="version">
     <h2>v0.6.0 — ペット名カスタマイズ 🐕💖</h2>
     <div class="date">2026年5月30日（土）</div>
@@ -93,58 +85,24 @@
       <li><span class="tag infra">INFRA</span> storage.js: loadPetName/savePetName追加（localStorage）</li>
     </ul>
   </div>
-<!-- 
-  ============================================
-  v0.2.0 の追記内容
-  既存の changelog.html の適切な位置に追加してください
-  ============================================
--->
-
-<section>
-  <h2>🎉 v0.2.0 — Supabase連携（データ永続化）</h2>
-  <p><strong>リリース日:</strong> 2026年5月28日（水）</p>
-  
-  <h3>✨ 新機能</h3>
-  <ul>
-    <li>📦 <strong>Supabase連携</strong>: 学習データがブラウザを閉じても保存されるようになりました</li>
-    <li>🌳 <strong>木の成長データ永続化</strong>: はっぱ・おはな・みのりの数がリロードしても残ります</li>
-    <li>📝 <strong>学習セッション記録</strong>: 毎回の学習結果（モード・スコア・日時）をデータベースに保存</li>
-    <li>⏳ <strong>ローディング画面</strong>: 起動時にデータ読み込み中の表示を追加</li>
-    <li>🔥 <strong>ストリーク管理強化</strong>: 日付チェックによる自動リセット機能</li>
-  </ul>
-
-  <h3>🔧 技術的変更</h3>
-  <ul>
-    <li>Supabaseプロジェクト作成（東京リージョン）</li>
-    <li>user_progress テーブル: 木の状態・ストリーク管理</li>
-    <li>learning_sessions テーブル: 学習セッション記録</li>
-    <li>src/lib/supabase.js 追加: Supabaseクライアント初期化</li>
-    <li>src/lib/storage.js 追加: データアクセスレイヤー</li>
-    <li>App.js をSupabase連携版に更新</li>
-    <li>LearningScreen.js: onCompleteにtotalQuestions引数追加</li>
-    <li>index.css: pulseアニメーション追加</li>
-    <li>@supabase/supabase-js パッケージ追加</li>
-    <li>Vercel環境変数設定（REACT_APP_SUPABASE_URL, REACT_APP_SUPABASE_ANON_KEY）</li>
-    <li>GitHubリポジトリをPublicに変更</li>
-  </ul>
-
-  <h3>📁 ファイル変更</h3>
-  <ul>
-    <li>🆕 src/lib/supabase.js（新規）</li>
-    <li>🆕 src/lib/storage.js（新規）</li>
-    <li>🆕 .env.example（新規）</li>
-    <li>✏️ src/App.js（Supabase連携追加）</li>
-    <li>✏️ src/screens/LearningScreen.js（onComplete引数追加）</li>
-    <li>✏️ src/index.css（pulseアニメーション追加）</li>
-    <li>✏️ package.json（@supabase/supabase-js追加、version更新）</li>
-    <li>✏️ public/version.json（0.2.0に更新）</li>
-    <li>✏️ package-lock.json（自動更新）</li>
-  </ul>
-</section>
-  
 
   <div class="version">
-    <h2>v0.1.1</h2>
+    <h2>v0.2.0 — Supabase連携（データ永続化）🔗</h2>
+    <div class="date">2026年5月28日（水）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> Supabase連携: 学習データがブラウザを閉じても保存</li>
+      <li><span class="tag new">NEW</span> 木の成長データ永続化: はっぱ・おはな・みのりの数がリロードしても残る</li>
+      <li><span class="tag new">NEW</span> 学習セッション記録: 毎回の学習結果をデータベースに保存</li>
+      <li><span class="tag new">NEW</span> ローディング画面: 起動時にデータ読み込み中の表示</li>
+      <li><span class="tag new">NEW</span> ストリーク管理強化: 日付チェックによる自動リセット</li>
+      <li><span class="tag infra">INFRA</span> Supabaseプロジェクト作成（東京リージョン）</li>
+      <li><span class="tag infra">INFRA</span> user_progress / learning_sessions テーブル作成</li>
+      <li><span class="tag infra">INFRA</span> Vercel環境変数設定</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.1.1 — 送りがな＋時計問題追加 ⏰</h2>
     <div class="date">2026年5月28日（水）</div>
     <ul>
       <li><span class="tag new">NEW</span> アナログ時計SVGコンポーネント（ClockSVG.js）追加</li>
@@ -160,7 +118,7 @@
   </div>
 
   <div class="version">
-    <h2>v0.1.0</h2>
+    <h2>v0.1.0 — 初期リリース 🌱</h2>
     <div class="date">2026年5月27日（火）</div>
     <ul>
       <li><span class="tag new">NEW</span> プロジェクト初期構築</li>
