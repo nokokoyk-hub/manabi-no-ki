@@ -39,9 +39,9 @@ const dbToAppFormat = (row) => ({
 const filterByLevels = (questions, subjectLevels) => {
   const levels = subjectLevels || DEFAULT_SUBJECT_LEVELS;
   return questions.filter(q => {
-    // キーは日本語のまま（さんすう, こくご, とけい, せいかつ）
-    const maxLevel = levels[q.subject] || 2;
-    return q.gradeLevel <= maxLevel;
+    // 設定レベルの問題だけ出す（ぴったり一致）
+    const targetLevel = levels[q.subject] || 2;
+    return q.gradeLevel === targetLevel;
   });
 };
 
