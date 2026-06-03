@@ -235,6 +235,7 @@ function App() {
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
+            onStartKagaku={() => startLearning('kagaku')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
             onOpenFukushu={() => setScreen('fukushu')}
