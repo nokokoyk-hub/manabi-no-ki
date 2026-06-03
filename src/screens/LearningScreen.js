@@ -15,6 +15,7 @@ import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../lib/questionLoader';
 import { getMameMessage } from '../constants/mameMessages';
+import { recordAnswer } from '../lib/storage';
 
 const MODE_LABELS = {
   mission: 'きょうの ミッション',
@@ -129,6 +130,9 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
     if (showResult) return;
     setSelected(idx);
     setShowResult(true);
+
+    // 📊 誤答記録: 1問ごとにanswer_historyへ非同期記録（fire-and-forget）
+    recordAnswer(q.id, idx === q.correct);
 
     if (idx === q.correct) {
       const newScore = score + 1;
