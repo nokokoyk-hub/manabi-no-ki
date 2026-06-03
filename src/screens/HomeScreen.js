@@ -150,7 +150,7 @@ const HomeScreen = ({
           <div style={{
             fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 6,
           }}>
-            {todayDone ? 'あしたも いっしょに がんばろうね' : 'その子にあわせた レベルで 5もん！'}
+            {todayDone ? 'あしたも いっしょに がんばろうね' : 'その子にあわせた レベルで 8もん！'}
           </div>
         </button>
       </div>
