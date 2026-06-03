@@ -8,12 +8,12 @@
 //   - コンボバッジ強化
 // ============================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
 import MameCharacter from '../components/MameCharacter';
 import { COLORS } from '../constants/colors';
-import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../data/levelQuestions';
+import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../lib/questionLoader';
 import { getMameMessage } from '../constants/mameMessages';
 
 const MODE_LABELS = {
@@ -41,13 +41,30 @@ const getComboPose = (combo) => {
 };
 
 const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
-  const [questions] = useState(() => {
-    if (mode === 'okurigana') return getQuestionsByCategory('okurigana', 5, subjectLevels);
-    if (mode === 'clock') return getQuestionsByCategory('clock', 5, subjectLevels);
-    if (mode === 'math') return getQuestionsBySubject('さんすう', 5, subjectLevels);
-    if (mode === 'kokugo') return getQuestionsBySubject('こくご', 5, subjectLevels);
-    return getTodayQuestions(5, subjectLevels);
-  });
+  const [questions, setQuestions] = useState([]);
+  const [isLoadingQ, setIsLoadingQ] = useState(true);
+
+  // 🗄️ Supabaseから非同期で問題取得（フォールバック付き）
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        let qs;
+        if (mode === 'okurigana') qs = await getQuestionsByCategory('okurigana', 5, subjectLevels);
+        else if (mode === 'clock') qs = await getQuestionsByCategory('clock', 5, subjectLevels);
+        else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
+        else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
+        else qs = await getTodayQuestions(5, subjectLevels);
+        setQuestions(qs || []);
+      } catch (err) {
+        console.error('問題取得エラー:', err);
+        setQuestions([]);
+      } finally {
+        setIsLoadingQ(false);
+      }
+    };
+    loadQuestions();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
@@ -59,6 +76,23 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
 
   const [mamePose, setMamePose] = useState('cheer');
   const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
+
+  // ローディング中
+  if (isLoadingQ) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: COLORS.bg,
+        fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', padding: 24,
+      }}>
+        <MameCharacter pose="dash" message={`${displayName}が もんだいを さがしてるよ！`} size={90} petName={displayName} />
+        <div style={{ marginTop: 16, fontSize: 14, color: COLORS.textLight, fontWeight: 700 }}>
+          じゅんび ちゅう...
+        </div>
+      </div>
+    );
+  }
 
   const q = questions[currentQ];
 
