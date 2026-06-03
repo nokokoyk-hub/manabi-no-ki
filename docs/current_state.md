@@ -26,6 +26,7 @@
 苦手を「だめ」と決めつけず、得意や興味を見つけて伸ばし、自己肯定感を育てるアプリ。
 苦手な教科は足元をやわらかく、得意な教科は天井を高くする。
 レベル設定は「そのレベルの問題だけ出す」方式で、教科ごとに独立管理。
+「かがく」など興味特化型教科はミッションに混ぜず、やりたい子だけが選べる設計。
 
 ---
 
@@ -33,10 +34,10 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.8.0** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.8.0'` |
-| version.json | `public/version.json` → `"version": "0.8.0"` |
-| package.json | `"version": "0.8.0"` |
+| 現在のバージョン | **v0.9.0** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.0'` |
+| version.json | `public/version.json` → `"version": "0.9.0"` |
+| package.json | `"version": "0.9.0"` |
 | 最終更新日 | 2026年6月3日（火） |
 
 ---
@@ -47,7 +48,7 @@
 |----------|------|------|
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
 | バックエンド | Supabase | ✅ 稼働中 |
-| 問題データ | Supabase questionsテーブル（v0.8.0〜） | ✅ 99問DB管理 |
+| 問題データ | Supabase questionsテーブル（v0.8.0〜） | ✅ 250問DB管理 |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
 | AI問題生成 | Claude API | 🔲 未着手 |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
@@ -75,29 +76,30 @@
 |----------|------|-----|
 | `user_progress` | 木の成長状態・ストリーク | ✅有効 |
 | `learning_sessions` | 学習セッション記録 | ✅有効 |
-| `questions` | 問題データ（99問）v0.8.0〜 | ✅有効 |
-| `answer_history` | 🔲 未作成（誤答記録・次回実装予定） | - |
+| `questions` | 問題データ（250問）v0.8.0〜 | ✅有効 |
+| `answer_history` | 誤答記録（v0.9.0で作成済み・コード実装は次回） | ✅有効 |
 
 ---
 
-## 📁 ファイル構成（v0.8.0時点）
+## 📁 ファイル構成（v0.9.0時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── version.json
-│   └── public/images/
-│       ├── mame/          # キャラ画像15枚（透過PNG）
-│       └── puzzles/       # パズル画像3枚
+│   ├── changelog.html         # 更新履歴（アプリ表示用）
+│   └── images/
+│       ├── mame/              # キャラ画像15枚（透過PNG）
+│       └── puzzles/           # パズル画像3枚
 ├── src/
-│   ├── App.js             # ルーター + 状態管理
+│   ├── App.js                 # ルーター + 状態管理
 │   ├── lib/
 │   │   ├── supabase.js
-│   │   ├── storage.js     # データアクセス + localStorage管理
-│   │   └── questionLoader.js  # Supabase問題取得 + フォールバック
+│   │   ├── storage.js         # データアクセス + localStorage管理
+│   │   └── questionLoader.js  # Supabase問題取得 + フォールバック + ミッション除外ロジック
 │   ├── constants/
-│   │   ├── colors.js
-│   │   ├── learningLevels.js
+│   │   ├── colors.js          # SUBJECT_COLORS（5教科対応）
+│   │   ├── learningLevels.js  # SUBJECT_LEVELS（5教科対応）
 │   │   └── mameMessages.js
 │   ├── components/
 │   │   ├── TreeSVG.js
@@ -107,12 +109,12 @@ manabi-no-ki/
 │   │   └── UpdateBanner.js
 │   ├── screens/
 │   │   ├── NamingScreen.js    # なまえ入力
-│   │   ├── HomeScreen.js
-│   │   ├── LearningScreen.js  # DB非同期読み込み
-│   │   ├── LevelSettingsScreen.js
+│   │   ├── HomeScreen.js      # 3列ボタン（おくりがな/とけい/かがく）
+│   │   ├── LearningScreen.js  # DB非同期読み込み + 5モード対応
+│   │   ├── LevelSettingsScreen.js  # 5教科対応
 │   │   ├── FukushuScreen.js
 │   │   ├── GohoubiScreen.js   # パズル + 着せ替え
-│   │   └── MimamoriScreen.js
+│   │   └── MimamoriScreen.js  # 更新履歴リンク + バージョン表示
 │   └── data/
 │       ├── questions.js       # フォールバック用（ハードコード）
 │       ├── levelQuestions.js   # フォールバック用
@@ -120,7 +122,7 @@ manabi-no-ki/
 │       └── costumeItems.js    # 着せ替えアイテム定義
 └── docs/
     ├── current_state.md
-    └── changelog.html
+    └── changelog.html         # 更新履歴（リポジトリ管理用）
 ```
 
 ---
@@ -144,54 +146,83 @@ manabi-no-ki/
 
 ### ✅ 実装済み
 - ペット名カスタマイズ（NamingScreen）
-- ホーム画面（木 + キャラ + ストリーク）
-- 学習画面（Supabase DB読み込み + フォールバック）
-- 教科別レベル設定（Lv1〜6、設定レベルの問題だけ出す）
+- ホーム画面（木 + キャラ + ストリーク + 3列ボタン）
+- 学習画面（Supabase DB読み込み + フォールバック + 5モード対応）
+- 教科別レベル設定（Lv1〜6、設定レベルの問題だけ出す・5教科対応）
 - ふくしゅう画面（モード単位の弱点推定）
 - ごほうびパズル（3×3、9日で完成、アーカイブ）
 - 着せ替え（8アイテム、条件達成で自動アンロック）
 - コンボ演出 + パーフェクト演出
-- みまもり画面
-- Supabase問題DB管理（99問）
+- みまもり画面 + 更新履歴リンク + バージョン表示
+- Supabase問題DB管理（250問・5教科）
+- ミッション8問出題
+- かがく教科（ミッション除外・専用ボタンからのみ）
+- answer_historyテーブル（作成済み・コード実装は次回）
 
 ### 🔲 未実装
 | 機能 | 優先度 |
 |------|--------|
-| 誤答記録（answer_historyテーブル） | 🔴 高 |
+| 誤答記録のコード実装（LearningScreen→answer_history書き込み） | 🔴 高 |
 | 復習の問題ごと精密出題 | 🔴 高 |
-| Lv3〜6の問題追加 | 🔴 高 |
+| 対象年齢設定（ひらがな/漢字切り替え） | 🟡 中 |
+| 問題文のルビ（ふりがな）対応 | 🟡 中 |
+| 問題文の漢字版（question_advanced列） | 🟡 中 |
 | Claude API問題自動生成 | 🟡 中 |
-| 元素・理科の問題 | 🟡 中 |
 | 音声読み上げ | 🟡 中 |
 | 名前変更機能 | 🟢 低 |
 
 ---
 
-## 📊 問題データ（Supabase questionsテーブル: 99問）
+## 📊 問題データ（Supabase questionsテーブル: 250問）
 
-| 教科 | Lv1 | Lv2 | Lv3 | Lv4 | Lv5 | Lv6 |
-|------|-----|-----|-----|-----|-----|-----|
-| さんすう | 22 | 11 | 0 | 0 | 0 | 0 |
-| こくご | 7 | 15 | 0 | 8 | 8 | 8 |
-| せいかつ | 7 | 3 | 0 | 0 | 0 | 0 |
-| とけい | 3 | 6 | 1 | 0 | 0 | 0 |
+| 教科 | Lv1 | Lv2 | Lv3 | Lv4 | Lv5 | Lv6 | 計 |
+|------|-----|-----|-----|-----|-----|-----|-----|
+| さんすう | 22 | 11 | 8 | 8 | 8 | 8 | 65 |
+| こくご | 7 | 15 | 8 | 8 | 8 | 8 | 54 |
+| せいかつ | 7 | 3 | 8 | 8 | 8 | 8 | 42 |
+| とけい | 3 | 6 | 8 | 8 | 8 | 8 | 41 |
+| かがく | 8 | 8 | 8 | 8 | 8 | 8 | 48 |
+| **合計** | **47** | **43** | **40** | **40** | **40** | **40** | **250** |
 
-※ Lv3, さんすうLv4以上, せいかつLv3以上, とけいLv4以上は問題未整備
+### ミッション出題ルール
+- ミッション: さんすう・こくご・せいかつ・とけい の4教科からバランスよく8問
+- かがく: ミッションには含まず、ホーム画面の専用ボタンから5問出題
+- MISSION_EXCLUDE_SUBJECTS = ['かがく']（questionLoader.js）
 
 ---
 
-## 📐 次回実装予定: 誤答記録＋復習強化（設計済み）
+## 📐 次回実装予定: 誤答記録＋復習強化
 
-### answer_historyテーブル
+### answer_historyテーブル（✅作成済み）
 ```
-id, device_id, question_id, is_correct, answered_at
+id (UUID), device_id (TEXT), question_id (TEXT), is_correct (BOOLEAN), answered_at (TIMESTAMPTZ)
 ```
+インデックス: device_id, question_id, device_id+is_correct(部分)
 
 ### 実装ステップ
-1. テーブル作成（Supabase）
-2. LearningScreenで1問ごとに正誤記録
+1. ~~テーブル作成（Supabase）~~ ✅完了
+2. LearningScreenで1問ごとに正誤記録 ← 次回ここから
 3. questionLoader.jsに誤答優先出題ロジック
 4. FukushuScreen改修
+
+---
+
+## 🔮 今後のロードマップ
+
+### 次回スレッド（優先順）
+1. 誤答記録コード実装（LearningScreen→answer_history書き込み）
+2. FukushuScreen改修（誤答優先出題）
+3. 対象年齢設定 + ルビ対応（フェーズ1: 設定UI）
+
+### 中期（v1.0に向けて）
+- 問題文のルビ（ふりがな）共通コンポーネント
+- question_advanced列（漢字版問題文）
+- Claude API問題自動生成
+- みまもり画面の学習分析強化（正答率推移グラフ等）
+
+### 長期
+- 音声読み上げ
+- 有料化・リリース準備
 
 ---
 
@@ -217,9 +248,10 @@ id, device_id, question_id, is_correct, answered_at
 - 修正前に影響範囲5ステップ確認
 - CI=true でビルドテスト（Vercelと同じ環境）
 - のんはコードに不慣れ。修正はちゃぴが担当
+- Supabaseダッシュボードは100行ページネーション注意
 
 ---
 
-> 最終更新: 2026年6月3日（火）13:15 JST
+> 最終更新: 2026年6月3日（火）JST
 > 更新者: ちゃぴ
-> バージョン: v0.8.0
+> バージョン: v0.9.0
