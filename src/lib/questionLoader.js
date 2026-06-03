@@ -81,7 +81,10 @@ const takeBalanced = (questions, count) => {
 // すべてフォールバック付き！
 // ------------------------------------------
 
-// ミッション用: 全教科からバランスよく
+// ミッションに含めない教科（専用ボタンからのみアクセス）
+const MISSION_EXCLUDE_SUBJECTS = ['かがく'];
+
+// ミッション用: 全教科からバランスよく（除外教科を除く）
 export const getTodayQuestions = async (count = 5, subjectLevels = DEFAULT_SUBJECT_LEVELS) => {
   if (!supabase) {
     console.log('📦 ローカルモード: ハードコード問題を使用');
@@ -98,7 +101,9 @@ export const getTodayQuestions = async (count = 5, subjectLevels = DEFAULT_SUBJE
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('DB問題なし');
 
-    const appQuestions = data.map(dbToAppFormat);
+    const appQuestions = data
+      .map(dbToAppFormat)
+      .filter(q => !MISSION_EXCLUDE_SUBJECTS.includes(q.subject));
     const filtered = filterByLevels(appQuestions, subjectLevels);
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
