@@ -1,6 +1,7 @@
 // ============================================
 // 📝 LearningScreen - 学習（問題回答）画面
 // v0.7.0: 新画像10枚を活用した演出強化
+// v0.9.1: 結果画面追加（ミッション完了→スコア表示→ホームへ）
 //   - 正解: happy→jump→medal（コンボ段階）
 //   - 不正解: sad（ぶるぶる）
 //   - 出題: cheer（わくわく）
@@ -42,6 +43,24 @@ const getComboPose = (combo) => {
   return 'happy';                     // 通常正解: ジャンプ
 };
 
+// スコアに応じた結果メッセージ
+const getResultMessage = (score, total, petName) => {
+  const rate = score / total;
+  if (rate === 1) return `ぜんもん せいかい！！${petName} だいかんどう！！😭💖🎉`;
+  if (rate >= 0.8) return `すごいね！${petName} うれしそう！🌟✨`;
+  if (rate >= 0.5) return `がんばったね！${petName} おうえんしてるよ！💪😊`;
+  return `だいじょうぶ！${petName}と いっしょに れんしゅうしよう！🐕💕`;
+};
+
+// スコアに応じたポーズ
+const getResultPose = (score, total) => {
+  const rate = score / total;
+  if (rate === 1) return 'cry_happy';
+  if (rate >= 0.8) return 'medal';
+  if (rate >= 0.5) return 'happy';
+  return 'cheer';
+};
+
 const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
   const [questions, setQuestions] = useState([]);
   const [isLoadingQ, setIsLoadingQ] = useState(true);
@@ -74,6 +93,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
   const [showStar, setShowStar] = useState(false);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [finished, setFinished] = useState(false); // 🆕 結果画面表示フラグ
 
   const displayName = petName || 'まめ';
 
@@ -99,7 +119,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
 
   const q = questions[currentQ];
 
-  if (!q) {
+  if (!q && !finished) {
     return (
       <div style={{
         minHeight: '100vh', background: COLORS.bg,
@@ -120,6 +140,105 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             fontFamily: "'Rounded Mplus 1c', sans-serif",
           }}>
             ホームへ もどる
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================
+  // 🎉 結果画面（ミッション完了後に表示）
+  // ============================================
+  if (finished) {
+    const total = questions.length;
+    const isPerfect = score === total;
+    const resultPose = getResultPose(score, total);
+    const resultMsg = getResultMessage(score, total, displayName);
+
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: isPerfect
+          ? 'linear-gradient(180deg, #FFF8E1 0%, #FFFDE7 50%, #F1F8E9 100%)'
+          : 'linear-gradient(180deg, #E3F2FD 0%, #F1F8E9 50%, #FFFFFF 100%)',
+        fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: 24, textAlign: 'center',
+      }}>
+        {/* タイトル */}
+        <div style={{
+          fontSize: 24, fontWeight: 800, color: COLORS.greenDark,
+          marginBottom: 8,
+        }}>
+          {isPerfect ? '🏆 パーフェクト！！ 🏆' : '🎉 おつかれさま！'}
+        </div>
+
+        {/* モード名 */}
+        <div style={{
+          fontSize: 14, color: COLORS.textLight, fontWeight: 600, marginBottom: 20,
+        }}>
+          {MODE_LABELS[mode] || 'ミッション'} けっか
+        </div>
+
+        {/* キャラクター */}
+        <MameCharacter
+          pose={resultPose}
+          message={resultMsg}
+          size={100}
+          petName={displayName}
+        />
+
+        {/* スコア表示 */}
+        <div style={{
+          background: 'white', borderRadius: 24, padding: '24px 40px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          marginTop: 20, marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.textLight, marginBottom: 8 }}>
+            せいかいすう
+          </div>
+          <div style={{
+            fontSize: 48, fontWeight: 800,
+            color: isPerfect ? '#FF6F00' : COLORS.green,
+            lineHeight: 1,
+          }}>
+            {score} <span style={{ fontSize: 20, color: COLORS.textLight }}>/ {total}</span>
+          </div>
+          {isPerfect && (
+            <div style={{
+              marginTop: 8, fontSize: 14, fontWeight: 700,
+              color: '#FF6F00',
+            }}>
+              ⭐ ぜんもん せいかい！ ⭐
+            </div>
+          )}
+        </div>
+
+        {/* 次回のメッセージ（ミッションの場合） */}
+        {mode === 'mission' && (
+          <div style={{
+            fontSize: 15, color: COLORS.text, fontWeight: 700,
+            marginBottom: 20, lineHeight: 1.8,
+          }}>
+            きょうの ミッションは おわり！<br />
+            🌅 あしたも いっしょに がんばろうね！
+          </div>
+        )}
+
+        {/* ボタン群 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 300 }}>
+          <button
+            onClick={() => onComplete(score, questions.length)}
+            style={{
+              background: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
+              color: 'white', border: 'none', borderRadius: 16,
+              padding: '16px 24px', fontSize: 18, fontWeight: 800,
+              cursor: 'pointer', boxShadow: '0 4px 15px rgba(76,175,80,0.4)',
+              fontFamily: "'Rounded Mplus 1c', sans-serif",
+            }}
+          >
+            🏠 ホームに もどる
           </button>
         </div>
       </div>
@@ -154,17 +273,8 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             setMamePose('cheer');
             setMameMsg(getMameMessage('question', displayName));
           } else {
-            // 最終問題完了
-            if (newScore === questions.length) {
-              // パーフェクト！
-              setMamePose('cry_happy');
-              setMameMsg(`ぜんもん せいかい！！${displayName} かんどう！！😭💖🎉`);
-              setTimeout(() => onComplete(newScore, questions.length), 2500);
-            } else {
-              setMamePose('flag');
-              setMameMsg(getMameMessage('complete', displayName));
-              setTimeout(() => onComplete(newScore, questions.length), 1500);
-            }
+            // 🆕 最終問題完了 → 結果画面へ（自動リダイレクトしない）
+            setFinished(true);
           }
         }, 1500);
       }, 500);
