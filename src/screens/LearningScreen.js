@@ -1,5 +1,5 @@
 // ============================================
-// 📝 LearningScreen - 学習（問題回答）画面♪
+// 📝 LearningScreen - 学習（問題回答）画面
 // v0.7.0: 新画像10枚を活用した演出強化
 // v0.9.1: 結果画面追加（ミッション完了→スコア表示→ホームへ）
 //   - 正解: happy→jump→medal（コンボ段階）
@@ -285,8 +285,15 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
-        setMamePose('cheer');
-        setMameMsg(getMameMessage('question', displayName));
+        if (currentQ < questions.length - 1) {
+          // 次の問題へ進む（不正解でも止まらない）
+          setCurrentQ(c => c + 1);
+          setMamePose('cheer');
+          setMameMsg(getMameMessage('question', displayName));
+        } else {
+          // 最終問題が不正解でも結果画面へ
+          setFinished(true);
+        }
       }, 1800);
     }
   };
