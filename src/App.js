@@ -17,6 +17,7 @@ import LevelSettingsScreen from './screens/LevelSettingsScreen';
 import FukushuScreen from './screens/FukushuScreen';
 import NamingScreen from './screens/NamingScreen';
 import GohoubiScreen from './screens/GohoubiScreen';
+import ZukanScreen from './screens/ZukanScreen';
 import UpdateBanner from './components/UpdateBanner';
 import {
   loadProgress,
@@ -84,30 +85,6 @@ function App() {
       }
     };
     init();
-  }, []);
-
-  // 🔄 タブ復帰時の日付チェック（ブクマ開きっぱ対策）
-  // タブが裏→表に戻った時にloadProgressを再実行して
-  // 日付が変わっていればtodayDoneをリセットする
-  useEffect(() => {
-    const handleVisibility = async () => {
-      if (document.visibilityState === 'visible') {
-        try {
-          const progress = await loadProgress();
-          setLeaves(progress.leaves);
-          setFlowers(progress.flowers);
-          setFruits(progress.fruits);
-          setStreak(progress.streak);
-          setTodayDone(progress.todayDone);
-          console.log('🔄 タブ復帰: 進捗リフレッシュ完了 (todayDone:', progress.todayDone, ')');
-        } catch (err) {
-          console.error('タブ復帰時の読み込みエラー:', err);
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
   // ペット名決定ハンドラ
@@ -245,6 +222,13 @@ function App() {
             puzzleData={puzzleData}
           />
         );
+      case 'zukan':
+        return (
+          <ZukanScreen
+            onBack={() => setScreen('home')}
+            petName={displayName}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -260,6 +244,7 @@ function App() {
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
             onStartKagaku={() => startLearning('kagaku')}
+            onOpenZukan={() => setScreen('zukan')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
             onOpenFukushu={() => setScreen('fukushu')}
