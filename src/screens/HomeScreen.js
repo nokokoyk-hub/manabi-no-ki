@@ -13,7 +13,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onStartKagaku, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onStartKagaku, onOpenZukan, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -176,10 +176,10 @@ const HomeScreen = ({
         </div>
       </div>
 
-      {/* 下部カード */}
+      {/* 下部カード（2×2グリッド） */}
       <div style={{
         padding: '0 20px 12px',
-        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10,
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
       }}>
         <div onClick={onStartOkurigana} style={{
           background: 'white', borderRadius: 16, padding: 14,
@@ -211,7 +211,18 @@ const HomeScreen = ({
           <div style={{ fontSize: 26, marginBottom: 4 }}>🧪</div>
           <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>かがく</div>
           <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            げんそ
+            クイズ
+          </div>
+        </div>
+        <div onClick={onOpenZukan} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E0F7FA',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>🔬</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>げんそずかん</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            しゅうきひょう
           </div>
         </div>
       </div>
