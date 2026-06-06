@@ -4,11 +4,12 @@
 // スマホでピンチズーム＋スクロール対応
 // ============================================
 
-import React from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../constants/colors';
 
 const ZukanScreen = ({ petName, onBack }) => {
   const displayName = petName || 'まめ';
+  const [isZoomed, setIsZoomed] = useState(false);
 
   return (
     <div style={{
@@ -66,25 +67,42 @@ const ZukanScreen = ({ petName, onBack }) => {
           </div>
         </div>
 
-        {/* 周期表画像（ピンチズーム対応） */}
-        <div style={{
-          width: '100%', maxWidth: 600,
-          overflow: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          borderRadius: 16,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          background: 'white',
-        }}>
+        {/* 周期表画像（タップでズーム対応） */}
+        <div
+          onClick={() => setIsZoomed(!isZoomed)}
+          style={{
+            width: '100%', maxWidth: 600,
+            overflow: isZoomed ? 'scroll' : 'hidden',
+            WebkitOverflowScrolling: 'touch',
+            borderRadius: 16,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            background: 'white',
+            cursor: 'pointer',
+            maxHeight: isZoomed ? '70vh' : 'none',
+          }}
+        >
           <img
             src="/public/images/genso_hyou.png"
             alt="げんそ しゅうきひょう（元素周期表）"
             style={{
-              width: '100%',
+              width: isZoomed ? '250%' : '100%',
               height: 'auto',
               display: 'block',
-              borderRadius: 16,
+              borderRadius: isZoomed ? 0 : 16,
+              transition: 'width 0.3s ease',
             }}
           />
+        </div>
+
+        {/* ズームヒント */}
+        <div style={{
+          marginTop: 8, fontSize: 13, fontWeight: 700,
+          color: isZoomed ? '#FF6F00' : COLORS.textLight,
+          textAlign: 'center',
+        }}>
+          {isZoomed
+            ? '🔍 ゆびで スクロールできるよ！もういちど タップで もどる'
+            : '👆 タップで おおきく できるよ！'}
         </div>
 
         {/* ミニ知識コーナー */}
