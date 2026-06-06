@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
 // バージョン: 0.9.2
-// 最終更新: 2026/06/05
+// 最終更新: 2026/06/06
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -244,6 +244,8 @@ function App() {
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
             onStartKagaku={() => startLearning('kagaku')}
+            onStartShakai={() => startLearning('shakai')}
+            onStartDoutoku={() => startLearning('doutoku')}
             onOpenZukan={() => setScreen('zukan')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
