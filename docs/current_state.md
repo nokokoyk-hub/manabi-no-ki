@@ -34,11 +34,11 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.9.0** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.0'` |
-| version.json | `public/version.json` → `"version": "0.9.0"` |
-| package.json | `"version": "0.9.0"` |
-| 最終更新日 | 2026年6月3日（火） |
+| 現在のバージョン | **v0.9.1** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.1'` |
+| version.json | `public/version.json` → `"version": "0.9.1"` |
+| package.json | `"version": "0.9.1"` |
+| 最終更新日 | 2026年6月5日（木） |
 
 ---
 
@@ -48,7 +48,7 @@
 |----------|------|------|
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
 | バックエンド | Supabase | ✅ 稼働中 |
-| 問題データ | Supabase questionsテーブル（v0.8.0〜） | ✅ 250問DB管理 |
+| 問題データ | Supabase questionsテーブル（v0.8.0〜） | ✅ 370問DB管理 |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
 | AI問題生成 | Claude API | 🔲 未着手 |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
@@ -76,27 +76,28 @@
 |----------|------|-----|
 | `user_progress` | 木の成長状態・ストリーク | ✅有効 |
 | `learning_sessions` | 学習セッション記録 | ✅有効 |
-| `questions` | 問題データ（250問）v0.8.0〜 | ✅有効 |
-| `answer_history` | 誤答記録（v0.9.0で作成済み・コード実装は次回） | ✅有効 |
+| `questions` | 問題データ（370問）v0.8.0〜 | ✅有効 |
+| `answer_history` | 誤答記録（v0.9.1で実装完了） | ✅有効 |
 
 ---
 
-## 📁 ファイル構成（v0.9.0時点）
+## 📁 ファイル構成（v0.9.1時点）
 
 ```
 manabi-no-ki/
 ├── public/
 │   ├── version.json
 │   ├── changelog.html         # 更新履歴（アプリ表示用）
-│   └── images/
+│   └── public/images/
 │       ├── mame/              # キャラ画像15枚（透過PNG）
-│       └── puzzles/           # パズル画像3枚
+│       ├── puzzles/           # パズル画像3枚
+│       └── genso_hyou.png     # 元素周期表（ずかん用）
 ├── src/
-│   ├── App.js                 # ルーター + 状態管理
+│   ├── App.js                 # ルーター + 状態管理 + タブ復帰リセット
 │   ├── lib/
 │   │   ├── supabase.js
-│   │   ├── storage.js         # データアクセス + localStorage管理
-│   │   └── questionLoader.js  # Supabase問題取得 + フォールバック + ミッション除外ロジック
+│   │   ├── storage.js         # データアクセス + recordAnswer + getWeakQuestions
+│   │   └── questionLoader.js  # Supabase問題取得 + 誤答優先出題(40%) + ミッション除外
 │   ├── constants/
 │   │   ├── colors.js          # SUBJECT_COLORS（5教科対応）
 │   │   ├── learningLevels.js  # SUBJECT_LEVELS（5教科対応）
@@ -109,12 +110,13 @@ manabi-no-ki/
 │   │   └── UpdateBanner.js
 │   ├── screens/
 │   │   ├── NamingScreen.js    # なまえ入力
-│   │   ├── HomeScreen.js      # 3列ボタン（おくりがな/とけい/かがく）
-│   │   ├── LearningScreen.js  # DB非同期読み込み + 5モード対応
+│   │   ├── HomeScreen.js      # 2×2ボタン（おくりがな/とけい/かがく/げんそずかん）
+│   │   ├── LearningScreen.js  # DB非同期読み込み + 5モード + 結果画面 + 誤答記録
 │   │   ├── LevelSettingsScreen.js  # 5教科対応
 │   │   ├── FukushuScreen.js
 │   │   ├── GohoubiScreen.js   # パズル + 着せ替え
-│   │   └── MimamoriScreen.js  # 更新履歴リンク + バージョン表示
+│   │   ├── MimamoriScreen.js  # 更新履歴リンク + バージョン表示
+│   │   └── ZukanScreen.js     # 元素周期表ビューア（タップズーム対応）
 │   └── data/
 │       ├── questions.js       # フォールバック用（ハードコード）
 │       ├── levelQuestions.js   # フォールバック用
@@ -146,7 +148,7 @@ manabi-no-ki/
 
 ### ✅ 実装済み
 - ペット名カスタマイズ（NamingScreen）
-- ホーム画面（木 + キャラ + ストリーク + 3列ボタン）
+- ホーム画面（木 + キャラ + ストリーク + 2×2ボタン）
 - 学習画面（Supabase DB読み込み + フォールバック + 5モード対応）
 - 教科別レベル設定（Lv1〜6、設定レベルの問題だけ出す・5教科対応）
 - ふくしゅう画面（モード単位の弱点推定）
@@ -154,16 +156,21 @@ manabi-no-ki/
 - 着せ替え（8アイテム、条件達成で自動アンロック）
 - コンボ演出 + パーフェクト演出
 - みまもり画面 + 更新履歴リンク + バージョン表示
-- Supabase問題DB管理（250問・5教科）
+- Supabase問題DB管理（370問・5教科）
 - ミッション8問出題
 - かがく教科（ミッション除外・専用ボタンからのみ）
-- answer_historyテーブル（作成済み・コード実装は次回）
+- **誤答記録（answer_history書き込み）** ← v0.9.1
+- **誤答優先出題（苦手問題を最大40%優先）** ← v0.9.1
+- **ミッション結果画面（スコア表示+ホームに戻る）** ← v0.9.1
+- **不正解でも次の問題に進む** ← v0.9.1
+- **タブ復帰時の自動日付リセット** ← v0.9.1
+- **げんそずかん（周期表ビューア・タップズーム対応）** ← v0.9.1
 
 ### 🔲 未実装
 | 機能 | 優先度 |
 |------|--------|
-| 誤答記録のコード実装（LearningScreen→answer_history書き込み） | 🔴 高 |
-| 復習の問題ごと精密出題 | 🔴 高 |
+| 教科再構成（せいかつ→しゃかい+どうとく） | 🔴 高 |
+| FukushuScreen改修（問題単位の精密出題） | 🔴 高 |
 | 対象年齢設定（ひらがな/漢字切り替え） | 🟡 中 |
 | 問題文のルビ（ふりがな）対応 | 🟡 中 |
 | 問題文の漢字版（question_advanced列） | 🟡 中 |
@@ -173,48 +180,54 @@ manabi-no-ki/
 
 ---
 
-## 📊 問題データ（Supabase questionsテーブル: 250問）
+## 📊 問題データ（Supabase questionsテーブル: 370問）
 
 | 教科 | Lv1 | Lv2 | Lv3 | Lv4 | Lv5 | Lv6 | 計 |
 |------|-----|-----|-----|-----|-----|-----|-----|
-| さんすう | 22 | 11 | 8 | 8 | 8 | 8 | 65 |
-| こくご | 7 | 15 | 8 | 8 | 8 | 8 | 54 |
+| さんすう | 22 | 11 | 20 | 20 | 20 | 20 | 113 |
+| こくご | 7 | 15 | 8 | 8 | 20 | 20 | 78 |
 | せいかつ | 7 | 3 | 8 | 8 | 8 | 8 | 42 |
 | とけい | 3 | 6 | 8 | 8 | 8 | 8 | 41 |
-| かがく | 8 | 8 | 8 | 8 | 8 | 8 | 48 |
-| **合計** | **47** | **43** | **40** | **40** | **40** | **40** | **250** |
+| かがく | 16 | 16 | 16 | 16 | 16 | 16 | 96 |
+| **合計** | **55** | **51** | **60** | **60** | **72** | **72** | **370** |
 
 ### ミッション出題ルール
 - ミッション: さんすう・こくご・せいかつ・とけい の4教科からバランスよく8問
 - かがく: ミッションには含まず、ホーム画面の専用ボタンから5問出題
 - MISSION_EXCLUDE_SUBJECTS = ['かがく']（questionLoader.js）
+- 誤答優先出題: 過去30日の誤答問題を最大40%まで優先的に出題
 
 ---
 
-## 📐 次回実装予定: 誤答記録＋復習強化
+## 🔮 次回実装予定: 教科再構成
 
-### answer_historyテーブル（✅作成済み）
-```
-id (UUID), device_id (TEXT), question_id (TEXT), is_correct (BOOLEAN), answered_at (TIMESTAMPTZ)
-```
-インデックス: device_id, question_id, device_id+is_correct(部分)
+### 設計（確定）
+- せいかつ（中身が理科）→ 理科問題をかがくに移行 → せいかつ消滅
+- しゃかい🗾 新規追加（地理・歴史・公民）
+- どうとく💛 新規追加（思いやり・ルール・きもち）
+- 教科数: 5→6
+- かがくのミッション除外は維持
 
 ### 実装ステップ
-1. ~~テーブル作成（Supabase）~~ ✅完了
-2. LearningScreenで1問ごとに正誤記録 ← 次回ここから
-3. questionLoader.jsに誤答優先出題ロジック
-4. FukushuScreen改修
+1. SQLでせいかつ問題のsubjectをかがくに変更
+2. しゃかい問題を新規追加（各レベル10-15問）
+3. どうとく問題を新規追加（各レベル10-15問）
+4. colors.js / learningLevels.js に新教科追加
+5. HomeScreen.jsのボタングリッド変更
+6. App.jsにモード追加
+7. ミッション出題バランス再設計
 
 ---
 
 ## 🔮 今後のロードマップ
 
 ### 次回スレッド（優先順）
-1. 誤答記録コード実装（LearningScreen→answer_history書き込み）
-2. FukushuScreen改修（誤答優先出題）
-3. 対象年齢設定 + ルビ対応（フェーズ1: 設定UI）
+1. 教科再構成（せいかつ→しゃかい+どうとく）
+2. FukushuScreen改修（誤答優先出題の活用）
+3. ZukanScreenのズーム改善（デプロイ待ち）
 
 ### 中期（v1.0に向けて）
+- 対象年齢設定 + ルビ対応（フェーズ1: 設定UI）
 - 問題文のルビ（ふりがな）共通コンポーネント
 - question_advanced列（漢字版問題文）
 - Claude API問題自動生成
@@ -236,6 +249,8 @@ id (UUID), device_id (TEXT), question_id (TEXT), is_correct (BOOLEAN), answered_
 | 5/29 | 得意を伸ばして自己肯定感を育てる | ✅ 設計思想に反映 |
 | 5/30 | キャラの名前を子供がつけられないか | ✅ v0.6.0で実装 |
 | 6/1 | ごほうびにパズルピース収集→絵の完成 | ✅ v0.7.1で実装 |
+| 6/5 | 社会や理科も作りたい（のんから） | 🔲 設計完了・次回実装 |
+| 6/5 | 道徳も入れたい（のんから） | 🔲 設計完了・次回実装 |
 
 ---
 
@@ -249,9 +264,10 @@ id (UUID), device_id (TEXT), question_id (TEXT), is_correct (BOOLEAN), answered_
 - CI=true でビルドテスト（Vercelと同じ環境）
 - のんはコードに不慣れ。修正はちゃぴが担当
 - Supabaseダッシュボードは100行ページネーション注意
+- 問題の正解が曖昧にならないよう注意（「革」問題の教訓）
 
 ---
 
-> 最終更新: 2026年6月3日（火）JST
+> 最終更新: 2026年6月5日（木）JST
 > 更新者: ちゃぴ
-> バージョン: v0.9.0
+> バージョン: v0.9.1
