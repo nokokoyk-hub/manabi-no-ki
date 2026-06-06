@@ -45,9 +45,23 @@ const MODE_INFO = {
     description: 'かんじ・ことばを 得意に合わせて',
     startMode: 'kokugo',
   },
+  shakai: {
+    label: 'しゃかい',
+    shortLabel: 'しゃかい',
+    emoji: '🗾',
+    description: 'ちり・れきし・くらしのルールを ふくしゅう',
+    startMode: 'shakai',
+  },
+  doutoku: {
+    label: 'どうとく',
+    shortLabel: 'どうとく',
+    emoji: '💛',
+    description: 'おもいやり・きもちを もういちど',
+    startMode: 'doutoku',
+  },
 };
 
-const DEFAULT_REVIEW_MODES = ['math', 'okurigana', 'clock', 'kokugo'];
+const DEFAULT_REVIEW_MODES = ['math', 'okurigana', 'clock', 'kokugo', 'shakai', 'doutoku'];
 
 const percent = (score, total) => {
   if (!total) return 0;
@@ -118,7 +132,7 @@ const buildRecommendations = (analysis) => {
     }
   });
 
-  return recommendations.slice(0, 4);
+  return recommendations.slice(0, 6);
 };
 
 const FukushuScreen = ({ onBack, onStartReview, petName }) => {

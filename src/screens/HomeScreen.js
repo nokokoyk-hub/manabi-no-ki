@@ -2,6 +2,7 @@
 // 🏠 HomeScreen - メインホーム画面
 // まなびの木 + キャラ🐕 + ミッションボタン + ナビ
 // v0.6.0: petName対応（キャラ名カスタマイズ）
+// v0.9.2: 教科再構成（しゃかい🗾・どうとく💛追加、2×3グリッド化）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +14,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onStartKagaku, onOpenZukan, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
+  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onStartKagaku, onStartShakai, onStartDoutoku, onOpenZukan, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -176,7 +177,7 @@ const HomeScreen = ({
         </div>
       </div>
 
-      {/* 下部カード（2×2グリッド） */}
+      {/* 教科ボタン（2×3グリッド） */}
       <div style={{
         padding: '0 20px 12px',
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
@@ -201,6 +202,28 @@ const HomeScreen = ({
           <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>とけい</div>
           <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
             なんじ？
+          </div>
+        </div>
+        <div onClick={onStartShakai} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #FBE9E7',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>🗾</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>しゃかい</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            ちり・れきし
+          </div>
+        </div>
+        <div onClick={onStartDoutoku} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #FFF8E1',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>💛</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>どうとく</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            きもち
           </div>
         </div>
         <div onClick={onStartKagaku} style={{

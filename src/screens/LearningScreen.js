@@ -2,6 +2,7 @@
 // 📝 LearningScreen - 学習（問題回答）画面
 // v0.7.0: 新画像10枚を活用した演出強化
 // v0.9.1: 結果画面追加（ミッション完了→スコア表示→ホームへ）
+// v0.9.2: しゃかい🗾・どうとく💛モード追加
 //   - 正解: happy→jump→medal（コンボ段階）
 //   - 不正解: sad（ぶるぶる）
 //   - 出題: cheer（わくわく）
@@ -23,6 +24,8 @@ const MODE_LABELS = {
   okurigana: 'おくりがな れんしゅう',
   clock: 'とけい れんしゅう',
   kagaku: '🧪 かがく れんしゅう',
+  shakai: '🗾 しゃかい れんしゅう',
+  doutoku: '💛 どうとく れんしゅう',
   math: 'さんすう ふくしゅう',
   kokugo: 'こくご ふくしゅう',
 };
@@ -75,6 +78,8 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
         else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
         else if (mode === 'kagaku') qs = await getQuestionsBySubject('かがく', 5, subjectLevels);
+        else if (mode === 'shakai') qs = await getQuestionsBySubject('しゃかい', 5, subjectLevels);
+        else if (mode === 'doutoku') qs = await getQuestionsBySubject('どうとく', 5, subjectLevels);
         else qs = await getTodayQuestions(8, subjectLevels);
         setQuestions(qs || []);
       } catch (err) {
