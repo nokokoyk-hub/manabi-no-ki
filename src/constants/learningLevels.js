@@ -1,6 +1,7 @@
 // ============================================
 // 🎚️ 教科別レベル設定
 // 発達凸凹に合わせて「学年」ではなく教科ごとの実力で調整する
+// v0.9.2: 教科再構成（せいかつ消滅→しゃかい🗾・どうとく💛追加）
 // ============================================
 
 export const MIN_LEARNING_LEVEL = 1;
@@ -32,20 +33,28 @@ export const SUBJECT_LEVELS = [
     highHint: '5ふんきざみも れんしゅう',
   },
   {
-    key: 'せいかつ',
-    emoji: '🌱',
-    label: 'せいかつ',
-    description: 'くらし・じかん・いきもの',
-    lowHint: '身近な ことから',
-    highHint: '少しずつ ひろげる',
-  },
-  {
     key: 'かがく',
     emoji: '🧪',
     label: 'かがく',
     description: 'げんそ・しゅうきひょう・かがくのふしぎ',
     lowHint: 'みぢかな ものから',
     highHint: 'げんその せかいを たんけん',
+  },
+  {
+    key: 'しゃかい',
+    emoji: '🗾',
+    label: 'しゃかい',
+    description: 'ちり・れきし・くらしのルール',
+    lowHint: 'みぢかな まちから',
+    highHint: 'にほんと せかいを まなぶ',
+  },
+  {
+    key: 'どうとく',
+    emoji: '💛',
+    label: 'どうとく',
+    description: 'おもいやり・ルール・きもち',
+    lowHint: 'やさしい きもちから',
+    highHint: 'じぶんで かんがえて こうどう',
   },
 ];
 
@@ -56,8 +65,9 @@ export const DEFAULT_SUBJECT_LEVELS = {
   さんすう: 1,
   こくご: 4,
   とけい: 2,
-  せいかつ: 2,
   かがく: 1,
+  しゃかい: 2,
+  どうとく: 1,
 };
 
 export const clampLearningLevel = (level) => {
