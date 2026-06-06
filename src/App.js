@@ -1,6 +1,6 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.9.1
+// バージョン: 0.9.2
 // 最終更新: 2026/06/05
 // ============================================
 // ⚠️ 修正時の注意:
@@ -36,7 +36,7 @@ import {
 import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.9.1';
+export const APP_VERSION = '0.9.2';
 
 function App() {
   const [screen, setScreen] = useState('home');
