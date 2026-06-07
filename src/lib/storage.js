@@ -576,3 +576,132 @@ export const incrementMissionCount = (isPerfect) => {
   saveCostumeData(data);
   return data;
 };
+
+// ============================================
+// 📊 みまもり画面用データ取得関数（v0.9.2追加）
+// ============================================
+
+/**
+ * 教科別正答率を取得（answer_history × questions JOINで集計）
+ * 返り値: [{ subject, emoji, total, correct, accuracy, levels: { [lv]: {total, correct, accuracy} } }]
+ */
+export const getSubjectAccuracy = async (days = 30) => {
+  if (!supabase) return [];
+
+  try {
+    const deviceId = getDeviceId();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    // answer_historyから期間内のデータ取得
+    const { data: answers, error: aErr } = await supabase
+      .from('answer_history')
+      .select('question_id, is_correct')
+      .eq('device_id', deviceId)
+      .gte('answered_at', since.toISOString());
+
+    if (aErr) throw aErr;
+    if (!answers || answers.length === 0) return [];
+
+    // question_idリストを作成
+    const questionIds = [...new Set(answers.map(a => a.question_id))];
+
+    // questionsからsubject情報を取得
+    const { data: questions, error: qErr } = await supabase
+      .from('questions')
+      .select('question_id, subject, subject_emoji, grade_level')
+      .in('question_id', questionIds);
+
+    if (qErr) throw qErr;
+    if (!questions) return [];
+
+    // question_id → subject マッピング
+    const questionMap = {};
+    questions.forEach(q => { questionMap[q.question_id] = q; });
+
+    // 教科別に集計
+    const subjectStats = {};
+    answers.forEach(a => {
+      const q = questionMap[a.question_id];
+      if (!q) return;
+      if (!subjectStats[q.subject]) {
+        subjectStats[q.subject] = {
+          subject: q.subject,
+          emoji: q.subject_emoji,
+          total: 0,
+          correct: 0,
+          levels: {},
+        };
+      }
+      subjectStats[q.subject].total++;
+      if (a.is_correct) subjectStats[q.subject].correct++;
+
+      // レベル別も集計
+      const lvl = q.grade_level;
+      if (!subjectStats[q.subject].levels[lvl]) {
+        subjectStats[q.subject].levels[lvl] = { total: 0, correct: 0 };
+      }
+      subjectStats[q.subject].levels[lvl].total++;
+      if (a.is_correct) subjectStats[q.subject].levels[lvl].correct++;
+    });
+
+    return Object.values(subjectStats).map(s => ({
+      ...s,
+      accuracy: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0,
+      levels: Object.fromEntries(
+        Object.entries(s.levels).map(([lv, d]) => [
+          lv,
+          { ...d, accuracy: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0 },
+        ])
+      ),
+    }));
+  } catch (err) {
+    console.error('❌ 教科別正答率取得エラー:', err);
+    return [];
+  }
+};
+
+/**
+ * 日別正答率の推移を取得
+ * 返り値: [{ date, total, correct, accuracy }]（日付昇順）
+ */
+export const getDailyAccuracyTrend = async (days = 14) => {
+  if (!supabase) return [];
+
+  try {
+    const deviceId = getDeviceId();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data: answers, error } = await supabase
+      .from('answer_history')
+      .select('is_correct, answered_at')
+      .eq('device_id', deviceId)
+      .gte('answered_at', since.toISOString())
+      .order('answered_at', { ascending: true });
+
+    if (error) throw error;
+    if (!answers || answers.length === 0) return [];
+
+    // 日別に集計
+    const dailyStats = {};
+    answers.forEach(a => {
+      const date = new Date(a.answered_at).toLocaleDateString('sv-SE');
+      if (!dailyStats[date]) {
+        dailyStats[date] = { date, total: 0, correct: 0 };
+      }
+      dailyStats[date].total++;
+      if (a.is_correct) dailyStats[date].correct++;
+    });
+
+    return Object.values(dailyStats)
+      .map(d => ({
+        ...d,
+        accuracy: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  } catch (err) {
+    console.error('❌ 日別推移取得エラー:', err);
+    return [];
+  }
+};
