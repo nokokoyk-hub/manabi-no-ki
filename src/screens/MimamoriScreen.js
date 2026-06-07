@@ -94,7 +94,7 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
@@ -407,7 +407,68 @@ const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettin
           </div>
         </div>
 
-        {/* ⑥ レベル設定導線 */}
+        {/* ⑥ 表示モード切り替え（ていがくねん / こうがくねん） */}
+        <div style={{
+          background: 'white', borderRadius: 16, padding: 20,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: 20,
+          border: '2px solid #E3F2FD',
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.text, marginBottom: 4 }}>
+            🔤 もじの ひょうじ
+          </div>
+          <div style={{ fontSize: 12, color: COLORS.textLight, marginBottom: 14 }}>
+            おこさまの よみの ちからに あわせて きりかえ
+          </div>
+          <div style={{
+            display: 'flex', borderRadius: 12, overflow: 'hidden',
+            border: '2px solid #E0E0E0',
+          }}>
+            <button
+              onClick={() => onChangeDisplayMode && onChangeDisplayMode('hiragana')}
+              style={{
+                flex: 1, padding: '12px 8px', border: 'none', cursor: 'pointer',
+                fontSize: 14, fontWeight: 700,
+                fontFamily: "'Rounded Mplus 1c', sans-serif",
+                background: displayMode === 'hiragana'
+                  ? 'linear-gradient(135deg, #42A5F5, #1E88E5)'
+                  : '#FAFAFA',
+                color: displayMode === 'hiragana' ? 'white' : COLORS.textLight,
+                transition: 'all 0.3s ease',
+              }}
+            >
+              🌱 ていがくねん
+              <div style={{
+                fontSize: 10, marginTop: 2,
+                color: displayMode === 'hiragana' ? 'rgba(255,255,255,0.8)' : '#BDBDBD',
+              }}>
+                ひらがな ちゅうしん
+              </div>
+            </button>
+            <button
+              onClick={() => onChangeDisplayMode && onChangeDisplayMode('kanji')}
+              style={{
+                flex: 1, padding: '12px 8px', border: 'none', cursor: 'pointer',
+                fontSize: 14, fontWeight: 700,
+                fontFamily: "'Rounded Mplus 1c', sans-serif",
+                background: displayMode === 'kanji'
+                  ? 'linear-gradient(135deg, #FF9800, #F57C00)'
+                  : '#FAFAFA',
+                color: displayMode === 'kanji' ? 'white' : COLORS.textLight,
+                transition: 'all 0.3s ease',
+              }}
+            >
+              📚 こうがくねん
+              <div style={{
+                fontSize: 10, marginTop: 2,
+                color: displayMode === 'kanji' ? 'rgba(255,255,255,0.8)' : '#BDBDBD',
+              }}>
+                かんじまじり
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* ⑦ レベル設定導線 */}
         {onOpenLevelSettings && (
           <div
             onClick={onOpenLevelSettings}
