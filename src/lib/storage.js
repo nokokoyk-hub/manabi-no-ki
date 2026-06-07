@@ -581,6 +581,34 @@ export const incrementMissionCount = (isPerfect) => {
 // 📊 みまもり画面用データ取得関数（v0.9.2追加）
 // ============================================
 
+// ============================================
+// 🔤 表示モード（ていがくねん / こうがくねん）
+// v0.9.2追加: Phase 1 設定UI
+// ============================================
+const DISPLAY_MODE_KEY = 'manabi_display_mode';
+
+/**
+ * 表示モードを読み込む
+ * 'hiragana' = ていがくねん（ひらがな中心）
+ * 'kanji' = こうがくねん（漢字交じり）
+ */
+export const loadDisplayMode = () => {
+  try {
+    return localStorage.getItem(DISPLAY_MODE_KEY) || 'hiragana';
+  } catch {
+    return 'hiragana';
+  }
+};
+
+export const saveDisplayMode = (mode) => {
+  try {
+    localStorage.setItem(DISPLAY_MODE_KEY, mode);
+    return mode;
+  } catch {
+    return mode;
+  }
+};
+
 /**
  * 教科別正答率を取得（answer_history × questions JOINで集計）
  * 返り値: [{ subject, emoji, total, correct, accuracy, levels: { [lv]: {total, correct, accuracy} } }]
