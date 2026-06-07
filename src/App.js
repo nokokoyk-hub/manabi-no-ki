@@ -197,7 +197,7 @@ function App() {
           />
         );
       case 'mimamori':
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} />;
       case 'level-settings':
         return (
           <LevelSettingsScreen
