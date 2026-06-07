@@ -32,6 +32,8 @@ import {
   loadPuzzleData,
   addPuzzlePiece,
   savePuzzleData,
+  loadDisplayMode,
+  saveDisplayMode,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 
@@ -48,6 +50,9 @@ function App() {
 
   // 🧩 パズルデータ
   const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
+
+  // 🔤 表示モード（ていがくねん / こうがくねん）
+  const [displayMode, setDisplayMode] = useState(() => loadDisplayMode());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -91,6 +96,12 @@ function App() {
   const handleNameDecided = useCallback((name) => {
     const saved = savePetName(name);
     setPetName(saved);
+  }, []);
+
+  // 表示モード変更ハンドラ
+  const handleDisplayModeChange = useCallback((mode) => {
+    const saved = saveDisplayMode(mode);
+    setDisplayMode(saved);
   }, []);
 
   const handleSubjectLevelsChange = useCallback((nextLevels) => {
@@ -197,7 +208,7 @@ function App() {
           />
         );
       case 'mimamori':
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} />;
       case 'level-settings':
         return (
           <LevelSettingsScreen
