@@ -401,7 +401,8 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {q.options.map((opt, idx) => {
+          {((displayMode === 'kanji' && q.optionsAdvanced && q.optionsAdvanced.length === q.options.length)
+            ? q.optionsAdvanced : q.options).map((opt, idx) => {
             let bg = 'white';
             let border = '2px solid #E0E0E0';
             let emoji = '';
