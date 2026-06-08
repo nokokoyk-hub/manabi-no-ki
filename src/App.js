@@ -205,6 +205,7 @@ function App() {
             petName={displayName}
             onComplete={handleLearningComplete}
             onBack={() => setScreen('home')}
+            displayMode={displayMode}
           />
         );
       case 'mimamori':
