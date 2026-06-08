@@ -64,7 +64,7 @@ const getResultPose = (score, total) => {
   return 'cheer';
 };
 
-const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack }) => {
+const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack, displayMode = 'hiragana' }) => {
   const [questions, setQuestions] = useState([]);
   const [isLoadingQ, setIsLoadingQ] = useState(true);
 
@@ -386,7 +386,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             textAlign: 'center', lineHeight: 1.6,
             letterSpacing: '0.05em', whiteSpace: 'pre-line',
           }}>
-            {q.question}
+            {displayMode === 'kanji' && q.questionAdvanced ? q.questionAdvanced : q.question}
           </div>
           <div style={{
             fontSize: 13, color: COLORS.textLight, textAlign: 'center',
