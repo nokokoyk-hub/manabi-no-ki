@@ -34,6 +34,9 @@ const dbToAppFormat = (row) => ({
   questionAdvanced: row.question_advanced ? unescapeNewlines(row.question_advanced) : undefined,
   hint: unescapeNewlines(row.hint),
   options: typeof row.options === 'string' ? JSON.parse(row.options) : row.options,
+  optionsAdvanced: row.options_advanced
+    ? (typeof row.options_advanced === 'string' ? JSON.parse(row.options_advanced) : row.options_advanced)
+    : undefined,
   correct: row.correct,
   clockTime: row.clock_time
     ? (typeof row.clock_time === 'string' ? JSON.parse(row.clock_time) : row.clock_time)
