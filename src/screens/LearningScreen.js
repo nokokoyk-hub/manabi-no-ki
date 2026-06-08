@@ -74,7 +74,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
       try {
         let qs;
         if (mode === 'okurigana') qs = await getQuestionsByCategory('okurigana', 5, subjectLevels);
-        else if (mode === 'clock') qs = await getQuestionsByCategory('clock', 5, subjectLevels);
+        else if (mode === 'clock') qs = await getQuestionsBySubject('とけい', 5, subjectLevels);
         else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
         else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
         else if (mode === 'kagaku') qs = await getQuestionsBySubject('かがく', 5, subjectLevels);
