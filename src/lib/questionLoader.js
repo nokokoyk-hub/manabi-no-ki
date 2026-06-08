@@ -31,6 +31,7 @@ const dbToAppFormat = (row) => ({
   category: row.category || undefined,
   gradeLevel: row.grade_level,
   question: unescapeNewlines(row.question),
+  questionAdvanced: row.question_advanced ? unescapeNewlines(row.question_advanced) : undefined,
   hint: unescapeNewlines(row.hint),
   options: typeof row.options === 'string' ? JSON.parse(row.options) : row.options,
   correct: row.correct,
