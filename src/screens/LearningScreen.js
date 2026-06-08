@@ -73,7 +73,11 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
     const loadQuestions = async () => {
       try {
         let qs;
-        if (mode === 'okurigana') qs = await getQuestionsByCategory('okurigana', 5, subjectLevels);
+        if (mode === 'okurigana') {
+          // 送り仮名は全問Lv2→レベル設定に関わらず全問出題
+          const okuLevels = { ...subjectLevels, こくご: 2 };
+          qs = await getQuestionsByCategory('okurigana', 5, okuLevels);
+        }
         else if (mode === 'clock') qs = await getQuestionsBySubject('とけい', 5, subjectLevels);
         else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
         else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
