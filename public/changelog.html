@@ -22,6 +22,37 @@
   <h1>🌳 まなびの木 — 変更履歴</h1>
 
   <div class="version">
+    <h2>v0.9.3 — 表示モード完成＋漢字問題文＋選択肢漢字化 📖✨</h2>
+    <div class="date">2026年6月9日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 表示モード Phase 2-3 完成！こうがくねんモードで漢字交じり問題文に切替</li>
+      <li><span class="tag new">NEW</span> question_advanced カラム追加（490問中421問に漢字版問題文を投入）</li>
+      <li><span class="tag new">NEW</span> options_advanced カラム追加（304問に漢字版選択肢を投入）</li>
+      <li><span class="tag new">NEW</span> NULLフォールバック設計（漢字版がない問題は自動でひらがな表示）</li>
+      <li><span class="tag fix">FIX</span> とけいLv3以上のcategory NULL問題を修正（全41問にcategory='clock'設定）</li>
+      <li><span class="tag fix">FIX</span> とけい個別モードの取得ロジックを教科ベースに変更（レベル設定が全レベルで有効に）</li>
+      <li><span class="tag fix">FIX</span> おくりがなモードのLv2固定対応（レベル設定に関わらず全問出題）</li>
+      <li><span class="tag infra">INFRA</span> questionLoader.js: dbToAppFormatにquestionAdvanced・optionsAdvanced追加</li>
+    </ul>
+  </div>
+
+  <div class="version">
+    <h2>v0.9.3 — 表示モード完成＋漢字切り替え490問対応 ✨</h2>
+    <div class="date">2026年6月9日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> 表示モード Phase 2-3 完了（こうがくねんモードで漢字交じり表示）</li>
+      <li><span class="tag new">NEW</span> question_advanced カラム追加（問題文421問の漢字版投入）</li>
+      <li><span class="tag new">NEW</span> options_advanced カラム追加（選択肢304問の漢字版投入）</li>
+      <li><span class="tag new">NEW</span> NULLフォールバック設計（漢字版未設定の問題はひらがな表示を維持）</li>
+      <li><span class="tag fix">FIX</span> とけいモードでLv3以降の問題が出ない不具合修正（category NULL問題）</li>
+      <li><span class="tag fix">FIX</span> とけいのレベル設定が全レベルで正しく動作するよう修正</li>
+      <li><span class="tag fix">FIX</span> おくりがなモードでレベル設定に関わらず全問出題されるよう修正</li>
+      <li><span class="tag infra">INFRA</span> questionLoader.js: dbToAppFormatにquestionAdvanced/optionsAdvanced追加</li>
+      <li><span class="tag infra">INFRA</span> LearningScreen.js: displayMode対応（問題文+選択肢の漢字切替）</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.2 — 6教科再構成＋保護者モード＋490問 🗾💛</h2>
     <div class="date">2026年6月7日（土）</div>
     <ul>
