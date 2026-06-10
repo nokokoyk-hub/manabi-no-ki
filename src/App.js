@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.9.3
-// 最終更新: 2026/06/06
+// バージョン: 0.9.4
+// 最終更新: 2026/06/10
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -9,7 +9,7 @@
 // - Supabase連携ロジックは lib/storage.js に集約
 // ============================================
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
@@ -34,11 +34,12 @@ import {
   savePuzzleData,
   loadDisplayMode,
   saveDisplayMode,
+  getTodayJST,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.9.3';
+export const APP_VERSION = '0.9.4';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -90,6 +91,52 @@ function App() {
       }
     };
     init();
+  }, []);
+
+  // ============================================
+  // 🌅 日跨ぎリセット（フルスクリーン対策）
+  // setInterval: 60秒ごとに日付チェック（開きっぱなし対策）
+  // visibilitychange: タブ復帰時にも即チェック
+  // v0.9.4: 新規追加
+  // ============================================
+  const dateRef = useRef(getTodayJST());
+
+  useEffect(() => {
+    const checkDateChange = async () => {
+      const today = getTodayJST();
+      if (today !== dateRef.current) {
+        console.log('🌅 日付が変わりました！ミッションをリセットします');
+        dateRef.current = today;
+
+        try {
+          const progress = await loadProgress();
+          setLeaves(progress.leaves);
+          setFlowers(progress.flowers);
+          setFruits(progress.fruits);
+          setStreak(progress.streak);
+          setTodayDone(progress.todayDone);
+        } catch (err) {
+          console.error('日跨ぎリセットエラー:', err);
+          setTodayDone(false);
+        }
+      }
+    };
+
+    // 60秒ごとに日付チェック（フルスクリーン開きっぱなし対策）
+    const interval = setInterval(checkDateChange, 60 * 1000);
+
+    // タブ復帰時にも日付チェック
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        checkDateChange();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   // ペット名決定ハンドラ
