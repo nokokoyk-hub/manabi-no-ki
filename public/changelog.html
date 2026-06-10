@@ -22,6 +22,21 @@
   <h1>🌳 まなびの木 — 変更履歴</h1>
 
   <div class="version">
+    <h2>v0.9.4 — 日跨ぎリセット＋着せ替え修正＋UpdateBanner改修 🌅👗</h2>
+    <div class="date">2026年6月10日（水）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> フルスクリーン日跨ぎリセット実装（setInterval 60秒 + visibilitychange）</li>
+      <li><span class="tag new">NEW</span> UpdateBanner改修: localStorage比較方式でデプロイ直後もバナー表示</li>
+      <li><span class="tag new">NEW</span> 更新完了バナー（緑🟢）＋更新あり通知（オレンジ🟠）の2段構え</li>
+      <li><span class="tag fix">FIX</span> 着せ替え機能が動作しない問題を修正（App.jsのstate接続漏れ）</li>
+      <li><span class="tag fix">FIX</span> ミッション完了時のアンロック判定（incrementMissionCount / checkCostumeUnlocks）追加</li>
+      <li><span class="tag fix">FIX</span> HomeScreen → equippedItem / GohoubiScreen → costumeData のprops接続修正</li>
+      <li><span class="tag infra">INFRA</span> storage.js: getTodayJSTをexport化（App.jsから共用）</li>
+      <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.2 → v0.9.4（3箇所同時更新）</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.3 — 表示モード完成＋漢字問題文＋選択肢漢字化 📖✨</h2>
     <div class="date">2026年6月9日（火）</div>
     <ul>
