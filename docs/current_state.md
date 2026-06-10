@@ -34,11 +34,11 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.9.3** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.3'` |
-| version.json | `public/version.json` → `"version": "0.9.3"` |
-| package.json | `"version": "0.9.3"` |
-| 最終更新日 | 2026年6月9日（火） |
+| 現在のバージョン | **v0.9.4** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.4'` |
+| version.json | `public/version.json` → `"version": "0.9.4"` |
+| package.json | `"version": "0.9.4"` |
+| 最終更新日 | 2026年6月10日（水） |
 
 ---
 
@@ -89,7 +89,7 @@
 
 ---
 
-## 📁 ファイル構成（v0.9.3時点）
+## 📁 ファイル構成（v0.9.4時点）
 
 ```
 manabi-no-ki/
@@ -101,10 +101,10 @@ manabi-no-ki/
 │       ├── puzzles/           # パズル画像3枚
 │       └── genso_hyou.png     # 元素周期表（ずかん用）
 ├── src/
-│   ├── App.js                 # ルーター + 状態管理 + displayMode管理
+│   ├── App.js                 # ルーター + 状態管理 + displayMode管理 + costumeData管理 + 日跨ぎリセット
 │   ├── lib/
 │   │   ├── supabase.js
-│   │   ├── storage.js         # データアクセス + displayMode
+│   │   ├── storage.js         # データアクセス + displayMode + getTodayJST（export）
 │   │   └── questionLoader.js  # Supabase問題取得 + 誤答優先出題 + dbToAppFormat（question_advanced/options_advanced対応）
 │   ├── constants/
 │   │   ├── colors.js
@@ -115,14 +115,14 @@ manabi-no-ki/
 │   │   ├── ClockSVG.js
 │   │   ├── StarBurst.js
 │   │   ├── MameCharacter.js
-│   │   └── UpdateBanner.js
+│   │   └── UpdateBanner.js    # localStorage比較 + version.json比較の2段構え
 │   ├── screens/
 │   │   ├── NamingScreen.js
-│   │   ├── HomeScreen.js      # 2×3ボタン
+│   │   ├── HomeScreen.js      # 2×3ボタン + equippedItem（着せ替え表示）
 │   │   ├── LearningScreen.js  # DB非同期読み込み + 7モード + displayMode漢字切替 + 誤答記録
 │   │   ├── LevelSettingsScreen.js
 │   │   ├── FukushuScreen.js
-│   │   ├── GohoubiScreen.js
+│   │   ├── GohoubiScreen.js   # costumeData props接続
 │   │   ├── MimamoriScreen.js  # 保護者モード + 表示モード切替UI
 │   │   └── ZukanScreen.js
 │   └── data/
@@ -166,12 +166,22 @@ manabi-no-ki/
   - category NULL問題修正 + getQuestionsBySubject方式に変更
 - **おくりがなモードのレベル固定対応** ← v0.9.3
   - 全問Lv2のため、レベル設定に関わらず全問出題
+- **フルスクリーン日跨ぎリセット** ← v0.9.4
+  - setInterval 60秒ごとの日付チェック（開きっぱなし対策）
+  - visibilitychange イベントでタブ復帰時も即チェック
+  - getTodayJST を storage.js から共用export
+- **着せ替え機能修正** ← v0.9.4
+  - App.js に costumeData state 管理を追加
+  - ミッション完了時の incrementMissionCount / checkCostumeUnlocks 接続
+  - HomeScreen → equippedItem / GohoubiScreen → costumeData のprops接続修正
+- **UpdateBanner改修** ← v0.9.4
+  - localStorage比較方式（manabi_last_version キー）でデプロイ直後もバナー表示
+  - 更新完了バナー（緑🟢）+ 更新あり通知（オレンジ🟠）の2段構え
 
 ### 🔲 未実装
 | 機能 | 優先度 |
 |------|--------|
-| フルスクリーン日跨ぎリセット（setInterval方式） | 🔴 高 |
-| おくりがな Lv3-6問題追加（約40問） | 🟡 中 |
+| おくりがな Lv3-6問題追加（約40問） | 🔴 高 |
 | FukushuScreen改修（問題単位の精密出題） | 🟡 中 |
 | Claude API問題自動生成 | 🟡 中 |
 | 音声読み上げ | 🟡 中 |
@@ -216,10 +226,10 @@ manabi-no-ki/
 
 ## 🔮 今後のロードマップ
 
-### 次回スレッド（優先順）
-1. **フルスクリーン日跨ぎリセット検証・実装**（setInterval方式）
-2. おくりがな Lv3-6問題追加（約40問）
-3. FukushuScreen改修（問題単位の精密復習）
+### 次回作業（優先順）
+1. **着せ替え動作の実機確認**（ミッションクリア→アンロック→ホーム表示）
+2. **おくりがな Lv3-6問題追加**（約40問）
+3. **FukushuScreen改修**（問題単位の精密復習）
 
 ### 中期（v1.0に向けて）
 - Claude API問題自動生成
@@ -260,9 +270,11 @@ manabi-no-ki/
 - Supabaseダッシュボードは100行ページネーション注意→実数確認はSELECT COUNT(*)
 - Supabase MCP経由でちゃぴが直接SQL実行可能
 - 表示モードの設定値: 'hiragana'（ていがくねん）/ 'kanji'（こうがくねん）
+- UpdateBanner: localStorage `manabi_last_version` キーで前回バージョンを記憶
+- 日跨ぎリセット: App.jsのuseEffectでsetInterval(60秒) + visibilitychange、storage.jsのgetTodayJSTを共用
 
 ---
 
-> 最終更新: 2026年6月9日（火）JST
+> 最終更新: 2026年6月10日（水）JST
 > 更新者: ちゃぴ
-> バージョン: v0.9.3
+> バージョン: v0.9.4
