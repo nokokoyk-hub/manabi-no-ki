@@ -1,62 +1,91 @@
 // ============================================
 // 🔄 UpdateBanner - アプリ更新通知
-// version.jsonとAPP_VERSIONを比較し、
-// 新バージョンがあれば通知バナーを表示
-// v0.6.3: 更新前にペット名を退避し、通常リロードに変更
+// 2段構え:
+//   ① localStorage保存バージョンとの比較 → 更新完了通知（緑）
+//   ② version.jsonとの比較 → 更新あり通知（オレンジ）
+// v0.6.3: ペット名退避 + 通常リロード
+// v0.9.4: localStorage比較方式を追加（デプロイ直後にもバナー表示）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
 import { backupPetNameForUpdate } from '../lib/storage';
 
+const LAST_VERSION_KEY = 'manabi_last_version';
+
 const UpdateBanner = ({ currentVersion }) => {
-  const [newVersion, setNewVersion] = useState(null);
+  // bannerType: 'updated'(更新完了/緑) | 'available'(更新あり/オレンジ) | null
+  const [bannerType, setBannerType] = useState(null);
+  const [prevVersion, setPrevVersion] = useState(null);
+  const [remoteVersion, setRemoteVersion] = useState(null);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    // ① ローカル保存バージョンとの比較（更新完了検知）
+    const lastVersion = localStorage.getItem(LAST_VERSION_KEY);
+
+    if (lastVersion && lastVersion !== currentVersion) {
+      // バージョンが上がった！更新完了バナーを表示
+      setPrevVersion(lastVersion);
+      setBannerType('updated');
+      localStorage.setItem(LAST_VERSION_KEY, currentVersion);
+      // 更新完了通知を6秒後に自動消去
+      const autoHide = setTimeout(() => setBannerType(null), 6000);
+      return () => clearTimeout(autoHide);
+    }
+
+    // 初回 or 一致 → 記録
+    if (!lastVersion) {
+      localStorage.setItem(LAST_VERSION_KEY, currentVersion);
+    }
+
+    // ② version.jsonとの比較（開きっぱなし対策）
     const checkUpdate = async () => {
       try {
-        // キャッシュ無効化してversion.jsonを取得
         const res = await fetch(`/version.json?t=${Date.now()}`);
         if (!res.ok) return;
         const data = await res.json();
 
         if (data.version && data.version !== currentVersion) {
-          // バージョンが違う → 更新あり！
-          setNewVersion(data.version);
+          setRemoteVersion(data.version);
+          setBannerType('available');
         }
       } catch (err) {
-        // ネットワークエラー等は静かに無視
         console.log('バージョンチェックスキップ');
       }
     };
 
-    // 起動時にチェック
     checkUpdate();
-
-    // 5分ごとにチェック（長時間開きっぱなし対策）
     const interval = setInterval(checkUpdate, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [currentVersion]);
 
-  const handleUpdate = () => {
-    backupPetNameForUpdate();
-    // localStorageを消しやすい強制リロードではなく、通常リロードで更新する
-    window.location.reload();
+  const handleTap = () => {
+    if (bannerType === 'available') {
+      // まだ古いバージョン → リロード
+      backupPetNameForUpdate();
+      window.location.reload();
+    } else {
+      // 更新完了通知 → 閉じるだけ
+      setDismissed(true);
+    }
   };
 
-  // 更新なし or 閉じた
-  if (!newVersion || dismissed) return null;
+  if (!bannerType || dismissed) return null;
+
+  const isUpdated = bannerType === 'updated';
 
   return (
     <div
-      onClick={handleUpdate}
+      onClick={handleTap}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 9999,
-        background: 'linear-gradient(135deg, #FF9800, #F57C00)',
+        background: isUpdated
+          ? 'linear-gradient(135deg, #4CAF50, #388E3C)'
+          : 'linear-gradient(135deg, #FF9800, #F57C00)',
         color: 'white',
         padding: '12px 20px',
         display: 'flex',
@@ -64,7 +93,9 @@ const UpdateBanner = ({ currentVersion }) => {
         justifyContent: 'space-between',
         cursor: 'pointer',
         fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
-        boxShadow: '0 4px 15px rgba(255,152,0,0.4)',
+        boxShadow: isUpdated
+          ? '0 4px 15px rgba(76,175,80,0.4)'
+          : '0 4px 15px rgba(255,152,0,0.4)',
         animation: 'mame-fadeIn 0.5s ease-out',
       }}
     >
@@ -76,12 +107,25 @@ const UpdateBanner = ({ currentVersion }) => {
           onError={(e) => { e.target.style.display = 'none'; }}
         />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 800 }}>
-            🎉 あたらしい バージョンが あるよ！
-          </div>
-          <div style={{ fontSize: 11, opacity: 0.9 }}>
-            v{currentVersion} → v{newVersion}　タップして こうしん！
-          </div>
+          {isUpdated ? (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 800 }}>
+                🎉 アップデート かんりょう！
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.9 }}>
+                v{prevVersion} → v{currentVersion} になったよ！
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 800 }}>
+                🎉 あたらしい バージョンが あるよ！
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.9 }}>
+                v{currentVersion} → v{remoteVersion}　タップして こうしん！
+              </div>
+            </>
+          )}
         </div>
       </div>
       <button
@@ -97,7 +141,7 @@ const UpdateBanner = ({ currentVersion }) => {
           fontFamily: "'Rounded Mplus 1c', sans-serif",
         }}
       >
-        あとで
+        {isUpdated ? 'OK' : 'あとで'}
       </button>
     </div>
   );
