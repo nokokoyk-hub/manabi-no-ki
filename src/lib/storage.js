@@ -113,7 +113,7 @@ export const backupPetNameForUpdate = () => {
 // ------------------------------------------
 // 日付ヘルパー（日本時間）
 // ------------------------------------------
-const getTodayJST = () => {
+export const getTodayJST = () => {
   const now = new Date();
   // UTC+9 で日本時間の日付を取得
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
