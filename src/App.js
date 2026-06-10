@@ -35,6 +35,9 @@ import {
   loadDisplayMode,
   saveDisplayMode,
   getTodayJST,
+  loadCostumeData,
+  incrementMissionCount,
+  checkCostumeUnlocks,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 
@@ -54,6 +57,9 @@ function App() {
 
   // 🔤 表示モード（ていがくねん / こうがくねん）
   const [displayMode, setDisplayMode] = useState(() => loadDisplayMode());
+
+  // 👗 着せ替えデータ
+  const [costumeData, setCostumeData] = useState(() => loadCostumeData());
 
   // 木の成長状態（Supabaseから読み込み）
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
@@ -186,6 +192,13 @@ function App() {
         savePuzzleData(result);
       }
       setPuzzleData(loadPuzzleData());
+
+      // 👗 着せ替えアンロック判定（v0.9.4修正）
+      const isPerfect = score === (totalQuestions || 5);
+      incrementMissionCount(isPerfect);
+      const latestPd = loadPuzzleData();
+      const { costumeData: newCostume } = checkCostumeUnlocks(newStreak, latestPd.completedIds.length);
+      setCostumeData(newCostume);
     }
 
     setScreen('home');
@@ -279,6 +292,8 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             puzzleData={puzzleData}
+            costumeData={costumeData}
+            onEquipChange={() => setCostumeData(loadCostumeData())}
           />
         );
       case 'zukan':
@@ -299,6 +314,7 @@ function App() {
             subjectLevels={subjectLevels}
             petName={displayName}
             puzzleData={puzzleData}
+            equippedItem={costumeData.equippedItem}
             onStartLearning={() => startLearning('mission')}
             onStartOkurigana={() => startLearning('okurigana')}
             onStartClock={() => startLearning('clock')}
