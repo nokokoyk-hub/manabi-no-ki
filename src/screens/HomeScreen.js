@@ -14,7 +14,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
-  onStartLearning, onOpenMimamori, onStartOkurigana, onStartClock, onStartKagaku, onStartShakai, onStartDoutoku, onOpenZukan, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
+  onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const [mameMessage, setMameMessage] = useState('');
 
@@ -177,31 +177,42 @@ const HomeScreen = ({
         </div>
       </div>
 
-      {/* 教科ボタン（2×3グリッド） */}
+      {/* 教科ボタン（2列グリッド） */}
       <div style={{
         padding: '0 20px 12px',
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
       }}>
-        <div onClick={onStartOkurigana} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E8F5E9',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>✏️</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>おくりがな</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            かんじ
-          </div>
-        </div>
-        <div onClick={onStartClock} style={{
+        <div onClick={onOpenMath} style={{
           background: 'white', borderRadius: 16, padding: 14,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
           cursor: 'pointer', border: '2px solid #E3F2FD',
         }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>⏰</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>とけい</div>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>🔢</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>さんすう</div>
           <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            なんじ？
+            けいさん
+          </div>
+        </div>
+        <div onClick={onOpenKokugo} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E8F5E9',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>📖</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>こくご</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            かんじ・ことば
+          </div>
+        </div>
+        <div onClick={onOpenRika} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E0F2F1',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>🌿</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>りか</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            しぜん・いきもの
           </div>
         </div>
         <div onClick={onStartShakai} style={{
@@ -215,6 +226,17 @@ const HomeScreen = ({
             ちり・れきし
           </div>
         </div>
+        <div onClick={onStartClock} style={{
+          background: 'white', borderRadius: 16, padding: 14,
+          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          cursor: 'pointer', border: '2px solid #E3F2FD',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 4 }}>⏰</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>とけい</div>
+          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
+            なんじ？
+          </div>
+        </div>
         <div onClick={onStartDoutoku} style={{
           background: 'white', borderRadius: 16, padding: 14,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
@@ -226,26 +248,15 @@ const HomeScreen = ({
             きもち
           </div>
         </div>
-        <div onClick={onStartKagaku} style={{
+        <div onClick={onOpenGenso} style={{
           background: 'white', borderRadius: 16, padding: 14,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
           cursor: 'pointer', border: '2px solid #F3E5F5',
         }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>🧪</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>かがく</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            クイズ
-          </div>
-        </div>
-        <div onClick={onOpenZukan} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E0F7FA',
-        }}>
           <div style={{ fontSize: 26, marginBottom: 4 }}>🔬</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>げんそずかん</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>げんそ</div>
           <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            しゅうきひょう
+            もんだい・ずかん
           </div>
         </div>
       </div>
