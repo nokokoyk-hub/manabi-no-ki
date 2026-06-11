@@ -18,6 +18,7 @@ import FukushuScreen from './screens/FukushuScreen';
 import NamingScreen from './screens/NamingScreen';
 import GohoubiScreen from './screens/GohoubiScreen';
 import ZukanScreen from './screens/ZukanScreen';
+import SubjectMenuScreen from './screens/SubjectMenuScreen';
 import UpdateBanner from './components/UpdateBanner';
 import {
   loadProgress,
@@ -42,7 +43,7 @@ import {
 import { getNextPuzzle } from './data/puzzles';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '0.9.4';
+export const APP_VERSION = '0.9.5';
 
 function App() {
   const [screen, setScreen] = useState('home');
@@ -303,6 +304,47 @@ function App() {
             petName={displayName}
           />
         );
+      case 'subject-kokugo':
+        return (
+          <SubjectMenuScreen
+            subject="kokugo"
+            onStartMode={startLearning}
+            onBack={() => setScreen('home')}
+            petName={displayName}
+            equippedItem={costumeData.equippedItem}
+          />
+        );
+      case 'subject-genso':
+        return (
+          <SubjectMenuScreen
+            subject="genso"
+            onStartMode={startLearning}
+            onOpenZukan={() => setScreen('zukan')}
+            onBack={() => setScreen('home')}
+            petName={displayName}
+            equippedItem={costumeData.equippedItem}
+          />
+        );
+      case 'subject-math':
+        return (
+          <SubjectMenuScreen
+            subject="math"
+            onStartMode={startLearning}
+            onBack={() => setScreen('home')}
+            petName={displayName}
+            equippedItem={costumeData.equippedItem}
+          />
+        );
+      case 'subject-rika':
+        return (
+          <SubjectMenuScreen
+            subject="rika"
+            onStartMode={startLearning}
+            onBack={() => setScreen('home')}
+            petName={displayName}
+            equippedItem={costumeData.equippedItem}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -316,12 +358,13 @@ function App() {
             puzzleData={puzzleData}
             equippedItem={costumeData.equippedItem}
             onStartLearning={() => startLearning('mission')}
-            onStartOkurigana={() => startLearning('okurigana')}
-            onStartClock={() => startLearning('clock')}
-            onStartKagaku={() => startLearning('kagaku')}
+            onOpenMath={() => setScreen('subject-math')}
+            onOpenKokugo={() => setScreen('subject-kokugo')}
+            onOpenRika={() => setScreen('subject-rika')}
             onStartShakai={() => startLearning('shakai')}
+            onStartClock={() => startLearning('clock')}
             onStartDoutoku={() => startLearning('doutoku')}
-            onOpenZukan={() => setScreen('zukan')}
+            onOpenGenso={() => setScreen('subject-genso')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
             onOpenFukushu={() => setScreen('fukushu')}
