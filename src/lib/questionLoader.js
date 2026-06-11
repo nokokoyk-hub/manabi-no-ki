@@ -127,7 +127,7 @@ const fetchWeakIds = async () => {
 // ------------------------------------------
 
 // ミッションに含めない教科（専用ボタンからのみアクセス）
-const MISSION_EXCLUDE_SUBJECTS = ['かがく'];
+const MISSION_EXCLUDE_SUBJECTS = ['げんそ'];
 
 // ミッション用: 全教科からバランスよく（除外教科を除く）
 export const getTodayQuestions = async (count = 5, subjectLevels = DEFAULT_SUBJECT_LEVELS) => {
