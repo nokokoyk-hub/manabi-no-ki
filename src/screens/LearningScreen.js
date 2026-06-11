@@ -23,11 +23,12 @@ const MODE_LABELS = {
   mission: 'きょうの ミッション',
   okurigana: 'おくりがな れんしゅう',
   clock: 'とけい れんしゅう',
-  kagaku: '🧪 かがく れんしゅう',
+  rika: '🌿 りか れんしゅう',
+  genso: '🔬 げんそ れんしゅう',
   shakai: '🗾 しゃかい れんしゅう',
   doutoku: '💛 どうとく れんしゅう',
-  math: 'さんすう ふくしゅう',
-  kokugo: 'こくご ふくしゅう',
+  math: '🔢 さんすう れんしゅう',
+  kokugo: '📖 こくご れんしゅう',
 };
 
 const getComboMessage = (combo, petName) => {
@@ -77,7 +78,8 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         else if (mode === 'clock') qs = await getQuestionsBySubject('とけい', 5, subjectLevels);
         else if (mode === 'math') qs = await getQuestionsBySubject('さんすう', 5, subjectLevels);
         else if (mode === 'kokugo') qs = await getQuestionsBySubject('こくご', 5, subjectLevels);
-        else if (mode === 'kagaku') qs = await getQuestionsBySubject('かがく', 5, subjectLevels);
+        else if (mode === 'rika') qs = await getQuestionsBySubject('りか', 5, subjectLevels);
+        else if (mode === 'genso') qs = await getQuestionsBySubject('げんそ', 5, subjectLevels);
         else if (mode === 'shakai') qs = await getQuestionsBySubject('しゃかい', 5, subjectLevels);
         else if (mode === 'doutoku') qs = await getQuestionsBySubject('どうとく', 5, subjectLevels);
         else qs = await getTodayQuestions(8, subjectLevels);
