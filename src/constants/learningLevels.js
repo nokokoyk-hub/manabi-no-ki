@@ -33,11 +33,19 @@ export const SUBJECT_LEVELS = [
     highHint: '5ふんきざみも れんしゅう',
   },
   {
-    key: 'かがく',
-    emoji: '🧪',
-    label: 'かがく',
-    description: 'げんそ・しゅうきひょう・かがくのふしぎ',
+    key: 'りか',
+    emoji: '🌿',
+    label: 'りか',
+    description: 'しぜん・いきもの・じっけん',
     lowHint: 'みぢかな ものから',
+    highHint: 'しぜんの しくみを たんけん',
+  },
+  {
+    key: 'げんそ',
+    emoji: '🔬',
+    label: 'げんそ',
+    description: 'げんそきごう・しゅうきひょう',
+    lowHint: 'みぢかな げんそから',
     highHint: 'げんその せかいを たんけん',
   },
   {
@@ -65,7 +73,8 @@ export const DEFAULT_SUBJECT_LEVELS = {
   さんすう: 1,
   こくご: 4,
   とけい: 2,
-  かがく: 1,
+  りか: 1,
+  げんそ: 1,
   しゃかい: 2,
   どうとく: 1,
 };
