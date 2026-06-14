@@ -289,6 +289,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
       setCombo(0);
       setMamePose('sad');
       setMameMsg(getMameMessage('wrong', displayName));
+      const delay = q.explanation ? 3500 : 1800;
       setTimeout(() => {
         setSelected(null);
         setShowResult(false);
@@ -301,7 +302,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
           // 最終問題が不正解でも結果画面へ
           setFinished(true);
         }
-      }, 1800);
+      }, delay);
     }
   };
 
@@ -428,6 +429,25 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
             );
           })}
         </div>
+
+        {/* 💡 解説表示（不正解時 + explanationがある場合のみ） */}
+        {showResult && selected !== null && selected !== q.correct && q.explanation && (
+          <div style={{
+            marginTop: 14,
+            padding: '14px 16px',
+            background: '#FFF8E1',
+            borderRadius: 14,
+            border: '2px solid #FFD54F',
+            animation: 'fadeIn 0.3s ease',
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#F57F17', marginBottom: 4 }}>
+              💡 ポイント
+            </div>
+            <div style={{ fontSize: 14, color: COLORS.text, lineHeight: 1.6 }}>
+              {q.explanation}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
