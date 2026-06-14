@@ -29,7 +29,9 @@
 | APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.5'` |
 | version.json | `public/version.json` → `"version": "0.9.5"` |
 | package.json | `"version": "0.9.5"` |
-| 最終更新日 | 2026年6月14日（土） |
+| 最終更新日 | 2026年6月14日（日） |
+
+> ※ 6/14（日）の解説追加はDBコンテンツ追加のみ（コード変更なし）のため、バージョンは v0.9.5 据え置き。
 
 ---
 
@@ -54,7 +56,9 @@
 |--------|-----|------|
 | question / question_advanced | TEXT | ひらがな版 / 漢字版問題文 |
 | options / options_advanced | JSONB | ひらがな版 / 漢字版選択肢 |
+| grade_level | INTEGER | 難易度レベル（1〜6）※カラム名は level ではなく grade_level |
 | category | TEXT | okurigana / clock 等 |
+| hint | TEXT (nullable) | 出題中のヒント |
 | explanation | TEXT (nullable) | 不正解時の解説文 v0.9.5〜 |
 
 ---
@@ -80,6 +84,28 @@
 
 ---
 
+## 💡 解説（explanation）進捗 ← 2026/6/14 更新
+
+| 教科 | 解説済 | 全体 | 状況 |
+|------|--------|------|------|
+| **さんすう** | **113** | 113 | 🏆 **全6レベル完全制覇** |
+| こくご | 10 | 126 | おくりがなLv3サンプルのみ |
+| りか | 0 | 68 | 未着手 |
+| しゃかい | 0 | 60 | 未着手 |
+| とけい | 0 | 51 | 未着手 |
+| どうとく | 0 | 60 | 未着手 |
+| げんそ | 0 | 70 | 未着手 |
+| **合計** | **123** | **548** | **約22%** |
+
+### 解説の書き方ガイド（さんすうで確立）
+- **ひらがな主体＋分かち書き**（解説は1カラムのみ＝表示モード非依存。ていがくねんでも読めるように）
+- 答えだけでなく**解き方の型**を入れる: 「10のまとまり」「九九の逆」「位で分解」「通分」「ひっくり返して掛ける」「速さの三角」など
+- 文章題は末尾に絵文字を1個程度（🍎✏️🍰など）で親しみUP
+- 表示先: LearningScreen.js 433-450行（不正解時のみ💡黄色カードで表示）
+- 配管: questionLoader.js `dbToAppFormat` 44行目 `explanation: row.explanation || undefined`（確認済✅）
+
+---
+
 ## 📝 機能一覧（v0.9.5時点）
 
 ### ✅ 実装済み主要機能
@@ -91,15 +117,25 @@
 - 着せ替え（8アイテム、ミッション初回クリア時に判定）
 - UpdateBanner（localStorage + version.json 2段構え）
 - 誤答記録 + 誤答優先出題 + 出題フレッシュ化
-- 解説機能（不正解時にexplanation表示、おくりがなLv3に10問サンプル投入済）
+- 解説機能（不正解時にexplanation表示。**さんすう全113問＋こくご10問に投入済**）
 - ごほうびパズル + げんそずかん + 保護者モード
 
 ### 🔲 未実装（優先順）
-1. 解説文の全問追加（随時）🔴
-2. PWA化 🔴
+1. 解説文の追加（さんすう✅完了 → 次: こくご続き / りか / しゃかい等）🔴
+2. PWA化（manifest.jsonは存在するがiconsが空、service worker無し）🔴
 3. FukushuScreen改修 🟡
 4. 問題追加（りかLv2補強等）🟡
 5. v1.0認証・課金（設計書完成済: docs/auth_and_billing_design.md）🟢
+
+---
+
+## ⚠️ 既知の整理候補（バグの温床になる前に）
+
+| 項目 | 内容 | 緊急度 |
+|------|------|--------|
+| public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするが本来は `public/images/` が正。PWA整理時に一緒に直すのが理想 | 🟡 |
+| changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある（過去の更新ミス）。履歴のため未削除。次回整理候補 | 🟢 |
+| デカいファイル | storage.js(22KB)・MimamoriScreen.js(21KB)・LearningScreen.js(18KB)。将来的にファイル分割候補 | 🟡 |
 
 ---
 
@@ -115,17 +151,18 @@
 ## 🔧 開発ルール
 
 - version.json / APP_VERSION / package.json は同時更新
+- **DBコンテンツのみの追加（解説など）はバージョンを上げない**（コード変更がないとUpdateBannerが誤通知するため）
 - `dbToAppFormat`（questionLoader.js）がDB→アプリの唯一の変換ポイント
 - DDLは`Supabase:apply_migration`、DMLは`Supabase:execute_sql`
 - JSONB列は`'[...]'::jsonb`明示キャスト必須
-- 日本語SQL UPDATEは8〜10行バッチが安定
-- changelog.htmlは public/ と docs/ の2箇所に配置
+- 日本語SQL UPDATEは8〜10行バッチが安定（CASE WHEN方式が安全）
+- **changelog.htmlは public/ と docs/ の2箇所に配置。必ず両方同時更新し、`diff` で一致確認すること**
 - のんはコードに不慣れ→修正はちゃぴ担当、ファイルで渡す
 - SubjectMenuScreen: SUBJECT_CATEGORIESにカテゴリ追加で拡張可能
 - 解説: explanationカラム（nullable）、NULLなら従来の❌表示のみ
 
 ---
 
-> 最終更新: 2026年6月14日（土）JST
+> 最終更新: 2026年6月14日（日）JST
 > 更新者: ちゃぴ
-> バージョン: v0.9.5
+> バージョン: v0.9.5（さんすう全問解説 完成）
