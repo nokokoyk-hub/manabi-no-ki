@@ -359,6 +359,36 @@ export const recordAnswer = async (questionId, isCorrect) => {
 };
 
 /**
+ * 直近N日以内に出題された問題IDを取得する
+ * 正解/不正解を問わず、出題されたもの全て
+ * 返り値: ['question_id_1', 'question_id_2', ...]
+ */
+export const getRecentQuestionIds = async (days = 3) => {
+  if (!supabase) return [];
+
+  try {
+    const deviceId = getDeviceId();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data, error } = await supabase
+      .from('answer_history')
+      .select('question_id')
+      .eq('device_id', deviceId)
+      .gte('answered_at', since.toISOString());
+
+    if (error) throw error;
+    if (!data || data.length === 0) return [];
+
+    // 重複除去してIDリストを返す
+    return [...new Set(data.map(row => row.question_id))];
+  } catch (err) {
+    console.warn('⚠️ 直近出題取得失敗:', err.message);
+    return [];
+  }
+};
+
+/**
  * 指定日数以内の誤答が多い問題IDを取得する
  * 返り値: [{ question_id, wrong_count, total_count, wrong_rate }]
  * wrong_rateが高い順にソート
