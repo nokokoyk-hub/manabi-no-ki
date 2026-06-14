@@ -7,7 +7,7 @@
 
 import { supabase } from './supabase';
 import { DEFAULT_SUBJECT_LEVELS } from '../constants/learningLevels';
-import { getWeakQuestions } from './storage';
+import { getWeakQuestions, getRecentQuestionIds } from './storage';
 import {
   getTodayQuestions as getTodayQuestionsLocal,
   getQuestionsByCategory as getQuestionsByCategoryLocal,
@@ -121,6 +121,34 @@ const fetchWeakIds = async () => {
   }
 };
 
+// 直近出題IDリストを取得する（失敗しても空配列で続行）
+const fetchRecentIds = async () => {
+  try {
+    return await getRecentQuestionIds(3);
+  } catch (err) {
+    console.warn('⚠️ 直近出題データ取得失敗:', err.message);
+    return [];
+  }
+};
+
+// 最近出た問題を後回しにする（プール不足時は全問使う安全設計）
+const applyRecentFilter = (questions, recentIds, minRequired = 5) => {
+  if (!recentIds || recentIds.length === 0) return questions;
+
+  const recentSet = new Set(recentIds);
+  const fresh = questions.filter(q => !recentSet.has(q.id));
+
+  // 新鮮な問題がminRequired以上あれば新鮮な問題だけ使う
+  if (fresh.length >= minRequired) {
+    console.log(`🆕 出題フレッシュ化: ${fresh.length}問(新鮮) / ${questions.length - fresh.length}問(最近出題済→除外)`);
+    return fresh;
+  }
+
+  // 足りなければ全問使う（詰まり防止）
+  console.log(`🔄 問題プール不足のため全問使用: ${questions.length}問`);
+  return questions;
+};
+
 // ------------------------------------------
 // Supabaseから問題を取得する関数群
 // すべてフォールバック付き！
@@ -153,9 +181,10 @@ export const getTodayQuestions = async (count = 5, subjectLevels = DEFAULT_SUBJE
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
 
-    // 🔄 誤答優先出題を試みる
-    const weakIds = await fetchWeakIds();
-    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    // 🆕 直近出題を後回し + 🔄 誤答優先出題
+    const [recentIds, weakIds] = await Promise.all([fetchRecentIds(), fetchWeakIds()]);
+    const freshFiltered = applyRecentFilter(filtered, recentIds, count);
+    const weakResult = prioritizeWeak(freshFiltered, weakIds, count);
     if (weakResult) {
       console.log(`✅ DB問題取得(誤答優先): ${filtered.length}問中${count}問を出題`);
       return weakResult;
@@ -190,16 +219,17 @@ export const getQuestionsByCategory = async (category, count = 5, subjectLevels 
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
 
-    // 🔄 誤答優先出題を試みる
-    const weakIds = await fetchWeakIds();
-    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    // 🆕 直近出題を後回し + 🔄 誤答優先出題
+    const [recentIds, weakIds] = await Promise.all([fetchRecentIds(), fetchWeakIds()]);
+    const freshFiltered = applyRecentFilter(filtered, recentIds, count);
+    const weakResult = prioritizeWeak(freshFiltered, weakIds, count);
     if (weakResult) {
-      console.log(`✅ DB問題取得(${category}/誤答優先): ${filtered.length}問`);
+      console.log(`✅ DB問題取得(${category}/誤答優先): ${freshFiltered.length}問`);
       return weakResult;
     }
 
-    console.log(`✅ DB問題取得(${category}): ${filtered.length}問`);
-    return shuffle(filtered).slice(0, count);
+    console.log(`✅ DB問題取得(${category}): ${freshFiltered.length}問`);
+    return shuffle(freshFiltered).slice(0, count);
   } catch (err) {
     console.warn(`⚠️ DB問題取得失敗(${category})、フォールバック:`, err.message);
     return getQuestionsByCategoryLocal(category, count, subjectLevels);
@@ -227,16 +257,17 @@ export const getQuestionsBySubject = async (subject, count = 5, subjectLevels = 
 
     if (filtered.length === 0) throw new Error('レベル対応問題なし');
 
-    // 🔄 誤答優先出題を試みる
-    const weakIds = await fetchWeakIds();
-    const weakResult = prioritizeWeak(filtered, weakIds, count);
+    // 🆕 直近出題を後回し + 🔄 誤答優先出題
+    const [recentIds, weakIds] = await Promise.all([fetchRecentIds(), fetchWeakIds()]);
+    const freshFiltered = applyRecentFilter(filtered, recentIds, count);
+    const weakResult = prioritizeWeak(freshFiltered, weakIds, count);
     if (weakResult) {
-      console.log(`✅ DB問題取得(${subject}/誤答優先): ${filtered.length}問`);
+      console.log(`✅ DB問題取得(${subject}/誤答優先): ${freshFiltered.length}問`);
       return weakResult;
     }
 
-    console.log(`✅ DB問題取得(${subject}): ${filtered.length}問`);
-    return shuffle(filtered).slice(0, count);
+    console.log(`✅ DB問題取得(${subject}): ${freshFiltered.length}問`);
+    return shuffle(freshFiltered).slice(0, count);
   } catch (err) {
     console.warn(`⚠️ DB問題取得失敗(${subject})、フォールバック:`, err.message);
     return getQuestionsBySubjectLocal(subject, count, subjectLevels);
