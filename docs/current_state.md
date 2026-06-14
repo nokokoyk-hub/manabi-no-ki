@@ -21,24 +21,15 @@
 
 ---
 
-## 🌱 設計思想
-
-苦手を「だめ」と決めつけず、得意や興味を見つけて伸ばし、自己肯定感を育てるアプリ。
-苦手な教科は足元をやわらかく、得意な教科は天井を高くする。
-レベル設定は「そのレベルの問題だけ出す」方式で、教科ごとに独立管理。
-「かがく」など興味特化型教科はミッションに混ぜず、やりたい子だけが選べる設計。
-
----
-
 ## 🔢 バージョン情報
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.9.4** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.4'` |
-| version.json | `public/version.json` → `"version": "0.9.4"` |
-| package.json | `"version": "0.9.4"` |
-| 最終更新日 | 2026年6月10日（水） |
+| 現在のバージョン | **v0.9.5** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.5'` |
+| version.json | `public/version.json` → `"version": "0.9.5"` |
+| package.json | `"version": "0.9.5"` |
+| 最終更新日 | 2026年6月14日（土） |
 
 ---
 
@@ -48,233 +39,93 @@
 |----------|------|------|
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
 | バックエンド | Supabase | ✅ 稼働中 |
-| 問題データ | Supabase questionsテーブル（v0.8.0〜） | ✅ 490問DB管理 |
+| 問題データ | Supabase questionsテーブル | ✅ 548問DB管理 |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
-| AI問題生成 | Claude API | 🔲 未着手 |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
 
----
+### インフラ情報
+- GitHub: `nokokoyk-hub/manabi-no-ki`（Public, main）
+- Vercel: `manabi-no-ki-kannari-norikos-projects.vercel.app`
+- Supabase: `ndqbtfahtjaafroevgwq`（東京リージョン）
+- テーブル: user_progress, learning_sessions, questions(548問), answer_history
 
-## 🌐 インフラ情報
-
-### GitHub
-- リポジトリ: `nokokoyk-hub/manabi-no-ki`（Public）
-- ブランチ: `main`（本番）
-
-### Vercel
-- プロジェクトID: `prj_NC6rJ3LFMakVQ9cXLCb3zl53xaYm`
-- チームID: `team_wLDUprmHVwDKbqydwaFCl5k7`
-- 本番URL: `manabi-no-ki-kannari-norikos-projects.vercel.app`
-
-### Supabase
-- プロジェクトID: `ndqbtfahtjaafroevgwq`
-- リージョン: `ap-northeast-1`（東京）
-
-#### テーブル構成
-| テーブル | 用途 | RLS |
-|----------|------|-----|
-| `user_progress` | 木の成長状態・ストリーク | ✅有効 |
-| `learning_sessions` | 学習セッション記録 | ✅有効 |
-| `questions` | 問題データ（490問）v0.8.0〜 | ✅有効 |
-| `answer_history` | 誤答記録（v0.9.1で実装完了） | ✅有効 |
-
-#### questionsテーブル主要カラム
+### questionsテーブル主要カラム
 | カラム | 型 | 説明 |
 |--------|-----|------|
-| question | TEXT | ひらがな版問題文（ていがくねんモード） |
-| question_advanced | TEXT (nullable) | 漢字交じり版問題文（こうがくねんモード）v0.9.3〜 |
-| options | JSONB | ひらがな版選択肢 |
-| options_advanced | JSONB (nullable) | 漢字交じり版選択肢 v0.9.3〜 |
-| category | TEXT | okurigana / clock 等（v0.9.3でclockのNULL修正済） |
+| question / question_advanced | TEXT | ひらがな版 / 漢字版問題文 |
+| options / options_advanced | JSONB | ひらがな版 / 漢字版選択肢 |
+| category | TEXT | okurigana / clock 等 |
+| explanation | TEXT (nullable) | 不正解時の解説文 v0.9.5〜 |
 
 ---
 
-## 📁 ファイル構成（v0.9.4時点）
+## 📊 問題データ（548問・7教科）
 
-```
-manabi-no-ki/
-├── public/
-│   ├── version.json
-│   ├── changelog.html
-│   └── public/images/
-│       ├── mame/              # キャラ画像15枚（透過PNG）
-│       ├── puzzles/           # パズル画像3枚
-│       └── genso_hyou.png     # 元素周期表（ずかん用）
-├── src/
-│   ├── App.js                 # ルーター + 状態管理 + displayMode管理 + costumeData管理 + 日跨ぎリセット
-│   ├── lib/
-│   │   ├── supabase.js
-│   │   ├── storage.js         # データアクセス + displayMode + getTodayJST（export）
-│   │   └── questionLoader.js  # Supabase問題取得 + 誤答優先出題 + dbToAppFormat（question_advanced/options_advanced対応）
-│   ├── constants/
-│   │   ├── colors.js
-│   │   ├── learningLevels.js
-│   │   └── mameMessages.js
-│   ├── components/
-│   │   ├── TreeSVG.js
-│   │   ├── ClockSVG.js
-│   │   ├── StarBurst.js
-│   │   ├── MameCharacter.js
-│   │   └── UpdateBanner.js    # localStorage比較 + version.json比較の2段構え
-│   ├── screens/
-│   │   ├── NamingScreen.js
-│   │   ├── HomeScreen.js      # 2×3ボタン + equippedItem（着せ替え表示）
-│   │   ├── LearningScreen.js  # DB非同期読み込み + 7モード + displayMode漢字切替 + 誤答記録
-│   │   ├── LevelSettingsScreen.js
-│   │   ├── FukushuScreen.js
-│   │   ├── GohoubiScreen.js   # costumeData props接続
-│   │   ├── MimamoriScreen.js  # 保護者モード + 表示モード切替UI
-│   │   └── ZukanScreen.js
-│   └── data/
-│       ├── questions.js       # フォールバック用
-│       ├── levelQuestions.js   # フォールバック用
-│       ├── puzzles.js
-│       └── costumeItems.js
-└── docs/
-    ├── current_state.md
-    └── changelog.html
-```
-
----
-
-## 📝 機能一覧
-
-### ✅ 実装済み
-- ペット名カスタマイズ（NamingScreen）
-- ホーム画面（木 + キャラ + ストリーク + 2×3ボタン）
-- 学習画面（Supabase DB読み込み + フォールバック + 7モード対応）
-- 教科別レベル設定（Lv1〜6、6教科対応）
-- ふくしゅう画面（7モード対応）
-- ごほうびパズル（3×3、9日で完成、アーカイブ）
-- 着せ替え（8アイテム）
-- コンボ演出 + パーフェクト演出
-- Supabase問題DB管理（490問・6教科）
-- ミッション8問出題（5教科からバランス出題、かがく除外）
-- 誤答記録（answer_history書き込み）
-- 誤答優先出題（苦手問題を最大40%優先）
-- ミッション結果画面
-- タブ復帰時の自動日付リセット
-- げんそずかん（周期表ビューア）
-- 保護者モード全面リニューアル（正答率バー/苦手検出/推移グラフ）
-- **表示モード切り替え Phase 1-3 全完了** ← v0.9.3
-  - ていがくねん（ひらがな中心）/ こうがくねん（漢字交じり）
-  - 設定UI + localStorage永続化
-  - question_advanced: 問題文421問の漢字版投入
-  - options_advanced: 選択肢304問の漢字版投入
-  - NULLフォールバック設計（未設定の問題は従来表示を維持）
-- **とけいモードのレベル設定対応** ← v0.9.3
-  - category NULL問題修正 + getQuestionsBySubject方式に変更
-- **おくりがなモードのレベル固定対応** ← v0.9.3
-  - 全問Lv2のため、レベル設定に関わらず全問出題
-- **フルスクリーン日跨ぎリセット** ← v0.9.4
-  - setInterval 60秒ごとの日付チェック（開きっぱなし対策）
-  - visibilitychange イベントでタブ復帰時も即チェック
-  - getTodayJST を storage.js から共用export
-- **着せ替え機能修正** ← v0.9.4
-  - App.js に costumeData state 管理を追加
-  - ミッション完了時の incrementMissionCount / checkCostumeUnlocks 接続
-  - HomeScreen → equippedItem / GohoubiScreen → costumeData のprops接続修正
-- **UpdateBanner改修** ← v0.9.4
-  - localStorage比較方式（manabi_last_version キー）でデプロイ直後もバナー表示
-  - 更新完了バナー（緑🟢）+ 更新あり通知（オレンジ🟠）の2段構え
-
-### 🔲 未実装
-| 機能 | 優先度 |
-|------|--------|
-| おくりがな Lv3-6問題追加（約40問） | 🔴 高 |
-| FukushuScreen改修（問題単位の精密出題） | 🟡 中 |
-| Claude API問題自動生成 | 🟡 中 |
-| 音声読み上げ | 🟡 中 |
-| 保護者PINロック | 🟢 低 |
-| 名前変更機能 | 🟢 低 |
-
----
-
-## 📊 問題データ（Supabase questionsテーブル: 490問）
-
-| 教科 | Lv1 | Lv2 | Lv3 | Lv4 | Lv5 | Lv6 | 計 | 漢字版問題文 | 漢字版選択肢 |
-|------|-----|-----|-----|-----|-----|-----|-----|---|---|
-| さんすう | 22 | 11 | 20 | 20 | 20 | 20 | 113 | 44 | 19 |
-| こくご | 7 | 15 | 8 | 8 | 20 | 20 | 78 | 78 | 4 |
-| かがく | 23 | 19 | 24 | 24 | 24 | 24 | 138 | 138 | 126 |
-| とけい | 3 | 6 | 8 | 8 | 8 | 8 | 41 | 41 | 39 |
-| しゃかい | 10 | 10 | 10 | 10 | 10 | 10 | 60 | 60 | 56 |
-| どうとく | 10 | 10 | 10 | 10 | 10 | 10 | 60 | 60 | 60 |
-| **合計** | **75** | **71** | **80** | **80** | **92** | **92** | **490** | **421** | **304** |
-
-※ 漢字版が未設定（NULL）の問題 = 計算式のみ・元素記号のみ・読み方テストのひらがな選択肢等 → フォールバックで従来表示
+| 教科 | Lv1 | Lv2 | Lv3 | Lv4 | Lv5 | Lv6 | 計 |
+|------|-----|-----|-----|-----|-----|-----|-----|
+| さんすう | 22 | 11 | 20 | 20 | 20 | 20 | 113 |
+| こくご | 15 | 15 | 18 | 18 | 30 | 30 | 126 |
+| りか | 16 | 7 | 12 | 11 | 10 | 12 | 68 |
+| しゃかい | 10 | 10 | 10 | 10 | 10 | 10 | 60 |
+| とけい | 13 | 6 | 8 | 8 | 8 | 8 | 51 |
+| どうとく | 10 | 10 | 10 | 10 | 10 | 10 | 60 |
+| げんそ | 7 | 12 | 12 | 13 | 14 | 12 | 70 |
+| **合計** | **93** | **71** | **90** | **90** | **102** | **102** | **548** |
 
 ### ミッション出題ルール
-- ミッション: さんすう・こくご・とけい・しゃかい・どうとく の5教科からバランスよく8問
-- かがく: ミッションには含まず、ホーム画面の専用ボタンから5問出題
-- MISSION_EXCLUDE_SUBJECTS = ['かがく']（questionLoader.js）
-- 誤答優先出題: 過去30日の誤答問題を最大40%まで優先的に出題
-
-### 問題取得パス（v0.9.3修正済）
-| モード | 取得関数 | 備考 |
-|--------|----------|------|
-| ミッション | getTodayQuestions | 5教科バランス出題 |
-| おくりがな | getQuestionsByCategory('okurigana') | こくごLv2固定で渡す |
-| とけい | getQuestionsBySubject('とけい') | v0.9.3で修正（旧: categoryベース） |
-| さんすう | getQuestionsBySubject('さんすう') | |
-| こくご | getQuestionsBySubject('こくご') | |
-| かがく | getQuestionsBySubject('かがく') | |
-| しゃかい | getQuestionsBySubject('しゃかい') | |
-| どうとく | getQuestionsBySubject('どうとく') | |
+- 6教科（さんすう・こくご・りか・しゃかい・とけい・どうとく）からバランスよく8問
+- げんそはミッション除外（MISSION_EXCLUDE_SUBJECTS = ['げんそ']）
+- 誤答優先: 過去30日の誤答問題を最大40%優先
+- フレッシュ化: 直近3日以内の出題を後回し（プール5問未満なら全問使用）
 
 ---
 
-## 🔮 今後のロードマップ
+## 📝 機能一覧（v0.9.5時点）
 
-### 次回作業（優先順）
-1. **着せ替え動作の実機確認**（ミッションクリア→アンロック→ホーム表示）
-2. **おくりがな Lv3-6問題追加**（約40問）
-3. **FukushuScreen改修**（問題単位の精密復習）
+### ✅ 実装済み主要機能
+- ホーム画面7ボタン構成（算国理社＋とけい・どうとく・げんそ）
+- SubjectMenuScreen（教科→カテゴリ階層：こくご→おくりがな/よみかき、げんそ→もんだい/ずかん）
+- 表示モード切り替え（ていがくねん/こうがくねん）
+- 教科別レベル設定（Lv1〜6、7教科）
+- フルスクリーン日跨ぎリセット（setInterval + visibilitychange）
+- 着せ替え（8アイテム、ミッション初回クリア時に判定）
+- UpdateBanner（localStorage + version.json 2段構え）
+- 誤答記録 + 誤答優先出題 + 出題フレッシュ化
+- 解説機能（不正解時にexplanation表示、おくりがなLv3に10問サンプル投入済）
+- ごほうびパズル + げんそずかん + 保護者モード
 
-### 中期（v1.0に向けて）
-- Claude API問題自動生成
-- 保護者PINロック
-- 音声読み上げ
-
-### 長期
-- 有料化・リリース準備
+### 🔲 未実装（優先順）
+1. 解説文の全問追加（随時）🔴
+2. PWA化 🔴
+3. FukushuScreen改修 🟡
+4. 問題追加（りかLv2補強等）🟡
+5. v1.0認証・課金（設計書完成済: docs/auth_and_billing_design.md）🟢
 
 ---
 
-## 📋 お母さんからのフィードバック記録
+## 💰 v1.0 課金設計（2026/6/14策定）
 
-| 日付 | 内容 | 対応状況 |
-|------|------|----------|
-| 5/27 | 漢字の送り仮名も作ってほしい | ✅ 実装済み |
-| 5/27 | 時計の見方も作ってほしい | ✅ 実装済み |
-| 5/29 | 教科ごとにレベルを自由設定したい | ✅ 実装済み |
-| 5/29 | 得意を伸ばして自己肯定感を育てる | ✅ 設計思想に反映 |
-| 5/30 | キャラの名前を子供がつけられないか | ✅ v0.6.0で実装 |
-| 6/1 | ごほうびにパズルピース収集→絵の完成 | ✅ v0.7.1で実装 |
-| 6/5 | 社会や理科も作りたい（のんから） | ✅ v0.9.2で実装 |
-| 6/5 | 道徳も入れたい（のんから） | ✅ v0.9.2で実装 |
-| 6/7 | ひらがな/漢字切り替えモード（のんから） | ✅ v0.9.3で完了 |
+フリーミアム月額200円。5日間トライアル→無料(ミッション1日1回)→プレミアム(全機能)。
+認証: Googleログイン + マジックリンク + WebView検知案内。
+課金: Stripe Checkout（みまもり画面内、保護者PINロック内）。
+設計書: `docs/auth_and_billing_design.md`
 
 ---
 
 ## 🔧 開発ルール
 
 - version.json / APP_VERSION / package.json は同時更新
-- `dbToAppFormat`（`src/lib/questionLoader.js`）がDB→アプリの唯一の変換ポイント。新カラム追加時は必ずここに追記
-- `ALTER TABLE`等のDDL操作は`Supabase:apply_migration`を使用。SELECT/DMLは`Supabase:execute_sql`
-- JSONB列へのキャスト: `'[...]'::jsonb`の明示キャストが必要
-- 日本語Unicode・絵文字を含むSQL UPDATEは8〜10行単位のCASEバッチが安定
-- changelog.htmlは public/ と docs/ の2箇所に同じファイルを配置
-- CI=true でビルドテスト（`REACT_APP_SUPABASE_URL=https://test.supabase.co REACT_APP_SUPABASE_KEY=test CI=true npx react-scripts build`）
-- のんはコードに不慣れ。修正はちゃぴが担当しファイルで渡す
-- Supabaseダッシュボードは100行ページネーション注意→実数確認はSELECT COUNT(*)
-- Supabase MCP経由でちゃぴが直接SQL実行可能
-- 表示モードの設定値: 'hiragana'（ていがくねん）/ 'kanji'（こうがくねん）
-- UpdateBanner: localStorage `manabi_last_version` キーで前回バージョンを記憶
-- 日跨ぎリセット: App.jsのuseEffectでsetInterval(60秒) + visibilitychange、storage.jsのgetTodayJSTを共用
+- `dbToAppFormat`（questionLoader.js）がDB→アプリの唯一の変換ポイント
+- DDLは`Supabase:apply_migration`、DMLは`Supabase:execute_sql`
+- JSONB列は`'[...]'::jsonb`明示キャスト必須
+- 日本語SQL UPDATEは8〜10行バッチが安定
+- changelog.htmlは public/ と docs/ の2箇所に配置
+- のんはコードに不慣れ→修正はちゃぴ担当、ファイルで渡す
+- SubjectMenuScreen: SUBJECT_CATEGORIESにカテゴリ追加で拡張可能
+- 解説: explanationカラム（nullable）、NULLなら従来の❌表示のみ
 
 ---
 
-> 最終更新: 2026年6月10日（水）JST
+> 最終更新: 2026年6月14日（土）JST
 > 更新者: ちゃぴ
-> バージョン: v0.9.4
+> バージョン: v0.9.5
