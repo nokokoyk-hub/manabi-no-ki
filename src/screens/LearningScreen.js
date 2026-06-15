@@ -444,7 +444,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
               💡 ポイント
             </div>
             <div style={{ fontSize: 14, color: COLORS.text, lineHeight: 1.6 }}>
-              {q.explanation}
+              {displayMode === 'kanji' && q.explanationAdvanced ? q.explanationAdvanced : q.explanation}
             </div>
           </div>
         )}
