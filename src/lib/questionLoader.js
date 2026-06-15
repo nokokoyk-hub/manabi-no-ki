@@ -42,6 +42,7 @@ const dbToAppFormat = (row) => ({
     ? (typeof row.clock_time === 'string' ? JSON.parse(row.clock_time) : row.clock_time)
     : undefined,
   explanation: row.explanation || undefined,
+  explanationAdvanced: row.explanation_advanced || undefined,
   difficulty: row.grade_level,
 });
 
