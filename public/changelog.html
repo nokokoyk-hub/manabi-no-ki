@@ -22,6 +22,20 @@
   <h1>🌳 まなびの木 — 変更履歴</h1>
 
   <div class="version">
+    <h2>v0.9.6 — りか解説 完成＋こうがくねんモード 漢字解説 対応 🔬💡🈂️</h2>
+    <div class="date">2026年6月15日（月）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> りか全68問に解説（explanation）を完備（Lv1:16 / Lv2:7 / Lv3:12 / Lv4:11 / Lv5:10 / Lv6:12）→ さんすうに続く2教科目の全レベル完成 🏆</li>
+      <li><span class="tag new">NEW</span> こうがくねんモード対応: りか全68問に漢字版解説（explanation_advanced）を追加。こうがくねんでは漢字混じり、ていがくねんではひらがな主体で表示</li>
+      <li><span class="tag new">NEW</span> 漢字レベル方針: 小学漢字（〜6年）は漢字／中学漢字（窒・浮・肝・蒸・惑 など）はひらがなで残し、間違えたときに読める解説に</li>
+      <li><span class="tag infra">INFRA</span> questionsテーブルに explanation_advanced カラム新設（nullable）</li>
+      <li><span class="tag infra">INFRA</span> questionLoader.js に explanationAdvanced を配管 / LearningScreen.js で displayMode により解説を漢字↔ひらがな切替（漢字版が無ければひらがなにフォールバック）</li>
+      <li><span class="tag infra">INFRA</span> 解説総数（ひらがな版）: 123問 → 191問（548問中 約35%）</li>
+      <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.5 → v0.9.6（3箇所同時更新）</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.5 追補 — さんすう全問 解説 完成 🔢💡</h2>
     <div class="date">2026年6月14日（日）</div>
     <ul>
