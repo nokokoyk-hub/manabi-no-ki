@@ -22,6 +22,21 @@
   <h1>🌳 まなびの木 — 変更履歴</h1>
 
   <div class="version">
+    <h2>v0.9.6 追補 — げんそ・さんすう漢字版 解説 完成＋とけいバグ修正＋品質管理キット 🧪🔢🕐🩺</h2>
+    <div class="date">2026年6月16日（火）</div>
+    <ul>
+      <li><span class="tag new">NEW</span> げんそ全70問に解説（explanation）＋漢字版解説（explanation_advanced）を完備（Lv1:7 / Lv2:12 / Lv3:12 / Lv4:13 / Lv5:14 / Lv6:12）🏆</li>
+      <li><span class="tag new">NEW</span> さんすう漢字版解説（explanation_advanced）113問を完備 → さんすうが ひらがな＋漢字 両面完成 🏆</li>
+      <li><span class="tag new">NEW</span> 「両方（ひらがな＋漢字）完成」教科が <strong>りか・しゃかい・とけい・どうとく・げんそ・さんすう の6教科</strong> に</li>
+      <li><span class="tag fix">FIX</span> とけい「この とけいは なんじ？」grade1の10問（id531〜540）で時計の図が表示されないバグを修正（clock_time が NULL だった→各問題の正解に合う時刻を投入）。図つき時計問題は計20問すべて正常化</li>
+      <li><span class="tag fix">FIX</span> げんそ「日本で発見された元素は何種類？」の正解を修正（誤: 4種類 → 正: 1種類＝ニホニウムのみ）</li>
+      <li><span class="tag infra">INFRA</span> 問題追加チェックリスト（健康診断キット）を新設: <code>docs/question_add_checklist.md</code>。問題追加後に SQL 一発でデータ抜け漏れ9項目を自動チェック</li>
+      <li><span class="tag infra">INFRA</span> 解説総数: ひらがな版 362→432問（約79%）／漢字版 239→422問（約77%）。残る漢字版バックログは こくご126問のみ</li>
+      <li><span class="tag infra">INFRA</span> アプリのコード変更なし（DBコンテンツ追加・修正のみ）→ バージョンは <strong>v0.9.6 据え置き</strong></li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.6 追補 — しゃかい・とけい・どうとく 解説 完成（ひらがな＋漢字）📚💡🈂️</h2>
     <div class="date">2026年6月15日（月）</div>
     <ul>
