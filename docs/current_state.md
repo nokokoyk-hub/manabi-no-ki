@@ -28,10 +28,12 @@
 | 現在のバージョン | **v0.9.8** |
 | APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.8'` |
 | version.json | `public/version.json` → `"version": "0.9.8"` |
+| docs/version.json | `docs/version.json` → `"version": "0.9.8"` |
 | package.json | `"version": "0.9.8"` |
 | 最終更新日 | 2026年6月19日（木） |
 
-> ※ v0.9.8 は **Phase B（保護者PINロック）+ Phase C（トライアル制限）+ GA4 + profilesテーブル新設**を含む。
+> ※ v0.9.8 は **Phase B（保護者PINロック）+ Phase C（トライアル制限）+ GA4 + profilesテーブル新設 + SEO基盤整備 + SMTP開通**を含む。
+> ※ 4箇所すべてv0.9.8に統一済み（6/19修正完了）。
 
 ---
 
@@ -42,12 +44,14 @@
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
 | バックエンド | Supabase | ✅ 稼働中 |
 | 認証 | Supabase Auth（Google OAuth + マジックリンク） | ✅ 稼働中（v0.9.7〜） |
+| メール送信 | Resend SMTP（マジックリンク用） | ✅ 稼働中（6/19開通） |
 | 問題データ | Supabase questionsテーブル | ✅ 587問DB管理 |
 | ユーザー管理 | Supabase profilesテーブル | ✅ 稼働中（v0.9.8〜） |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
 | アクセス解析 | Google Analytics 4（GA4） | ✅ 稼働中（v0.9.8〜） |
 | ユーザー管理シート | Google Sheets + Apps Script | ✅ 稼働中（v0.9.8〜） |
+| SEO | OGP・JSON-LD・sitemap・robots | ✅ 設定済み（6/19） |
 
 ### インフラ情報
 - **独自ドメイン: `manabinoki.net`**（お名前.com取得、Vercelネームサーバー接続、SSL自動）
@@ -59,6 +63,32 @@
 - GA4: 測定ID `G-64GLZZQC24`（プロパティ「まなびの木」）
 - テーブル: user_progress, learning_sessions, questions(587問), answer_history, **profiles(v0.9.8〜)**
 - ビュー: **user_management_view**（Google Sheets連携用）
+
+### SMTP設定（マジックリンク用・6/19開通）
+| 項目 | 値 |
+|------|-----|
+| サービス | **Resend** |
+| Host | `smtp.resend.com` |
+| Port | `587`（※465はSupabaseでタイムアウトするため不可） |
+| Username | `resend` |
+| Password | ResendのAPIキー |
+| Sender email | `noreply@manabinoki.net` |
+| Sender name | `まなびの木` |
+| ドメイン認証 | DKIM / SPF / MX すべてVerified |
+| Resendアカウント | nokoko3@outlook.jpで登録 |
+
+> ※ Brevoは無料プランのSMTPリレー制限により不採用。Brevo APIは使える（テストメール送信確認済み）がSMTP経由は不可だった。
+> ※ お受験マネージャーのResendとは別アカウント（1アカウント1ドメイン制限のため）。
+
+### SEO設定（6/19設定）
+- **OGPタグ**: og:title, og:description, og:type, og:url, og:site_name, og:locale
+- **Twitter Card**: summary
+- **canonical URL**: https://manabinoki.net/
+- **JSON-LD構造化データ**: WebApplication（EducationalApplication）
+- **robots.txt**: Allow: / / Disallow: /api/ / Sitemap指定
+- **sitemap.xml**: トップページ + changelog
+- **manifest.json**: description, lang, orientation追加
+- ⚠️ **Google Search Console未登録**（次回タスク）
 
 ### questionsテーブル主要カラム
 | カラム | 型 | 説明 |
@@ -123,7 +153,7 @@
 | 方式 | 状態 | 技術 |
 |------|------|------|
 | Googleログイン | ✅ 稼働中 | Supabase Auth（リダイレクト方式） |
-| メールログイン（マジックリンク） | ✅ 稼働中 | Supabase Auth（パスワード不要） |
+| メールログイン（マジックリンク） | ✅ 稼働中 | Supabase Auth + Resend SMTP |
 
 ### 認証フロー
 - 未ログイン → AuthScreen.js（ログイン画面）表示
@@ -190,10 +220,12 @@
 
 ### ✅ 実装済み主要機能
 - **🔐 認証（Googleログイン＋マジックリンク）** ← v0.9.7
-- **🔒 保護者PINロック** ← v0.9.8 NEW
-- **🎫 トライアル制限（5日→無料→プレミアム）** ← v0.9.8 NEW
-- **📊 GA4アクセス解析** ← v0.9.8 NEW
-- **📋 Google Sheets ユーザー管理** ← v0.9.8 NEW
+- **🔒 保護者PINロック** ← v0.9.8
+- **🎫 トライアル制限（5日→無料→プレミアム）** ← v0.9.8
+- **📊 GA4アクセス解析** ← v0.9.8
+- **📋 Google Sheets ユーザー管理** ← v0.9.8
+- **📧 マジックリンクSMTP（Resend）** ← 6/19開通
+- **🔍 SEO基盤（OGP・JSON-LD・sitemap）** ← 6/19設定
 - ホーム画面7ボタン構成（算国理社＋とけい・どうとく・げんそ）
 - SubjectMenuScreen（教科→カテゴリ階層）
 - 表示モード切り替え（ていがくねん/こうがくねん）
@@ -206,14 +238,48 @@
 - ごほうびパズル + げんそずかん + 保護者モード
 
 ### 🔲 未実装（優先順）
-1. **Phase D: Stripe Checkout連携** 🔴 ← **次のステップ**
-2. **Phase A-4: device_id → user_id 移行** 🟡
-3. **www → wwwなし リダイレクト統一**（Vercel設定のみ）🟡
-4. PWA化 🟡
-5. 利用規約・プライバシーポリシーページ 🟡
-6. FukushuScreen改修 🟡
-7. 問題追加（とけいLv2補強、りかLv4-5等）🟡
-8. UI調整 🟡
+1. **🤖 キャラクター追加（ロボットくん）** 🔴 ← **次の実装ステップ**
+2. **Phase D: Stripe Checkout連携** 🔴
+3. **利用規約・プライバシーポリシー・特商法表記ページ** 🔴（課金前に必須）
+4. Phase A-4: device_id → user_id 移行 🟡
+5. PWA化（アプリアイコン対応） 🟡
+6. Google Search Console 登録・サイトマップ送信 🟡
+7. Google Play Store 公開（TWA） 🟡
+8. FukushuScreen改修 🟡
+9. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
+10. UI調整 🟡
+
+---
+
+## 🤖 キャラクター計画
+
+### 新キャラ: ロボットくん（仮称）
+- 水彩タッチのかわいいロボット。頭にアンテナ、お腹に水色ライト。
+- **のんが複数ポーズ・表情を作成中**（通常・考え中・拍手・手振り等）
+- 1枚目: アプリアイコン用（数字+双葉付き）
+- 2枚目: 透過PNG（アプリ内キャラ用）
+
+### 配置計画
+- **ホーム画面**: 木の両脇に「まめ」と「ロボットくん」を配置
+- **正解時**: 拍手ポーズ + CSSアニメ（バウンス）
+- **不正解時**: 考え中ポーズ
+- **出題中**: ランダムでまめ or ロボットくん登場
+- CSSアニメーションで軽量に動かす（画像切り替え + 揺れ・跳ね）
+
+### アイコン活用
+- ロボットくんの画像をfavicon・PWAアイコン・OG画像にも活用予定
+
+---
+
+## 🚀 ストア公開ロードマップ
+
+| バージョン | 内容 |
+|-----------|------|
+| **v0.9.9** | キャラクター追加 + UI調整 + 利用規約・プラポリ・特商法ページ |
+| **v1.0.0** | Phase D: Stripe Checkout連携 + PWA化 🎉 |
+| **v1.0.1〜** | Google Play Store 公開（TWA）+ フィードバック反映 |
+
+> ストア公開には利用規約・プライバシーポリシーが審査で必須。課金ありで出す方が審査やり直し不要。
 
 ---
 
@@ -223,8 +289,9 @@
 |------|------|--------|
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
-| デカいファイル | App.js(516行)・storage.js(22KB)・MimamoriScreen.js(564行)・LearningScreen.js(18KB)。App.jsは特に肥大化傾向、将来的にファイル分割候補 | 🟡 |
+| デカいファイル | App.js(519行)・storage.js(22KB)・MimamoriScreen.js(563行)・LearningScreen.js(18KB)。App.jsは特に肥大化傾向、将来的にファイル分割候補 | 🟡 |
 | device_id / user_id 二重管理 | storage.jsはまだdevice_idベース。Phase A-4で移行予定 | 🟡 |
+| auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
 
 ### 🩺 品質管理ツール
 - **`docs/question_add_checklist.md`** = 問題追加チェックリスト（健康診断キット）
@@ -239,6 +306,7 @@
 認証: ✅ Googleログイン + マジックリンク **実装済み（v0.9.7）**
 PIN: ✅ 保護者PINロック **実装済み（v0.9.8）**
 トライアル制限: ✅ 自動切り替え **実装済み（v0.9.8）**
+SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 課金: Stripe Checkout（みまもり画面内、保護者PINロック内）。
 設計書: `docs/auth_and_billing_design.md`
 
@@ -253,7 +321,7 @@ PIN: ✅ 保護者PINロック **実装済み（v0.9.8）**
 
 ## 🔧 開発ルール
 
-- version.json / APP_VERSION / package.json は同時更新
+- version.json / APP_VERSION / package.json / **docs/version.json** は同時更新（4箇所）
 - **DBコンテンツのみの追加（解説など）はバージョンを上げない**
 - `dbToAppFormat`（questionLoader.js）がDB→アプリの唯一の変換ポイント
 - DDLは`Supabase:apply_migration`、DMLは`Supabase:execute_sql`
@@ -266,9 +334,10 @@ PIN: ✅ 保護者PINロック **実装済み（v0.9.8）**
 - **認証関連**: AuthScreen.js、App.jsに認証状態管理。supabase未接続時は認証スキップ
 - **課金プラン**: App.jsでprofilesから読み取り、canAccessPremiumで判定。PremiumGateでロック表示
 - **PINロック**: MimamoriScreen内でPinGateコンポーネントが入口をガード
+- **SMTP**: Supabase SMTP設定 → Resend（smtp.resend.com:587）。ポート465はタイムアウト不可
 
 ---
 
 > 最終更新: 2026年6月19日（木）JST
 > 更新者: ちゃぴ
-> バージョン: v0.9.8（Phase B+C完了、GA4導入、profilesテーブル新設、Google Sheets連携）
+> バージョン: v0.9.8（Phase B+C完了、GA4導入、profilesテーブル新設、Google Sheets連携、SMTP開通、SEO基盤整備）
