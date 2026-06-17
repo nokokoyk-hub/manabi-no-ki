@@ -10,6 +10,7 @@
 // ============================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import AuthScreen from './screens/AuthScreen';
 import HomeScreen from './screens/HomeScreen';
 import LearningScreen from './screens/LearningScreen';
 import MimamoriScreen from './screens/MimamoriScreen';
@@ -41,11 +42,37 @@ import {
   checkCostumeUnlocks,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
+import { supabase } from './lib/supabase';
 
 // eslint-disable-next-line no-unused-vars
 export const APP_VERSION = '0.9.6';
 
 function App() {
+  // ===== 🔐 認証状態（Phase A）=====
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(!!supabase); // supabaseがあるときだけ認証チェック
+
+  // 認証状態の監視
+  useEffect(() => {
+    if (!supabase) return; // ローカルモードは認証スキップ
+
+    // 現在のセッション確認
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    // 認証状態の変化を監視（ログイン/ログアウト時に自動更新）
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ===== 既存の画面・学習状態 =====
   const [screen, setScreen] = useState('home');
   const [learningMode, setLearningMode] = useState('mission');
   const [subjectLevels, setSubjectLevels] = useState(() => loadSubjectLevels());
@@ -226,6 +253,32 @@ function App() {
   // 表示用のペット名（未設定時のフォールバック）
   const displayName = petName || DEFAULT_PET_NAME;
 
+  // ===== 🔐 認証チェック（Phase A）=====
+  // 認証ローディング中
+  if (authLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(180deg, #E3F2FD 0%, #F1F8E9 40%, #FFFFFF 100%)',
+        fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+      }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: '#2E7D32' }}>
+          🌳 まなびの木
+        </div>
+      </div>
+    );
+  }
+
+  // 未ログイン → ログイン画面（supabase有効時のみ）
+  if (supabase && !user) {
+    return <AuthScreen />;
+  }
+
+  // ===== 既存のローディング（データ読み込み中）=====
   // ローディング画面
   if (isLoading) {
     return (
