@@ -21,6 +21,7 @@ import GohoubiScreen from './screens/GohoubiScreen';
 import ZukanScreen from './screens/ZukanScreen';
 import SubjectMenuScreen from './screens/SubjectMenuScreen';
 import UpdateBanner from './components/UpdateBanner';
+import PremiumGate from './components/PremiumGate';
 import {
   loadProgress,
   saveProgress,
@@ -71,6 +72,65 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // ===== 💰 課金プラン状態（Phase C）=====
+  const [userPlan, setUserPlan] = useState('premium'); // デフォルトpremium（制限なし）
+  const [trialDaysLeft, setTrialDaysLeft] = useState(null);
+
+  // プロフィール取得（subscription_status + trial判定）
+  useEffect(() => {
+    if (!supabase || !user) {
+      setUserPlan('premium'); // ローカルモード → 制限なし
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('subscription_status, trial_started_at')
+          .eq('id', user.id)
+          .single();
+
+        if (error || !data) {
+          console.error('Profile取得エラー:', error);
+          setUserPlan('trial');
+          return;
+        }
+
+        let status = data.subscription_status;
+        let daysLeft = null;
+
+        if (status === 'trial' && data.trial_started_at) {
+          const trialStart = new Date(data.trial_started_at);
+          const now = new Date();
+          const daysPassed = Math.floor((now - trialStart) / (1000 * 60 * 60 * 24));
+          daysLeft = Math.max(0, 5 - daysPassed);
+
+          if (daysLeft <= 0) {
+            // トライアル期限切れ → freeに自動更新
+            status = 'free';
+            daysLeft = 0;
+            await supabase
+              .from('profiles')
+              .update({ subscription_status: 'free' })
+              .eq('id', user.id);
+          }
+        }
+
+        setUserPlan(status);
+        setTrialDaysLeft(daysLeft);
+      } catch (err) {
+        console.error('Profile取得例外:', err);
+        setUserPlan('trial');
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  // 有料機能かどうか判定（free→ロック、trial/premium→OK）
+  const canAccessPremium = userPlan === 'premium' || userPlan === 'trial';
 
   // ===== 既存の画面・学習状態 =====
   const [screen, setScreen] = useState('home');
@@ -246,6 +306,11 @@ function App() {
 
   // 学習開始ハンドラ
   const startLearning = (mode) => {
+    // 無料ユーザーはミッション以外ロック
+    if (!canAccessPremium && mode !== 'mission') {
+      setScreen('premium-gate');
+      return;
+    }
     setLearningMode(mode);
     setScreen('learning');
   };
@@ -323,8 +388,10 @@ function App() {
           />
         );
       case 'mimamori':
+        if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} />;
         return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} />;
       case 'level-settings':
+        if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} />;
         return (
           <LevelSettingsScreen
             levels={subjectLevels}
@@ -333,6 +400,7 @@ function App() {
           />
         );
       case 'fukushu':
+        if (!canAccessPremium) return <PremiumGate featureName="ふくしゅう" onBack={() => setScreen('home')} />;
         return (
           <FukushuScreen
             onBack={() => setScreen('home')}
@@ -351,6 +419,7 @@ function App() {
           />
         );
       case 'zukan':
+        if (!canAccessPremium) return <PremiumGate featureName="げんそずかん" onBack={() => setScreen('home')} />;
         return (
           <ZukanScreen
             onBack={() => setScreen('home')}
@@ -358,6 +427,7 @@ function App() {
           />
         );
       case 'subject-kokugo':
+        if (!canAccessPremium) return <PremiumGate featureName="こくご れんしゅう" onBack={() => setScreen('home')} />;
         return (
           <SubjectMenuScreen
             subject="kokugo"
@@ -368,6 +438,7 @@ function App() {
           />
         );
       case 'subject-genso':
+        if (!canAccessPremium) return <PremiumGate featureName="げんそ" onBack={() => setScreen('home')} />;
         return (
           <SubjectMenuScreen
             subject="genso"
@@ -379,6 +450,7 @@ function App() {
           />
         );
       case 'subject-math':
+        if (!canAccessPremium) return <PremiumGate featureName="さんすう れんしゅう" onBack={() => setScreen('home')} />;
         return (
           <SubjectMenuScreen
             subject="math"
@@ -389,6 +461,7 @@ function App() {
           />
         );
       case 'subject-rika':
+        if (!canAccessPremium) return <PremiumGate featureName="りか れんしゅう" onBack={() => setScreen('home')} />;
         return (
           <SubjectMenuScreen
             subject="rika"
@@ -398,6 +471,8 @@ function App() {
             equippedItem={costumeData.equippedItem}
           />
         );
+      case 'premium-gate':
+        return <PremiumGate featureName="この きのう" onBack={() => setScreen('home')} />;
       default:
         return (
           <HomeScreen
@@ -410,6 +485,8 @@ function App() {
             petName={displayName}
             puzzleData={puzzleData}
             equippedItem={costumeData.equippedItem}
+            userPlan={userPlan}
+            trialDaysLeft={trialDaysLeft}
             onStartLearning={() => startLearning('mission')}
             onOpenMath={() => setScreen('subject-math')}
             onOpenKokugo={() => setScreen('subject-kokugo')}
