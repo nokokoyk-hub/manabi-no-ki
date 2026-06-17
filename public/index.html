@@ -5,10 +5,35 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="theme-color" content="#4CAF50" />
-    <meta name="description" content="まなびの木 - たのしく まなぼう！" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- SEO基本 -->
+    <title>🌳 まなびの木 | まなぶほど 木がそだつ！たのしい学習アプリ</title>
+    <meta name="description" content="まなびの木は、さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科を楽しく学べる小学生向け学習アプリです。まなぶほど木が育ち、パズルやきせかえも楽しめます。" />
+    <link rel="canonical" href="https://manabinoki.net/" />
+
+    <!-- OGP（SNSシェア用） -->
+    <meta property="og:title" content="🌳 まなびの木 | まなぶほど 木がそだつ！" />
+    <meta property="og:description" content="さんすう・こくご・りかなど7教科を楽しく学べる小学生向け学習アプリ。まなぶほど木が育ち、パズルやきせかえも楽しめます。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://manabinoki.net/" />
+    <meta property="og:site_name" content="まなびの木" />
+    <meta property="og:locale" content="ja_JP" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="🌳 まなびの木 | まなぶほど 木がそだつ！" />
+    <meta name="twitter:description" content="さんすう・こくご・りかなど7教科を楽しく学べる小学生向け学習アプリ。" />
+
+    <!-- 追加SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="まなびの木" />
+
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.ico" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>🌳 まなびの木</title>
+
     <!-- Google Analytics 4 (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-64GLZZQC24"></script>
     <script>
@@ -16,6 +41,30 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-64GLZZQC24');
+    </script>
+
+    <!-- 構造化データ（JSON-LD） -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "まなびの木",
+      "description": "さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科を楽しく学べる小学生向け学習アプリ",
+      "url": "https://manabinoki.net",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY",
+        "description": "無料トライアル5日間、その後月額200円"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "student"
+      },
+      "inLanguage": "ja"
+    }
     </script>
   </head>
   <body>
