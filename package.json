@@ -1,6 +1,6 @@
 {
   "name": "manabi-no-ki",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
