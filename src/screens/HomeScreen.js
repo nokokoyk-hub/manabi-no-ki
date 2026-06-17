@@ -14,8 +14,11 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
+  userPlan, trialDaysLeft,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
+  const isFree = userPlan === 'free';
+  const isTrial = userPlan === 'trial';
   const [mameMessage, setMameMessage] = useState('');
 
   // 画面表示時にキャラのメッセージをセット
@@ -75,9 +78,10 @@ const HomeScreen = ({
             borderRadius: 12, padding: '8px 14px', fontSize: 13,
             fontWeight: 700, color: COLORS.textLight, cursor: 'pointer',
             fontFamily: "'Rounded Mplus 1c', sans-serif",
+            opacity: isFree ? 0.55 : 1,
           }}
         >
-          👀 みまもり
+          {isFree ? '🔒' : '👀'} みまもり
         </button>
       </div>
 
@@ -91,6 +95,44 @@ const HomeScreen = ({
             boxShadow: '0 3px 12px rgba(255,87,34,0.3)',
           }}>
             🔥 {streak}にち れんぞく！
+          </div>
+        </div>
+      )}
+
+      {/* トライアルバナー（Phase C） */}
+      {isTrial && trialDaysLeft !== null && (
+        <div style={{
+          display: 'flex', justifyContent: 'center', marginBottom: 4, padding: '0 20px',
+        }}>
+          <div style={{
+            background: trialDaysLeft <= 1
+              ? 'linear-gradient(135deg, #FF9800, #F44336)'
+              : 'linear-gradient(135deg, #42A5F5, #7E57C2)',
+            color: 'white', borderRadius: 16, padding: '8px 20px',
+            fontSize: 13, fontWeight: 700, textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)', width: '100%', maxWidth: 320,
+          }}>
+            {trialDaysLeft > 1
+              ? `🎁 あと ${trialDaysLeft}にち ぜんぶ つかえるよ！`
+              : trialDaysLeft === 1
+                ? '🌳 あしたから ミッション１かいだけに なるよ'
+                : '⏰ トライアルが おわりました'}
+          </div>
+        </div>
+      )}
+
+      {/* 無料プランバナー */}
+      {isFree && (
+        <div style={{
+          display: 'flex', justifyContent: 'center', marginBottom: 4, padding: '0 20px',
+        }}>
+          <div style={{
+            background: '#FFF3E0', border: '1px solid #FFE0B2',
+            borderRadius: 16, padding: '8px 20px',
+            fontSize: 12, fontWeight: 600, textAlign: 'center',
+            color: '#E65100', width: '100%', maxWidth: 320,
+          }}>
+            🆓 むりょうプラン — ミッション 1にち1かい
           </div>
         </div>
       )}
@@ -182,83 +224,33 @@ const HomeScreen = ({
         padding: '0 20px 12px',
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
       }}>
-        <div onClick={onOpenMath} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E3F2FD',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>🔢</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>さんすう</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            けいさん
+        {[
+          { emoji: '🔢', name: 'さんすう', sub: 'けいさん', onClick: onOpenMath, border: '#E3F2FD', locked: isFree },
+          { emoji: '📖', name: 'こくご', sub: 'かんじ・ことば', onClick: onOpenKokugo, border: '#E8F5E9', locked: isFree },
+          { emoji: '🌿', name: 'りか', sub: 'しぜん・いきもの', onClick: onOpenRika, border: '#E0F2F1', locked: isFree },
+          { emoji: '🗾', name: 'しゃかい', sub: 'ちり・れきし', onClick: onStartShakai, border: '#FBE9E7', locked: isFree },
+          { emoji: '⏰', name: 'とけい', sub: 'なんじ？', onClick: onStartClock, border: '#E3F2FD', locked: isFree },
+          { emoji: '💛', name: 'どうとく', sub: 'きもち', onClick: onStartDoutoku, border: '#FFF8E1', locked: isFree },
+          { emoji: '🔬', name: 'げんそ', sub: 'もんだい・ずかん', onClick: onOpenGenso, border: '#F3E5F5', locked: isFree },
+        ].map((btn, i) => (
+          <div key={i} onClick={btn.onClick} style={{
+            background: 'white', borderRadius: 16, padding: 14,
+            textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+            cursor: 'pointer', border: `2px solid ${btn.border}`,
+            position: 'relative', opacity: btn.locked ? 0.55 : 1,
+          }}>
+            <div style={{ fontSize: 26, marginBottom: 4 }}>{btn.emoji}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>{btn.name}</div>
+            <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>{btn.sub}</div>
+            {btn.locked && (
+              <div style={{
+                position: 'absolute', top: 6, right: 6,
+                fontSize: 14, background: 'rgba(0,0,0,0.08)', borderRadius: 8,
+                padding: '1px 5px',
+              }}>🔒</div>
+            )}
           </div>
-        </div>
-        <div onClick={onOpenKokugo} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E8F5E9',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>📖</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>こくご</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            かんじ・ことば
-          </div>
-        </div>
-        <div onClick={onOpenRika} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E0F2F1',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>🌿</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>りか</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            しぜん・いきもの
-          </div>
-        </div>
-        <div onClick={onStartShakai} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #FBE9E7',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>🗾</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>しゃかい</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            ちり・れきし
-          </div>
-        </div>
-        <div onClick={onStartClock} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #E3F2FD',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>⏰</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>とけい</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            なんじ？
-          </div>
-        </div>
-        <div onClick={onStartDoutoku} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #FFF8E1',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>💛</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>どうとく</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            きもち
-          </div>
-        </div>
-        <div onClick={onOpenGenso} style={{
-          background: 'white', borderRadius: 16, padding: 14,
-          textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          cursor: 'pointer', border: '2px solid #F3E5F5',
-        }}>
-          <div style={{ fontSize: 26, marginBottom: 4 }}>🔬</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.text }}>げんそ</div>
-          <div style={{ fontSize: 10, color: COLORS.textLight, marginTop: 2 }}>
-            もんだい・ずかん
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* ごほうび・ふくしゅう */}
@@ -281,12 +273,20 @@ const HomeScreen = ({
           background: 'white', borderRadius: 16, padding: 16,
           textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
           cursor: 'pointer', border: '2px solid #E8F5E9',
+          position: 'relative', opacity: isFree ? 0.55 : 1,
         }}>
           <div style={{ fontSize: 28, marginBottom: 4 }}>📚</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>ふくしゅう</div>
           <div style={{ fontSize: 11, color: COLORS.textLight, marginTop: 2 }}>
             にがてを そっと れんしゅう
           </div>
+          {isFree && (
+            <div style={{
+              position: 'absolute', top: 6, right: 6,
+              fontSize: 14, background: 'rgba(0,0,0,0.08)', borderRadius: 8,
+              padding: '1px 5px',
+            }}>🔒</div>
+          )}
         </div>
       </div>
     </div>
