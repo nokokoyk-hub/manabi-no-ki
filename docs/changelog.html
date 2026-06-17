@@ -20,6 +20,23 @@
 </head>
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
+  <div class="version">
+    <h2>v0.9.7 — Google認証導入＋独自ドメイン＋問題追加39問 🔐🌐📝</h2>
+    <p class="date">2026年6月18日（水）</p>
+    <ul>
+      <li><span class="tag new">NEW</span> 🔐 Google認証（Supabase Auth）導入: Googleログイン＋マジックリンク（パスワード不要メールログイン）の2方式</li>
+      <li><span class="tag new">NEW</span> AuthScreen.js 新規作成: ログイン画面（WebView検知＋ヘルプ案内＋エラー時メールログイン自動誘導）</li>
+      <li><span class="tag new">NEW</span> 🌐 独自ドメイン <strong>manabinoki.net</strong> 取得・Vercel接続・SSL自動化</li>
+      <li><span class="tag new">NEW</span> 問題追加 +39問（548→587問）: りかLv2+10, こくごLv1+5/Lv2+5, さんすうLv2+9, とけいLv6+5, しゃかいLv6+5（全問フルセット投入）</li>
+      <li><span class="tag new">NEW</span> 認証設定手順書 <code>docs/auth_setup_guide.md</code> 作成（GCP + Supabase 設定ガイド）</li>
+      <li><span class="tag infra">INFRA</span> GCP: プロジェクト <code>manabinoki</code> → OAuth Client ID発行</li>
+      <li><span class="tag infra">INFRA</span> Supabase: Google Auth ON / Email Auth ON / Site URL = manabinoki.net / Redirect URLs設定</li>
+      <li><span class="tag infra">INFRA</span> App.js: 認証状態管理（supabase.auth.onAuthStateChange）＋未ログイン時AuthScreen表示</li>
+      <li><span class="tag infra">INFRA</span> supabase未接続（ローカルモード）時は認証スキップ → 既存動作維持</li>
+      <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.6 → v0.9.7（3箇所同時更新）</li>
+    </ul>
+  </div>
+
 
   <div class="version">
     <h2>v0.9.6 追補 — こくご解説 完全制覇！全7教科×両面 100%完成 🏆🏆📝</h2>
