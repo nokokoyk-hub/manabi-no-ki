@@ -11,6 +11,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { COLORS, SUBJECT_COLORS } from '../constants/colors';
+import PinGate from '../components/PinGate';
 import {
   getRecentSessions,
   getSubjectAccuracy,
@@ -94,7 +95,27 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user }) => {
+  // ===== 🔐 PINゲート（Phase B）=====
+  const [pinVerified, setPinVerified] = useState(false);
+
+  // PIN未通過 → PinGate表示
+  if (!pinVerified) {
+    return (
+      <PinGate
+        user={user}
+        onSuccess={() => setPinVerified(true)}
+        onBack={onBack}
+      />
+    );
+  }
+
+  // ===== ここから通常のみまもり画面 =====
+  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} />;
+};
+
+// --- 既存のみまもり画面コンテンツ（PINゲート通過後に表示）---
+const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
