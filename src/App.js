@@ -1,6 +1,6 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 0.9.7
+// バージョン: 0.9.4
 // 最終更新: 2026/06/10
 // ============================================
 // ⚠️ 修正時の注意:
@@ -323,7 +323,7 @@ function App() {
           />
         );
       case 'mimamori':
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} />;
       case 'level-settings':
         return (
           <LevelSettingsScreen
