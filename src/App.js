@@ -61,6 +61,10 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
+      // Supabase Auth リダイレクト後の #access_token=... 残骸をクリア
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     });
 
     // 認証状態の変化を監視（ログイン/ログアウト時に自動更新）
