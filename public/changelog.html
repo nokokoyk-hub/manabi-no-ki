@@ -21,6 +21,27 @@
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
   <div class="version">
+    <h2>v0.9.8 — 保護者PINロック＋トライアル制限＋GA4＋ユーザー管理基盤 🔒🎫📊</h2>
+    <p class="date">2026年6月19日（木）</p>
+    <ul>
+      <li><span class="tag new">NEW</span> 🔒 Phase B: 保護者PINロック実装 — みまもり画面に4桁PINゲートを追加。初回はPIN新規設定（2回入力確認）、以降は照合。テンキーUI＋シェイクアニメーション</li>
+      <li><span class="tag new">NEW</span> 🎫 Phase C: トライアル制限ロジック実装 — 5日間全機能→無料（ミッション1日1回＋パズル・きせかえ）→プレミアム（全機能）の3段階自動切り替え</li>
+      <li><span class="tag new">NEW</span> 🔒 PremiumGate画面 — 無料ユーザーが有料機能タップ時に「おうちのひとに そうだんしてね🌳」表示</li>
+      <li><span class="tag new">NEW</span> ホーム画面にトライアルバナー（「🎁 あと○にち ぜんぶ つかえるよ！」）＋無料プランバナー＋教科ボタンにロックアイコン表示</li>
+      <li><span class="tag new">NEW</span> 📊 Google Analytics 4（GA4）タグ埋め込み — アクセス解析・ユーザー行動トラッキング開始</li>
+      <li><span class="tag new">NEW</span> 📋 Google Sheets ユーザー管理シート連携 — Apps ScriptでSupabase→Sheets自動同期（毎朝9時）</li>
+      <li><span class="tag infra">INFRA</span> profilesテーブル新設（auth.usersと1:1連携）: guardian_pin / trial_started_at / subscription_status / stripe_customer_id</li>
+      <li><span class="tag infra">INFRA</span> user_management_viewビュー新設（Google Sheets連携用）</li>
+      <li><span class="tag infra">INFRA</span> 新規ユーザー登録時にprofileを自動作成するDBトリガー設定</li>
+      <li><span class="tag infra">INFRA</span> RLS（行レベルセキュリティ）設定: 自分のprofileのみ読み書き可能</li>
+      <li><span class="tag fix">FIX</span> Supabase Auth リダイレクト後のURL末尾 # 残骸を自動クリア</li>
+      <li><span class="tag fix">FIX</span> v0.9.7バージョン不整合修正（APP_VERSION・package.json を version.json と同期）</li>
+      <li><span class="tag infra">INFRA</span> 新規コンポーネント: PinGate.js / PremiumGate.js</li>
+      <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.7 → v0.9.8（3箇所同時更新）</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.7 — Google認証導入＋独自ドメイン＋問題追加39問 🔐🌐📝</h2>
     <p class="date">2026年6月18日（水）</p>
     <ul>
