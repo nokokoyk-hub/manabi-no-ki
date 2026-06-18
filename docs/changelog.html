@@ -21,6 +21,20 @@
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
   <div class="version">
+    <h2>v0.9.9 — ロボットくん登場＋利用規約＋Stripe課金テスト 🤖📜💳</h2>
+    <p class="date">2026年6月18日（木）</p>
+    <ul>
+      <li><span class="tag new">NEW</span> 🤖 ロボットくんキャラクター追加 — ホーム画面の木の左側に配置。手振り＋ガッツポーズの2ポーズ、ふわふわ浮遊＋タップでぽよんアニメーション</li>
+      <li><span class="tag new">NEW</span> 📜 利用規約・プライバシーポリシー・特定商取引法表記ページ追加 — ログイン画面・みまもり画面からアクセス可能。認証前でも閲覧OK</li>
+      <li><span class="tag new">NEW</span> 💳 Phase D: Stripe Checkout連携（テスト環境） — みまもり画面のプラン管理セクションからPayment Linkで月額200円の決済が可能に</li>
+      <li><span class="tag new">NEW</span> 💳 Supabase Edge Function「stripe-webhook」デプロイ — 決済完了→自動premium切り替え、解約→自動free戻しのWebhook処理</li>
+      <li><span class="tag fix">改善</span> みまもり画面をfreeプランでもアクセス可能に変更 — PINロックで保護されているため安全性を維持しつつ、課金導線を確保</li>
+      <li><span class="tag fix">改善</span> App.jsにStripe決済成功後のリダイレクト検知＋プロフィール自動再読み込み機能追加</li>
+      <li><span class="tag infra">基盤</span> ロボットくん画像の背景除去＋透過PNG変換（400x400）＋リポジトリ配置</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v0.9.8 — 保護者PINロック＋トライアル制限＋GA4＋ユーザー管理基盤 🔒🎫📊</h2>
     <p class="date">2026年6月19日（木）</p>
     <ul>
