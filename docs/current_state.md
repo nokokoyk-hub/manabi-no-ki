@@ -25,15 +25,15 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.9.8** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.8'` |
-| version.json | `public/version.json` → `"version": "0.9.8"` |
-| docs/version.json | `docs/version.json` → `"version": "0.9.8"` |
-| package.json | `"version": "0.9.8"` |
-| 最終更新日 | 2026年6月19日（木） |
+| 現在のバージョン | **v0.9.9** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.9'` |
+| version.json | `public/version.json` → `"version": "0.9.9"` |
+| docs/version.json | `docs/version.json` → `"version": "0.9.9"` |
+| package.json | `"version": "0.9.9"` |
+| 最終更新日 | 2026年6月18日（木） |
 
-> ※ v0.9.8 は **Phase B（保護者PINロック）+ Phase C（トライアル制限）+ GA4 + profilesテーブル新設 + SEO基盤整備 + SMTP開通**を含む。
-> ※ 4箇所すべてv0.9.8に統一済み（6/19修正完了）。
+> ※ v0.9.9 は **利用規約・プラポリ・特商法ページ + ロボットくん追加 + Stripe Checkout連携（テスト環境） + みまもりfreeアクセス解放**を含む。
+> ※ 4箇所すべてv0.9.9に統一済み（6/19修正完了）。
 
 ---
 
@@ -46,11 +46,11 @@
 | 認証 | Supabase Auth（Google OAuth + マジックリンク） | ✅ 稼働中（v0.9.7〜） |
 | メール送信 | Resend SMTP（マジックリンク用） | ✅ 稼働中（6/19開通） |
 | 問題データ | Supabase questionsテーブル | ✅ 587問DB管理 |
-| ユーザー管理 | Supabase profilesテーブル | ✅ 稼働中（v0.9.8〜） |
+| ユーザー管理 | Supabase profilesテーブル | ✅ 稼働中（v0.9.9〜） |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
-| アクセス解析 | Google Analytics 4（GA4） | ✅ 稼働中（v0.9.8〜） |
-| ユーザー管理シート | Google Sheets + Apps Script | ✅ 稼働中（v0.9.8〜） |
+| アクセス解析 | Google Analytics 4（GA4） | ✅ 稼働中（v0.9.9〜） |
+| ユーザー管理シート | Google Sheets + Apps Script | ✅ 稼働中（v0.9.9〜） |
 | SEO | OGP・JSON-LD・sitemap・robots | ✅ 設定済み（6/19） |
 
 ### インフラ情報
@@ -61,7 +61,7 @@
 - Supabase: `ndqbtfahtjaafroevgwq`（東京リージョン）
 - GCP: プロジェクト `manabinoki`（OAuth Client ID発行済み）
 - GA4: 測定ID `G-64GLZZQC24`（プロパティ「まなびの木」）
-- テーブル: user_progress, learning_sessions, questions(587問), answer_history, **profiles(v0.9.8〜)**
+- テーブル: user_progress, learning_sessions, questions(587問), answer_history, **profiles(v0.9.9〜)**
 - ビュー: **user_management_view**（Google Sheets連携用）
 
 ### SMTP設定（マジックリンク用・6/19開通）
@@ -101,7 +101,7 @@
 | explanation | TEXT (nullable) | 不正解時の解説文（ていがくねん用・ひらがな主体）v0.9.5〜 |
 | explanation_advanced | TEXT (nullable) | 不正解時の解説文（こうがくねん用・漢字混じり）v0.9.6〜 |
 
-### profilesテーブル（v0.9.8〜）
+### profilesテーブル（v0.9.9〜）
 | カラム | 型 | 説明 |
 |--------|-----|------|
 | id | UUID (PK) | auth.users.id と1:1連携 |
@@ -161,7 +161,7 @@
 - WebView検知（LINE/Facebook/Instagram/Yahoo）→ 案内バナー表示
 - Googleログイン失敗時 → メールログインへ自動誘導
 - supabase未接続（ローカルモード）時は認証スキップ → 既存動作を維持
-- **認証後のURL末尾 # 残骸を自動クリア（v0.9.8〜）**
+- **認証後のURL末尾 # 残骸を自動クリア（v0.9.9〜）**
 
 ### 関連設定
 - GCP: プロジェクト `manabinoki` → OAuth Client ID
@@ -172,7 +172,7 @@
 
 ---
 
-## 🔒 保護者PINロック（Phase B・v0.9.8〜）
+## 🔒 保護者PINロック（Phase B・v0.9.9〜）
 
 - みまもり画面に入る前に4桁PIN入力を要求
 - **初回**: PIN新規設定（2回入力で確認）→ Supabase profiles.guardian_pin に保存
@@ -183,7 +183,7 @@
 
 ---
 
-## 🎫 トライアル制限（Phase C・v0.9.8〜）
+## 🎫 トライアル制限（Phase C・v0.9.9〜）
 
 ### プラン設計
 | プラン | 料金 | 内容 |
@@ -199,7 +199,7 @@
 | パズル・きせかえ | ✅ | ✅ | ✅ |
 | 教科別モード（7教科） | 🔒 | ✅ | ✅ |
 | ふくしゅう | 🔒 | ✅ | ✅ |
-| みまもり | 🔒 | ✅ | ✅ |
+| みまもり | ✅ | ✅ | ✅ |
 | レベル設定 | 🔒 | ✅ | ✅ |
 | げんそずかん | 🔒 | ✅ | ✅ |
 
@@ -216,16 +216,20 @@
 
 ---
 
-## 📝 機能一覧（v0.9.8時点）
+## 📝 機能一覧（v0.9.9時点）
 
 ### ✅ 実装済み主要機能
 - **🔐 認証（Googleログイン＋マジックリンク）** ← v0.9.7
-- **🔒 保護者PINロック** ← v0.9.8
-- **🎫 トライアル制限（5日→無料→プレミアム）** ← v0.9.8
-- **📊 GA4アクセス解析** ← v0.9.8
-- **📋 Google Sheets ユーザー管理** ← v0.9.8
+- **🔒 保護者PINロック** ← v0.9.9
+- **🎫 トライアル制限（5日→無料→プレミアム）** ← v0.9.9
+- **📊 GA4アクセス解析** ← v0.9.9
+- **📋 Google Sheets ユーザー管理** ← v0.9.9
 - **📧 マジックリンクSMTP（Resend）** ← 6/19開通
 - **🔍 SEO基盤（OGP・JSON-LD・sitemap）** ← 6/19設定
+- **🤖 ロボットくんキャラクター** ← v0.9.9
+- **📜 利用規約・プライバシーポリシー・特商法表記ページ** ← v0.9.9
+- **💳 Stripe Checkout連携（テスト環境）** ← v0.9.9
+- **みまもり画面 freeアクセス解放** ← v0.9.9
 - ホーム画面7ボタン構成（算国理社＋とけい・どうとく・げんそ）
 - SubjectMenuScreen（教科→カテゴリ階層）
 - 表示モード切り替え（ていがくねん/こうがくねん）
@@ -238,10 +242,11 @@
 - ごほうびパズル + げんそずかん + 保護者モード
 
 ### 🔲 未実装（優先順）
-1. **🤖 キャラクター追加（ロボットくん）** 🔴 ← **次の実装ステップ**
-2. **Phase D: Stripe Checkout連携** 🔴
-3. **利用規約・プライバシーポリシー・特商法表記ページ** 🔴（課金前に必須）
-4. Phase A-4: device_id → user_id 移行 🟡
+1. ~~🤖 キャラクター追加（ロボットくん）~~ ✅ **完了（v0.9.9）**
+2. ~~Phase D: Stripe Checkout連携~~ ✅ **テスト環境完了（v0.9.9）**
+3. ~~利用規約・プライバシーポリシー・特商法表記ページ~~ ✅ **完了（v0.9.9）**
+4. **Stripe本番切替 + 解約機能** 🔴 ← **次の実装ステップ**
+5. Phase A-4: device_id → user_id 移行 🟡
 5. PWA化（アプリアイコン対応） 🟡
 6. Google Search Console 登録・サイトマップ送信 🟡
 7. Google Play Store 公開（TWA） 🟡
@@ -251,20 +256,25 @@
 
 ---
 
-## 🤖 キャラクター計画
+## 🤖 キャラクター（v0.9.9実装済み）
 
-### 新キャラ: ロボットくん（仮称）
+### ロボットくん
 - 水彩タッチのかわいいロボット。頭にアンテナ、お腹に水色ライト。
-- **のんが複数ポーズ・表情を作成中**（通常・考え中・拍手・手振り等）
-- 1枚目: アプリアイコン用（数字+双葉付き）
-- 2枚目: 透過PNG（アプリ内キャラ用）
+- コンポーネント: `src/components/RobotCharacter.js`
+- 画像: `public/public/images/robot/` に3枚配置
 
-### 配置計画
-- **ホーム画面**: 木の両脇に「まめ」と「ロボットくん」を配置
-- **正解時**: 拍手ポーズ + CSSアニメ（バウンス）
-- **不正解時**: 考え中ポーズ
-- **出題中**: ランダムでまめ or ロボットくん登場
-- CSSアニメーションで軽量に動かす（画像切り替え + 揺れ・跳ね）
+| ファイル | ポーズ | 用途 |
+|----------|--------|------|
+| robot_wave.png | 👋 手振り | ホーム画面・通常 |
+| robot_cheer.png | 💪 ガッツポーズ | ミッションクリア後 |
+| robot_icon.png | 📱 アイコン | favicon・PWA用（将来） |
+
+### 配置状況
+- **ホーム画面**: 木の左にロボットくん、右にまめ ✅
+- **ふわふわ浮遊アニメーション** ✅
+- **タップでぽよん** ✅（まめと同じmame-tap風）
+- ミッションクリア後はガッツポーズに切り替わり ✅
+- ロボットくんの名前機能: 🔲 未実装（将来）
 
 ### アイコン活用
 - ロボットくんの画像をfavicon・PWAアイコン・OG画像にも活用予定
@@ -275,8 +285,8 @@
 
 | バージョン | 内容 |
 |-----------|------|
-| **v0.9.9** | キャラクター追加 + UI調整 + 利用規約・プラポリ・特商法ページ |
-| **v1.0.0** | Phase D: Stripe Checkout連携 + PWA化 🎉 |
+| **v0.9.9** | ✅ キャラクター追加 + 利用規約・プラポリ・特商法 + Stripe Checkout（テスト） |
+| **v1.0.0** | Stripe本番切替 + 解約機能 + PWA化 🎉 |
 | **v1.0.1〜** | Google Play Store 公開（TWA）+ フィードバック反映 |
 
 > ストア公開には利用規約・プライバシーポリシーが審査で必須。課金ありで出す方が審査やり直し不要。
@@ -300,21 +310,49 @@
 
 ---
 
+
+### Stripe連携（v0.9.9〜テスト環境）
+| 項目 | 値 |
+|------|-----|
+| Payment Link（テスト） | `https://buy.stripe.com/test_7sYeVfeH146D5uN8q608g00` |
+| Product ID | `prod_Uj2cOQ9UaokddU` |
+| Edge Function | `stripe-webhook`（Supabase Edge Functions） |
+| Webhook URL | `https://ndqbtfahtjaafroevgwq.supabase.co/functions/v1/stripe-webhook` |
+| Webhookイベント | `checkout.session.completed` / `customer.subscription.deleted` |
+| 環境変数 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`（Supabase Secrets設定済み） |
+| 決済フロー | みまもり画面 → アップグレードボタン → Payment Link（+client_reference_id） → Webhook → profiles更新 |
+| テスト決済 | ✅ 成功確認済み（2026/06/18） |
+| 本番切替 | 🔲 未実施（テスト→ライブモード切替が必要） |
+
+> ※ みまもり画面はPINロックで保護されているため、freeプランでもアクセス可能に変更（v0.9.9）。課金ボタンがPINロック内にあるので子どもの誤課金を防止。
+
+### 法的ページ（v0.9.9〜）
+| ページ | コンポーネント | アクセス |
+|--------|---------------|---------|
+| 利用規約 | `src/screens/TermsScreen.js` | 認証前からアクセス可能 |
+| プライバシーポリシー | `src/screens/PrivacyScreen.js` | 認証前からアクセス可能 |
+| 特商法表記 | `src/screens/TokushohoScreen.js` | 認証前からアクセス可能 |
+
+- AuthScreen（ログイン画面）下部にリンク配置
+- MimamoriScreen（保護者画面）下部にリンク配置
+- App.jsで認証チェック前にバイパス判定（ログイン前でも閲覧可能）
+- 事業者: NON WORKS / 連絡先: manabinokiinfo@gmail.com
+
 ## 💰 v1.0 課金設計（2026/6/14策定）
 
 フリーミアム月額200円。5日間トライアル→無料(ミッション1日1回)→プレミアム(全機能)。
 認証: ✅ Googleログイン + マジックリンク **実装済み（v0.9.7）**
-PIN: ✅ 保護者PINロック **実装済み（v0.9.8）**
-トライアル制限: ✅ 自動切り替え **実装済み（v0.9.8）**
+PIN: ✅ 保護者PINロック **実装済み（v0.9.9）**
+トライアル制限: ✅ 自動切り替え **実装済み（v0.9.9）**
 SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 課金: Stripe Checkout（みまもり画面内、保護者PINロック内）。
 設計書: `docs/auth_and_billing_design.md`
 
 ### v1.0実装Phase進捗
 - [x] **Phase A: 認証基盤** ✅（v0.9.7）
-- [x] **Phase B: 保護者PINロック** ✅（v0.9.8）
-- [x] **Phase C: トライアル制限ロジック** ✅（v0.9.8）
-- [ ] **Phase D: Stripe Checkout連携** ← **次のステップ**
+- [x] **Phase B: 保護者PINロック** ✅（v0.9.9）
+- [x] **Phase C: トライアル制限ロジック** ✅（v0.9.9）
+- [x] **Phase D: Stripe Checkout連携** ✅（v0.9.9・テスト環境）
 - [ ] Phase A-4: device_id → user_id 移行（別途）
 
 ---
@@ -338,6 +376,6 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 
 ---
 
-> 最終更新: 2026年6月19日（木）JST
-> 更新者: ちゃぴ
-> バージョン: v0.9.8（Phase B+C完了、GA4導入、profilesテーブル新設、Google Sheets連携、SMTP開通、SEO基盤整備）
+> 最終更新: 2026年6月18日（木）JST
+> 更新者: ちゃぴ（スレッド18）
+> バージョン: v0.9.9（Phase B+C完了、GA4導入、Stripe Checkout連携、ロボットくん追加、利用規約・プラポリ・特商法ページ、みまもりfreeアクセス解放）
