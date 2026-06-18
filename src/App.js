@@ -20,6 +20,9 @@ import NamingScreen from './screens/NamingScreen';
 import GohoubiScreen from './screens/GohoubiScreen';
 import ZukanScreen from './screens/ZukanScreen';
 import SubjectMenuScreen from './screens/SubjectMenuScreen';
+import TermsScreen from './screens/TermsScreen';
+import PrivacyScreen from './screens/PrivacyScreen';
+import TokushohoScreen from './screens/TokushohoScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
 import {
@@ -342,9 +345,26 @@ function App() {
     );
   }
 
+  // 📜 利用規約等は認証不要で表示（ログイン前でもアクセス可能）
+  if (['terms', 'privacy', 'tokushoho'].includes(screen)) {
+    const legalOnBack = () => setScreen('home');
+    switch (screen) {
+      case 'terms': return <TermsScreen onBack={legalOnBack} />;
+      case 'privacy': return <PrivacyScreen onBack={legalOnBack} />;
+      case 'tokushoho': return <TokushohoScreen onBack={legalOnBack} />;
+      default: break;
+    }
+  }
+
   // 未ログイン → ログイン画面（supabase有効時のみ）
   if (supabase && !user) {
-    return <AuthScreen />;
+    return (
+      <AuthScreen
+        onOpenTerms={() => setScreen('terms')}
+        onOpenPrivacy={() => setScreen('privacy')}
+        onOpenTokushoho={() => setScreen('tokushoho')}
+      />
+    );
   }
 
   // ===== 既存のローディング（データ読み込み中）=====
@@ -393,7 +413,7 @@ function App() {
         );
       case 'mimamori':
         if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} />;
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} />;
         return (
@@ -477,6 +497,12 @@ function App() {
         );
       case 'premium-gate':
         return <PremiumGate featureName="この きのう" onBack={() => setScreen('home')} />;
+      case 'terms':
+        return <TermsScreen onBack={() => setScreen('home')} />;
+      case 'privacy':
+        return <PrivacyScreen onBack={() => setScreen('home')} />;
+      case 'tokushoho':
+        return <TokushohoScreen onBack={() => setScreen('home')} />;
       default:
         return (
           <HomeScreen
