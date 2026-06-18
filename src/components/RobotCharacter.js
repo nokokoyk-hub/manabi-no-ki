@@ -4,10 +4,10 @@
 // 新規作成: 2026/06/18
 // ============================================
 // ポーズ: wave（通常・手振り）/ cheer（ガッツポーズ・正解時）
-// CSSアニメーションで軽量に動かす
+// タップでぽよん + CSSアニメーションで軽量に動かす
 // ============================================
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 
 const ROBOT_IMAGES = {
   wave:  '/public/images/robot/robot_wave.png',
@@ -19,15 +19,28 @@ const ROBOT_ANIMATIONS = {
   cheer: 'robot-bounce 0.5s ease-out',
 };
 
-const RobotCharacter = ({ pose = 'wave', size = 80 }) => {
+const RobotCharacter = ({ pose = 'wave', size = 80, robotName = 'ロボットくん' }) => {
+  const [isTapped, setIsTapped] = useState(false);
+
   const imageSrc = ROBOT_IMAGES[pose] || ROBOT_IMAGES.wave;
-  const animation = ROBOT_ANIMATIONS[pose] || ROBOT_ANIMATIONS.wave;
+  const animation = isTapped
+    ? 'robot-tap 0.5s ease-out'
+    : (ROBOT_ANIMATIONS[pose] || ROBOT_ANIMATIONS.wave);
+
+  const handleTap = useCallback(() => {
+    if (isTapped) return;
+    setIsTapped(true);
+    setTimeout(() => setIsTapped(false), 500);
+  }, [isTapped]);
 
   return (
-    <div style={{ position: 'relative', width: size, height: size }}>
+    <div
+      onClick={handleTap}
+      style={{ position: 'relative', width: size, height: size, cursor: 'pointer' }}
+    >
       <img
         src={imageSrc}
-        alt="ロボットくん"
+        alt={robotName}
         style={{
           width: size,
           height: size,
@@ -47,6 +60,14 @@ const RobotCharacter = ({ pose = 'wave', size = 80 }) => {
           0% { transform: scale(1); }
           30% { transform: scale(1.15); }
           60% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
+        @keyframes robot-tap {
+          0% { transform: scale(1); }
+          20% { transform: scale(0.85); }
+          40% { transform: scale(1.15); }
+          60% { transform: scale(0.95); }
+          80% { transform: scale(1.05); }
           100% { transform: scale(1); }
         }
       `}</style>
