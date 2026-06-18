@@ -17,6 +17,7 @@ import {
   getSubjectAccuracy,
   getDailyAccuracyTrend,
 } from '../lib/storage';
+import { supabase } from '../lib/supabase';
 
 // 曜日名（日本語）
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
@@ -120,6 +121,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   // 起動時にデータ取得
   useEffect(() => {
@@ -547,8 +549,46 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
             💳 プラン管理
           </div>
           {userPlan === 'premium' ? (
-            <div style={{ fontSize: 13, color: COLORS.text }}>
-              ✅ <span style={{ fontWeight: 700, color: COLORS.green }}>プレミアムプラン</span> ご利用中
+            <div>
+              <div style={{ fontSize: 13, color: COLORS.text, marginBottom: 10 }}>
+                ✅ <span style={{ fontWeight: 700, color: COLORS.green }}>プレミアムプラン</span> ご利用中
+              </div>
+              <button
+                onClick={async () => {
+                  if (!supabase) return;
+                  try {
+                    setPortalLoading(true);
+                    const { data, error } = await supabase.functions.invoke('create-portal-session');
+                    if (error) throw error;
+                    if (data?.url) {
+                      window.open(data.url, '_blank');
+                    } else {
+                      alert('ポータルの作成に失敗しました');
+                    }
+                  } catch (err) {
+                    console.error('Portal error:', err);
+                    alert('エラーが発生しました。しばらく待ってからお試しください。');
+                  } finally {
+                    setPortalLoading(false);
+                  }
+                }}
+                disabled={portalLoading}
+                style={{
+                  width: '100%', padding: '10px 0',
+                  borderRadius: 20, border: '2px solid #E0E0E0',
+                  background: 'white', color: COLORS.text,
+                  fontSize: 13, fontWeight: 700,
+                  cursor: portalLoading ? 'default' : 'pointer',
+                  fontFamily: 'inherit',
+                  opacity: portalLoading ? 0.6 : 1,
+                  transition: 'opacity 0.2s ease',
+                }}
+              >
+                {portalLoading ? '読み込み中...' : '📋 プランを管理する（解約・変更）'}
+              </button>
+              <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
+                Stripeの安全なページで手続きできます
+              </div>
             </div>
           ) : userPlan === 'trial' ? (
             <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6 }}>
