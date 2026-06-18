@@ -95,7 +95,7 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
   // ===== 🔐 PINゲート（Phase B）=====
   const [pinVerified, setPinVerified] = useState(false);
 
@@ -111,11 +111,11 @@ const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettin
   }
 
   // ===== ここから通常のみまもり画面 =====
-  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} />;
+  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} />;
 };
 
 // --- 既存のみまもり画面コンテンツ（PINゲート通過後に表示）---
-const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode }) => {
+const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
@@ -539,7 +539,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
         </div>
 
         {/* ⑧ 更新履歴 + バージョン */}
-        <div style={{ textAlign: 'center', paddingBottom: 40 }}>
+        <div style={{ textAlign: 'center', paddingBottom: 16 }}>
           <button
             onClick={() => window.open('/changelog.html', '_blank')}
             style={{
@@ -554,6 +554,30 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           <div style={{ fontSize: 11, color: '#BDBDBD', marginTop: 8 }}>
             まなびの木 v{appVersion}
           </div>
+        </div>
+
+        {/* ⑨ 利用規約等リンク */}
+        <div style={{
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          gap: 8, paddingBottom: 40, flexWrap: 'wrap',
+        }}>
+          <button onClick={onOpenTerms} style={{
+            background: 'none', border: 'none', fontSize: 11,
+            color: '#AAAAAA', cursor: 'pointer', padding: '2px 4px',
+            fontFamily: 'inherit', textDecoration: 'underline',
+          }}>利用規約</button>
+          <span style={{ fontSize: 11, color: '#DDDDDD' }}>|</span>
+          <button onClick={onOpenPrivacy} style={{
+            background: 'none', border: 'none', fontSize: 11,
+            color: '#AAAAAA', cursor: 'pointer', padding: '2px 4px',
+            fontFamily: 'inherit', textDecoration: 'underline',
+          }}>プライバシーポリシー</button>
+          <span style={{ fontSize: 11, color: '#DDDDDD' }}>|</span>
+          <button onClick={onOpenTokushoho} style={{
+            background: 'none', border: 'none', fontSize: 11,
+            color: '#AAAAAA', cursor: 'pointer', padding: '2px 4px',
+            fontFamily: 'inherit', textDecoration: 'underline',
+          }}>特商法表記</button>
         </div>
       </div>
     </div>

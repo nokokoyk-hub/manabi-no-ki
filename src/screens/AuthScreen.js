@@ -20,7 +20,7 @@ const isWebView = () => {
   return /Line|FBAV|FB_IAB|FBAN|Instagram|YJApp|Yahoo/i.test(ua);
 };
 
-function AuthScreen() {
+function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -216,6 +216,15 @@ function AuthScreen() {
           はじめての方も ログインするだけで<br />
           アカウントが できます！
         </p>
+
+        {/* ===== 利用規約等リンク ===== */}
+        <div style={styles.legalLinks}>
+          <button onClick={onOpenTerms} style={styles.legalLink}>利用規約</button>
+          <span style={styles.legalDivider}>|</span>
+          <button onClick={onOpenPrivacy} style={styles.legalLink}>プライバシーポリシー</button>
+          <span style={styles.legalDivider}>|</span>
+          <button onClick={onOpenTokushoho} style={styles.legalLink}>特商法表記</button>
+        </div>
       </div>
     </div>
   );
@@ -412,6 +421,31 @@ const styles = {
     lineHeight: 1.6,
     marginTop: 12,
     marginBottom: 0,
+  },
+  // --- 利用規約等リンク ---
+  legalLinks: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 16,
+    paddingTop: 12,
+    borderTop: '1px solid #F0F0F0',
+    flexWrap: 'wrap',
+  },
+  legalLink: {
+    background: 'none',
+    border: 'none',
+    fontSize: 11,
+    color: '#AAAAAA',
+    cursor: 'pointer',
+    padding: '2px 4px',
+    fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+    textDecoration: 'underline',
+  },
+  legalDivider: {
+    fontSize: 11,
+    color: '#DDDDDD',
   },
 };
 
