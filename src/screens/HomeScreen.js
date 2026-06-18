@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
+import RobotCharacter from '../components/RobotCharacter';
 import { COLORS } from '../constants/colors';
 import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
@@ -142,8 +143,17 @@ const HomeScreen = ({
         display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
         padding: '0 20px', marginTop: 8, position: 'relative',
       }}>
+        {/* ロボットくんは木の左に */}
+        <div style={{
+          position: 'absolute', left: 16, bottom: 0,
+        }}>
+          <RobotCharacter
+            pose={todayDone ? 'cheer' : 'wave'}
+            size={72}
+          />
+        </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
-        {/* キャラは木の横に立つ */}
+        {/* まめは木の右に */}
         <div style={{
           position: 'absolute', right: 20, bottom: 0,
         }}>
