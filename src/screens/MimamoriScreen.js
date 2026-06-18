@@ -95,7 +95,7 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, userPlan, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
   // ===== 🔐 PINゲート（Phase B）=====
   const [pinVerified, setPinVerified] = useState(false);
 
@@ -111,11 +111,11 @@ const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettin
   }
 
   // ===== ここから通常のみまもり画面 =====
-  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} />;
+  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} user={user} userPlan={userPlan} />;
 };
 
 // --- 既存のみまもり画面コンテンツ（PINゲート通過後に表示）---
-const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
+const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho, user, userPlan }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
@@ -538,7 +538,52 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         </div>
 
-        {/* ⑧ 更新履歴 + バージョン */}
+        {/* ⑧ プラン管理（保護者向け） */}
+        <div style={{
+          background: 'white', borderRadius: 16, padding: '16px 20px',
+          margin: '0 16px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.greenDark, marginBottom: 8 }}>
+            💳 プラン管理
+          </div>
+          {userPlan === 'premium' ? (
+            <div style={{ fontSize: 13, color: COLORS.text }}>
+              ✅ <span style={{ fontWeight: 700, color: COLORS.green }}>プレミアムプラン</span> ご利用中
+            </div>
+          ) : userPlan === 'trial' ? (
+            <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6 }}>
+              🎫 トライアル期間中（全機能お試し中）
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 12 }}>
+                無料プランをご利用中です。プレミアム（月額200円）にアップグレードすると、全教科の学習モード・ふくしゅう・みまもり機能がすべて使えるようになります。
+              </div>
+              <button
+                onClick={() => {
+                  const paymentUrl = 'https://buy.stripe.com/test_7sYeVfeH146D5uN8q608g00'
+                    + (user?.id ? `?client_reference_id=${user.id}` : '');
+                  window.open(paymentUrl, '_blank');
+                }}
+                style={{
+                  width: '100%', padding: '12px 0',
+                  borderRadius: 24, border: 'none',
+                  background: 'linear-gradient(135deg, #FF9800, #FF5722)',
+                  color: 'white', fontSize: 15, fontWeight: 700,
+                  cursor: 'pointer', boxShadow: '0 3px 8px rgba(255,87,34,0.3)',
+                  fontFamily: 'inherit',
+                }}
+              >
+                🌟 プレミアムにアップグレード（月額200円）
+              </button>
+              <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
+                いつでも解約OK・ジュース1本分🧃
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ⑨ 更新履歴 + バージョン */}
         <div style={{ textAlign: 'center', paddingBottom: 16 }}>
           <button
             onClick={() => window.open('/changelog.html', '_blank')}
