@@ -134,6 +134,15 @@ function App() {
     };
 
     fetchProfile();
+
+    // 💳 Stripe決済完了後のリダイレクト検知
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('checkout') === 'success') {
+      // URLパラメータをクリア（リロード無限ループ防止）
+      window.history.replaceState(null, '', window.location.pathname);
+      // Webhook処理を待って再取得（3秒後）
+      setTimeout(() => fetchProfile(), 3000);
+    }
   }, [user]);
 
   // 有料機能かどうか判定（free→ロック、trial/premium→OK）
@@ -413,7 +422,7 @@ function App() {
         );
       case 'mimamori':
         if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} />;
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} />;
         return (
