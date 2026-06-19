@@ -83,6 +83,7 @@ function App() {
   // ===== 💰 課金プラン状態（Phase C）=====
   const [userPlan, setUserPlan] = useState('premium'); // デフォルトpremium（制限なし）
   const [trialDaysLeft, setTrialDaysLeft] = useState(null);
+  const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
 
   // プロフィール取得（subscription_status + trial判定）
   useEffect(() => {
@@ -95,7 +96,7 @@ function App() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('subscription_status, trial_started_at')
+          .select('subscription_status, trial_started_at, stripe_customer_id')
           .eq('id', user.id)
           .single();
 
@@ -127,6 +128,7 @@ function App() {
 
         setUserPlan(status);
         setTrialDaysLeft(daysLeft);
+        setHasStripeCustomer(!!data.stripe_customer_id);
       } catch (err) {
         console.error('Profile取得例外:', err);
         setUserPlan('trial');
@@ -421,7 +423,7 @@ function App() {
           />
         );
       case 'mimamori':
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} />;
         return (
