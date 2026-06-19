@@ -616,7 +616,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               </div>
               <button
                 onClick={() => {
-                  const paymentUrl = 'https://buy.stripe.com/test_7sYeVfeH146D5uN8q608g00'
+                  const paymentUrl = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
                     + (user?.id ? `?client_reference_id=${user.id}` : '');
                   window.open(paymentUrl, '_blank');
                 }}
