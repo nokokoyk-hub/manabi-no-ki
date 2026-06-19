@@ -30,10 +30,10 @@
 | version.json | `public/version.json` → `"version": "0.9.9"` |
 | docs/version.json | `docs/version.json` → `"version": "0.9.9"` |
 | package.json | `"version": "0.9.9"` |
-| 最終更新日 | 2026年6月18日（木） |
+| 最終更新日 | 2026年6月19日（木） |
 
-> ※ v0.9.9 は **利用規約・プラポリ・特商法ページ + ロボットくん追加 + Stripe Checkout連携（テスト環境） + みまもりfreeアクセス解放**を含む。
-> ※ 4箇所すべてv0.9.9に統一済み（6/19修正完了）。
+> ※ v0.9.9 は **利用規約・プラポリ・特商法ページ + ロボットくん追加 + Stripe Checkout連携（テスト→本番切替完了） + 解約機能 + みまもりfreeアクセス解放**を含む。
+> ※ 4箇所すべてv0.9.9に統一済み。
 
 ---
 
@@ -228,7 +228,9 @@
 - **🔍 SEO基盤（OGP・JSON-LD・sitemap）** ← 6/19設定
 - **🤖 ロボットくんキャラクター** ← v0.9.9
 - **📜 利用規約・プライバシーポリシー・特商法表記ページ** ← v0.9.9
-- **💳 Stripe Checkout連携（テスト環境）** ← v0.9.9
+- **💳 Stripe Checkout連携（本番稼働中）** ← v0.9.9（6/19本番切替）
+- **🔓 Stripe Customer Portal（解約・プラン管理）** ← 6/19実装
+- **🌳 trialアップグレードボタン** ← 6/19追加
 - **みまもり画面 freeアクセス解放** ← v0.9.9
 - ホーム画面7ボタン構成（算国理社＋とけい・どうとく・げんそ）
 - SubjectMenuScreen（教科→カテゴリ階層）
@@ -245,14 +247,15 @@
 1. ~~🤖 キャラクター追加（ロボットくん）~~ ✅ **完了（v0.9.9）**
 2. ~~Phase D: Stripe Checkout連携~~ ✅ **テスト環境完了（v0.9.9）**
 3. ~~利用規約・プライバシーポリシー・特商法表記ページ~~ ✅ **完了（v0.9.9）**
-4. **Stripe本番切替 + 解約機能** 🔴 ← **次の実装ステップ**
-5. Phase A-4: device_id → user_id 移行 🟡
-5. PWA化（アプリアイコン対応） 🟡
-6. Google Search Console 登録・サイトマップ送信 🟡
-7. Google Play Store 公開（TWA） 🟡
-8. FukushuScreen改修 🟡
-9. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
-10. UI調整 🟡
+4. ~~Stripe本番切替 + 解約機能~~ ✅ **完了（6/19）**
+5. **PWA化（ロボットくんアイコン活用）** 🔴 ← **次の実装ステップ**
+6. **Google Search Console 登録・サイトマップ送信** 🔴
+7. Phase A-4: device_id → user_id 移行 🟡
+8. Google Play Store 公開（TWA） 🟡
+9. FukushuScreen改修 🟡
+10. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
+11. ロボットくん名前機能 🟡
+12. UI調整 🟡
 
 ---
 
@@ -285,8 +288,8 @@
 
 | バージョン | 内容 |
 |-----------|------|
-| **v0.9.9** | ✅ キャラクター追加 + 利用規約・プラポリ・特商法 + Stripe Checkout（テスト） |
-| **v1.0.0** | Stripe本番切替 + 解約機能 + PWA化 🎉 |
+| **v0.9.9** | ✅ キャラクター追加 + 利用規約・プラポリ・特商法 + Stripe本番切替 + 解約機能 |
+| **v1.0.0** | PWA化 + Google Search Console + ストア審査準備 🎉 |
 | **v1.0.1〜** | Google Play Store 公開（TWA）+ フィードバック反映 |
 
 > ストア公開には利用規約・プライバシーポリシーが審査で必須。課金ありで出す方が審査やり直し不要。
@@ -299,7 +302,7 @@
 |------|------|--------|
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
-| デカいファイル | App.js(519行)・storage.js(22KB)・MimamoriScreen.js(563行)・LearningScreen.js(18KB)。App.jsは特に肥大化傾向、将来的にファイル分割候補 | 🟡 |
+| デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
 | device_id / user_id 二重管理 | storage.jsはまだdevice_idベース。Phase A-4で移行予定 | 🟡 |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
 
@@ -311,20 +314,31 @@
 ---
 
 
-### Stripe連携（v0.9.9〜テスト環境）
+### Stripe連携（v0.9.9〜 本番稼働中）
 | 項目 | 値 |
 |------|-----|
-| Payment Link（テスト） | `https://buy.stripe.com/test_7sYeVfeH146D5uN8q608g00` |
-| Product ID | `prod_Uj2cOQ9UaokddU` |
-| Edge Function | `stripe-webhook`（Supabase Edge Functions） |
+| Stripeアカウント | `acct_1TjaQSDVjCZnmwjF`（まなびの木専用・本番有効化済み） |
+| Payment Link（本番） | `https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00` |
+| Product | まなびの木 プレミアム（¥200/月） |
+| Edge Function① | `stripe-webhook`（Webhook処理） |
+| Edge Function② | `create-portal-session`（Customer Portal URL生成） |
 | Webhook URL | `https://ndqbtfahtjaafroevgwq.supabase.co/functions/v1/stripe-webhook` |
 | Webhookイベント | `checkout.session.completed` / `customer.subscription.deleted` |
-| 環境変数 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`（Supabase Secrets設定済み） |
+| 環境変数 | `STRIPE_SECRET_KEY`（sk_live_） / `STRIPE_WEBHOOK_SECRET`（whsec_）Supabase Secrets設定済み |
 | 決済フロー | みまもり画面 → アップグレードボタン → Payment Link（+client_reference_id） → Webhook → profiles更新 |
-| テスト決済 | ✅ 成功確認済み（2026/06/18） |
-| 本番切替 | 🔲 未実施（テスト→ライブモード切替が必要） |
+| 解約フロー | みまもり画面 → プラン管理ボタン → Edge Function → Stripe Customer Portal → 解約 → Webhook → profiles更新 |
+| 本番切替 | ✅ 完了（2026/06/19） |
+| テスト決済 | ✅ テスト環境で成功確認済み |
 
-> ※ みまもり画面はPINロックで保護されているため、freeプランでもアクセス可能に変更（v0.9.9）。課金ボタンがPINロック内にあるので子どもの誤課金を防止。
+> ※ お受験マネージャーとは別のStripeアカウント。お受験マネージャーのサンドボックスでテスト後、まなびの木専用アカウントの本番に移行。
+> ※ みまもり画面はPINロックで保護されているため、freeプランでもアクセス可能。課金ボタンがPINロック内にあるので子どもの誤課金を防止。
+> ※ Customer Portalは「請求期間の終了時にキャンセル」設定（払った分は最後まで使える）。
+
+### Edge Function技術ノート
+- `create-portal-session`: **JWT直接デコード方式**（`getUser()`はES256 JWT互換性問題あり→不使用）
+- `verify_jwt: false` で両Edge Functionをデプロイ（内部で自前認証 or Webhook署名検証）
+- フロントからは `fetch` 直接呼び出し + `supabase.auth.getSession()` でトークン明示送信
+- `hasStripeCustomer` 判定: stripe_customer_idがある場合のみCustomer Portalボタン表示（DB直接premium設定の開発者アカウントではボタン非表示）
 
 ### 法的ページ（v0.9.9〜）
 | ページ | コンポーネント | アクセス |
@@ -345,14 +359,16 @@
 PIN: ✅ 保護者PINロック **実装済み（v0.9.9）**
 トライアル制限: ✅ 自動切り替え **実装済み（v0.9.9）**
 SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
-課金: Stripe Checkout（みまもり画面内、保護者PINロック内）。
+課金: Stripe Checkout（みまもり画面内、保護者PINロック内）。**本番稼働中（6/19〜）**
+解約: Stripe Customer Portal（みまもり画面内、請求期間終了時キャンセル）。**実装済み（6/19〜）**
 設計書: `docs/auth_and_billing_design.md`
 
 ### v1.0実装Phase進捗
 - [x] **Phase A: 認証基盤** ✅（v0.9.7）
 - [x] **Phase B: 保護者PINロック** ✅（v0.9.9）
 - [x] **Phase C: トライアル制限ロジック** ✅（v0.9.9）
-- [x] **Phase D: Stripe Checkout連携** ✅（v0.9.9・テスト環境）
+- [x] **Phase D: Stripe Checkout連携** ✅（v0.9.9・テスト→6/19本番切替完了）
+- [x] **Phase D-2: 解約機能（Customer Portal）** ✅（6/19実装）
 - [ ] Phase A-4: device_id → user_id 移行（別途）
 
 ---
@@ -373,9 +389,12 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - **課金プラン**: App.jsでprofilesから読み取り、canAccessPremiumで判定。PremiumGateでロック表示
 - **PINロック**: MimamoriScreen内でPinGateコンポーネントが入口をガード
 - **SMTP**: Supabase SMTP設定 → Resend（smtp.resend.com:587）。ポート465はタイムアウト不可
+- **Edge Function認証**: `getUser()`はES256 JWT互換性問題あり→JWT直接Base64デコード方式を使用。`verify_jwt: false`で自前認証
+- **Edge Function呼び出し**: `supabase.functions.invoke()`ではなく`fetch`直接+`getSession()`でトークン明示送信が確実
+- **Stripeアカウント**: まなびの木専用（`acct_1TjaQSDVjCZnmwjF`）。お受験マネージャーとは完全分離
 
 ---
 
-> 最終更新: 2026年6月18日（木）JST
-> 更新者: ちゃぴ（スレッド18）
-> バージョン: v0.9.9（Phase B+C完了、GA4導入、Stripe Checkout連携、ロボットくん追加、利用規約・プラポリ・特商法ページ、みまもりfreeアクセス解放）
+> 最終更新: 2026年6月19日（木）JST
+> 更新者: ちゃぴ（スレッド19）
+> バージョン: v0.9.9（Phase B+C完了、GA4導入、Stripe本番切替完了、解約機能実装、trialアップグレードボタン追加、ロボットくん追加、利用規約・プラポリ・特商法ページ、みまもりfreeアクセス解放）
