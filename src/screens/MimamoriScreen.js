@@ -96,7 +96,7 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, userPlan, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, userPlan, hasStripeCustomer, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
   // ===== 🔐 PINゲート（Phase B）=====
   const [pinVerified, setPinVerified] = useState(false);
 
@@ -112,11 +112,11 @@ const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettin
   }
 
   // ===== ここから通常のみまもり画面 =====
-  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} user={user} userPlan={userPlan} />;
+  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} />;
 };
 
 // --- 既存のみまもり画面コンテンツ（PINゲート通過後に表示）---
-const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho, user, userPlan }) => {
+const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho, user, userPlan, hasStripeCustomer }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
@@ -550,60 +550,64 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
           {userPlan === 'premium' ? (
             <div>
-              <div style={{ fontSize: 13, color: COLORS.text, marginBottom: 10 }}>
+              <div style={{ fontSize: 13, color: COLORS.text, marginBottom: hasStripeCustomer ? 10 : 0 }}>
                 ✅ <span style={{ fontWeight: 700, color: COLORS.green }}>プレミアムプラン</span> ご利用中
               </div>
-              <button
-                onClick={async () => {
-                  if (!supabase) return;
-                  try {
-                    setPortalLoading(true);
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session?.access_token) {
-                      alert('ログインセッションが切れています。再ログインしてください。');
-                      return;
-                    }
-                    const res = await fetch(
-                      `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create-portal-session`,
-                      {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${session.access_token}`,
-                          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
-                        },
+              {hasStripeCustomer && (
+                <>
+                  <button
+                    onClick={async () => {
+                      if (!supabase) return;
+                      try {
+                        setPortalLoading(true);
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (!session?.access_token) {
+                          alert('ログインセッションが切れています。再ログインしてください。');
+                          return;
+                        }
+                        const res = await fetch(
+                          `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create-portal-session`,
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${session.access_token}`,
+                              'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
+                            },
+                          }
+                        );
+                        const result = await res.json();
+                        if (result?.url) {
+                          window.open(result.url, '_blank');
+                        } else {
+                          alert(result?.error || 'ポータルの作成に失敗しました');
+                        }
+                      } catch (err) {
+                        console.error('Portal error:', err);
+                        alert('エラーが発生しました。しばらく待ってからお試しください。');
+                      } finally {
+                        setPortalLoading(false);
                       }
-                    );
-                    const result = await res.json();
-                    if (result?.url) {
-                      window.open(result.url, '_blank');
-                    } else {
-                      alert(result?.error || 'ポータルの作成に失敗しました');
-                    }
-                  } catch (err) {
-                    console.error('Portal error:', err);
-                    alert('エラーが発生しました。しばらく待ってからお試しください。');
-                  } finally {
-                    setPortalLoading(false);
-                  }
-                }}
-                disabled={portalLoading}
-                style={{
-                  width: '100%', padding: '10px 0',
-                  borderRadius: 20, border: '2px solid #E0E0E0',
-                  background: 'white', color: COLORS.text,
-                  fontSize: 13, fontWeight: 700,
-                  cursor: portalLoading ? 'default' : 'pointer',
-                  fontFamily: 'inherit',
-                  opacity: portalLoading ? 0.6 : 1,
-                  transition: 'opacity 0.2s ease',
-                }}
-              >
-                {portalLoading ? '読み込み中...' : '📋 プランを管理する（解約・変更）'}
-              </button>
-              <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
-                Stripeの安全なページで手続きできます
-              </div>
+                    }}
+                    disabled={portalLoading}
+                    style={{
+                      width: '100%', padding: '10px 0',
+                      borderRadius: 20, border: '2px solid #E0E0E0',
+                      background: 'white', color: COLORS.text,
+                      fontSize: 13, fontWeight: 700,
+                      cursor: portalLoading ? 'default' : 'pointer',
+                      fontFamily: 'inherit',
+                      opacity: portalLoading ? 0.6 : 1,
+                      transition: 'opacity 0.2s ease',
+                    }}
+                  >
+                    {portalLoading ? '読み込み中...' : '📋 プランを管理する（解約・変更）'}
+                  </button>
+                  <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
+                    Stripeの安全なページで手続きできます
+                  </div>
+                </>
+              )}
             </div>
           ) : userPlan === 'trial' ? (
             <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6 }}>
