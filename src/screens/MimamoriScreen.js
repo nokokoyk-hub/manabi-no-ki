@@ -558,12 +558,27 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
                   if (!supabase) return;
                   try {
                     setPortalLoading(true);
-                    const { data, error } = await supabase.functions.invoke('create-portal-session');
-                    if (error) throw error;
-                    if (data?.url) {
-                      window.open(data.url, '_blank');
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session?.access_token) {
+                      alert('ログインセッションが切れています。再ログインしてください。');
+                      return;
+                    }
+                    const res = await fetch(
+                      `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create-portal-session`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${session.access_token}`,
+                          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
+                        },
+                      }
+                    );
+                    const result = await res.json();
+                    if (result?.url) {
+                      window.open(result.url, '_blank');
                     } else {
-                      alert('ポータルの作成に失敗しました');
+                      alert(result?.error || 'ポータルの作成に失敗しました');
                     }
                   } catch (err) {
                     console.error('Portal error:', err);
