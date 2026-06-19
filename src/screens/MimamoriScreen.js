@@ -610,8 +610,29 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               )}
             </div>
           ) : userPlan === 'trial' ? (
-            <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6 }}>
-              🎫 トライアル期間中（全機能お試し中）
+            <div>
+              <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 10 }}>
+                🎫 トライアル期間中（全機能お試し中）
+              </div>
+              <button
+                onClick={() => {
+                  const paymentUrl = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
+                    + (user?.id ? `?client_reference_id=${user.id}` : '');
+                  window.open(paymentUrl, '_blank');
+                }}
+                style={{
+                  width: '100%', padding: '10px 0',
+                  borderRadius: 20, border: '2px solid #FF9800',
+                  background: 'white', color: '#FF9800',
+                  fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                🌳 気に入ったら今すぐプレミアムに！（月額200円）
+              </button>
+              <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
+                トライアル終了を待たずにいつでも切り替えOK
+              </div>
             </div>
           ) : (
             <div>
