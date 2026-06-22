@@ -144,7 +144,7 @@ const HomeScreen = ({
         padding: '0 10px', marginTop: 8,
       }}>
         {/* ロボットくんは木の左に */}
-        <div style={{ flexShrink: 0, marginRight: -12, zIndex: 1 }}>
+        <div style={{ flexShrink: 0, width: 72, marginRight: -8, zIndex: 1, overflow: 'visible' }}>
           <RobotCharacter
             pose={todayDone ? 'cheer' : 'wave'}
             size={72}
@@ -152,7 +152,7 @@ const HomeScreen = ({
         </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
         {/* まめは木の右に */}
-        <div style={{ flexShrink: 0, marginLeft: -12, zIndex: 1 }}>
+        <div style={{ flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible' }}>
           <MameCharacter
             pose={todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal')}
             message={mameMessage}
