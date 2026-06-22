@@ -122,7 +122,6 @@ const MameCharacter = ({
       textAlign: 'center',
       animation: 'mame-fadeIn 0.3s ease-out',
       lineHeight: 1.5,
-      whiteSpace: isRight ? 'nowrap' : 'normal',
       flexShrink: 0,
     }}>
       {message}
@@ -157,7 +156,7 @@ const MameCharacter = ({
     <div style={{
       display: 'flex',
       flexDirection: isRight ? 'row' : 'column',
-      alignItems: isRight ? 'flex-end' : 'center',
+      alignItems: isRight ? 'center' : 'center',
       gap: isRight ? 6 : 8,
       ...style,
     }}>
