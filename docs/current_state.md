@@ -25,15 +25,15 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v0.9.9** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '0.9.9'` |
-| version.json | `public/version.json` → `"version": "0.9.9"` |
-| docs/version.json | `docs/version.json` → `"version": "0.9.9"` |
-| package.json | `"version": "0.9.9"` |
-| 最終更新日 | 2026年6月19日（木） |
+| 現在のバージョン | **v1.0.0** 🎉 |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.0'` |
+| version.json | `public/version.json` → `"version": "1.0.0"` |
+| docs/version.json | `docs/version.json` → `"version": "1.0.0"` |
+| package.json | `"version": "1.0.0"` |
+| 最終更新日 | 2026年6月22日（日） |
 
-> ※ v0.9.9 は **利用規約・プラポリ・特商法ページ + ロボットくん追加 + Stripe Checkout連携（テスト→本番切替完了） + 解約機能 + みまもりfreeアクセス解放**を含む。
-> ※ 4箇所すべてv0.9.9に統一済み。
+> ※ v1.0.0 は **PWA化完了（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
+> ※ 4箇所すべてv1.0.0に統一済み。
 
 ---
 
@@ -48,6 +48,7 @@
 | 問題データ | Supabase questionsテーブル | ✅ 587問DB管理 |
 | ユーザー管理 | Supabase profilesテーブル | ✅ 稼働中（v0.9.9〜） |
 | デプロイ | Vercel（GitHub連携・自動デプロイ） | ✅ 稼働中 |
+| PWA | manifest.json + Service Worker + アイコン | ✅ 稼働中（v1.0.0〜） |
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
 | アクセス解析 | Google Analytics 4（GA4） | ✅ 稼働中（v0.9.9〜） |
 | ユーザー管理シート | Google Sheets + Apps Script | ✅ 稼働中（v0.9.9〜） |
@@ -248,14 +249,18 @@
 2. ~~Phase D: Stripe Checkout連携~~ ✅ **テスト環境完了（v0.9.9）**
 3. ~~利用規約・プライバシーポリシー・特商法表記ページ~~ ✅ **完了（v0.9.9）**
 4. ~~Stripe本番切替 + 解約機能~~ ✅ **完了（6/19）**
-5. **PWA化（ロボットくんアイコン活用）** 🔴 ← **次の実装ステップ**
-6. **Google Search Console 登録・サイトマップ送信** 🔴
-7. Phase A-4: device_id → user_id 移行 🟡
-8. Google Play Store 公開（TWA） 🟡
-9. FukushuScreen改修 🟡
-10. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
-11. ロボットくん名前機能 🟡
-12. UI調整 🟡
+5. ~~**PWA化（ロボットくんアイコン活用）**~~ ✅ **完了（v1.0.0）**
+6. **Google Search Console 登録・サイトマップ送信** 🔴 ← **次の実装ステップ**
+7. **OG画像をロボットくんに設定** 🔴
+8. **UpdateBannerの自動消去タイミング調整** 🔴
+9. **ストア掲載素材（スクリーンショット・説明文・フィーチャーグラフィック）** 🔴
+10. **TWAビルド + Digital Asset Links** 🔴
+11. Phase A-4: device_id → user_id 移行 🟡
+12. Google Play Store 公開（TWA） 🟡
+13. FukushuScreen改修 🟡
+14. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
+15. ロボットくん名前機能 🟡
+16. UI調整 🟡
 
 ---
 
@@ -279,8 +284,18 @@
 - ミッションクリア後はガッツポーズに切り替わり ✅
 - ロボットくんの名前機能: 🔲 未実装（将来）
 
-### アイコン活用
-- ロボットくんの画像をfavicon・PWAアイコン・OG画像にも活用予定
+### アイコン活用（v1.0.0〜 PWA対応済み）
+| ファイル | サイズ | 用途 |
+|----------|--------|------|
+| robot-icon-192.png | 192x192 | PWAアイコン（Android） |
+| robot-icon-512.png | 512x512 | PWAアイコン（大）+ ストア用 |
+| apple-touch-icon.png | 180x180 | iPhoneホーム画面アイコン |
+| favicon-32.png | 32x32 | ブラウザタブ |
+| favicon.ico | 16/32/48px | レガシーブラウザ |
+
+- manifest.json: icons 3エントリ（192 any / 512 any / 512 maskable）
+- Service Worker: `public/service-worker.js`（パススルー方式・キャッシュなし）
+- SW登録: `src/index.js` で `navigator.serviceWorker.register()`
 
 ---
 
@@ -289,9 +304,10 @@
 | バージョン | 内容 |
 |-----------|------|
 | **v0.9.9** | ✅ キャラクター追加 + 利用規約・プラポリ・特商法 + Stripe本番切替 + 解約機能 |
-| **v1.0.0** | PWA化 + Google Search Console + ストア審査準備 🎉 |
-| **v1.0.1〜** | Google Play Store 公開（TWA）+ フィードバック反映 |
+| **v1.0.0** | ✅ PWA化完了 + ストア審査準備 🎉 |
+| **v1.0.1〜** | Google Play Store 公開（TWA）+ OG画像 + UpdateBanner調整 + フィードバック反映 |
 
+> Google Play Developerアカウントはお受験マネージャーで登録済み。新規アプリ追加でまなびの木を出店予定。
 > ストア公開には利用規約・プライバシーポリシーが審査で必須。課金ありで出す方が審査やり直し不要。
 
 ---
@@ -304,7 +320,15 @@
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
 | デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
 | device_id / user_id 二重管理 | storage.jsはまだdevice_idベース。Phase A-4で移行予定 | 🟡 |
+| UpdateBanner 6秒自動消去 | 更新完了バナーが6秒で消えるため見逃しやすい。表示時間延長 or タップ消去のみに変更を検討 | 🟡 |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
+| OG画像未設定 | og:imageが未設定。ロボットくんの画像をOG画像に活用予定 | 🟡 |
+
+### 🔒 soul-backup同居対策（v1.0.0〜）
+- **profilesトリガー二重ガード**実装済み: ①app_tagチェック + ②soul_usersチェック + ON CONFLICT DO NOTHING
+- **soul_user_management_view**作成済み: soul-backup専用のユーザー管理ビュー
+- **SMTP送信者名問題**: Supabaseプロジェクト単位のためsoul-backupユーザーにも「まなびの木」名義でメールが届く → Twitter告知 + アプリ内注意書きで対応（将来的にSupabase分離で根本解決）
+- **soul-backup側signInWithOtp修正**: `data: { app: 'soul-backup' }` メタデータ付与が未実装 → 修正ガイド作成済み・次回適用予定
 
 ### 🩺 品質管理ツール
 - **`docs/question_add_checklist.md`** = 問題追加チェックリスト（健康診断キット）
@@ -395,6 +419,6 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 
 ---
 
-> 最終更新: 2026年6月19日（木）JST
-> 更新者: ちゃぴ（スレッド19）
-> バージョン: v0.9.9（Phase B+C完了、GA4導入、Stripe本番切替完了、解約機能実装、trialアップグレードボタン追加、ロボットくん追加、利用規約・プラポリ・特商法ページ、みまもりfreeアクセス解放）
+> 最終更新: 2026年6月22日（日）JST
+> 更新者: ちゃぴ（スレッド20）
+> バージョン: v1.0.0（PWA化完了、soul-backup混入対策、ストア公開準備、ロボットくんアイコン統一）
