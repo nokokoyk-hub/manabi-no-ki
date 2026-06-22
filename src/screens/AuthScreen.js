@@ -93,8 +93,8 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
   // ------------------------------------------
   const handleVerifyOtp = async () => {
     const code = otpCode.trim();
-    if (!code || code.length < 6) {
-      setMessage('6けたの コードを いれてね');
+    if (!code || code.length < 8) {
+      setMessage('8けたの コードを いれてね');
       return;
     }
     setIsLoading(true);
@@ -180,7 +180,7 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
               <h2 style={styles.otpTitle}>コードを いれてね！</h2>
               <p style={styles.otpDesc}>
                 <strong>{email}</strong> に<br />
-                6けたの コードを おくったよ
+                8けたの コードを おくったよ
               </p>
             </div>
 
@@ -190,10 +190,10 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              maxLength={6}
+              maxLength={8}
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="000000"
+              placeholder="00000000"
               style={styles.otpInput}
               disabled={isLoading}
               onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
@@ -203,11 +203,11 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
             {/* 確認ボタン */}
             <button
               onClick={handleVerifyOtp}
-              disabled={isLoading || otpCode.length < 6}
+              disabled={isLoading || otpCode.length < 8}
               style={{
                 ...styles.verifyButton,
-                opacity: (isLoading || otpCode.length < 6) ? 0.5 : 1,
-                cursor: (isLoading || otpCode.length < 6) ? 'not-allowed' : 'pointer',
+                opacity: (isLoading || otpCode.length < 8) ? 0.5 : 1,
+                cursor: (isLoading || otpCode.length < 8) ? 'not-allowed' : 'pointer',
               }}
             >
               {isLoading ? 'かくにん中...' : '✅ ログイン！'}
