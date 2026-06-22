@@ -2,11 +2,33 @@
   "short_name": "まなびの木",
   "name": "まなびの木 - まなぶほど 木がそだつ！",
   "description": "さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科を楽しく学べる小学生向け学習アプリ",
-  "icons": [],
-  "start_url": ".",
+  "icons": [
+    {
+      "src": "/robot-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/robot-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/robot-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "scope": "/",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#4CAF50",
   "background_color": "#FFF8F0",
   "lang": "ja",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "categories": ["education", "kids"]
 }
