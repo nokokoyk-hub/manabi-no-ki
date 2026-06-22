@@ -28,8 +28,8 @@ const UpdateBanner = ({ currentVersion }) => {
       setPrevVersion(lastVersion);
       setBannerType('updated');
       localStorage.setItem(LAST_VERSION_KEY, currentVersion);
-      // 更新完了通知を6秒後に自動消去
-      const autoHide = setTimeout(() => setBannerType(null), 6000);
+      // 更新完了通知を15秒後に自動消去（v1.0.1: 6秒→15秒に延長、見逃し防止）
+      const autoHide = setTimeout(() => setBannerType(null), 15000);
       return () => clearTimeout(autoHide);
     }
 
