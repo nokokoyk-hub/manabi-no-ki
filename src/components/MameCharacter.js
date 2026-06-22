@@ -87,6 +87,7 @@ const MameCharacter = ({
   petName = 'まめ',
   enableTap = true,
   equippedItem = null,
+  messagePosition = 'top',
   style = {},
 }) => {
   const [isTapped, setIsTapped] = useState(false);
@@ -104,43 +105,63 @@ const MameCharacter = ({
 
   const showSparkles = pose === 'sparkle' || pose === 'medal';
 
+  const isRight = messagePosition === 'right';
+
+  // 吹き出し要素
+  const bubble = message ? (
+    <div style={{
+      background: 'white',
+      borderRadius: 16,
+      padding: '8px 14px',
+      fontSize: 13,
+      fontWeight: 700,
+      color: '#5D4037',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      position: 'relative',
+      maxWidth: isRight ? 180 : 200,
+      textAlign: 'center',
+      animation: 'mame-fadeIn 0.3s ease-out',
+      lineHeight: 1.5,
+      whiteSpace: isRight ? 'nowrap' : 'normal',
+      flexShrink: 0,
+    }}>
+      {message}
+      {/* 三角（矢印）: 上表示なら下向き、右表示なら左向き */}
+      {isRight ? (
+        <div style={{
+          position: 'absolute',
+          left: -8,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 0, height: 0,
+          borderTop: '8px solid transparent',
+          borderBottom: '8px solid transparent',
+          borderRight: '8px solid white',
+        }} />
+      ) : (
+        <div style={{
+          position: 'absolute',
+          bottom: -8,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 0, height: 0,
+          borderLeft: '8px solid transparent',
+          borderRight: '8px solid transparent',
+          borderTop: '8px solid white',
+        }} />
+      )}
+    </div>
+  ) : null;
+
   return (
     <div style={{
       display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 8,
+      flexDirection: isRight ? 'row' : 'column',
+      alignItems: isRight ? 'flex-end' : 'center',
+      gap: isRight ? 6 : 8,
       ...style,
     }}>
-      {message && (
-        <div style={{
-          background: 'white',
-          borderRadius: 16,
-          padding: '8px 14px',
-          fontSize: 13,
-          fontWeight: 700,
-          color: '#5D4037',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          position: 'relative',
-          maxWidth: 200,
-          textAlign: 'center',
-          animation: 'mame-fadeIn 0.3s ease-out',
-          lineHeight: 1.5,
-        }}>
-          {message}
-          <div style={{
-            position: 'absolute',
-            bottom: -8,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 0,
-            height: 0,
-            borderLeft: '8px solid transparent',
-            borderRight: '8px solid transparent',
-            borderTop: '8px solid white',
-          }} />
-        </div>
-      )}
+      {!isRight && bubble}
 
       <div
         onClick={handleTap}
@@ -205,6 +226,7 @@ const MameCharacter = ({
           );
         })()}
       </div>
+      {isRight && bubble}
     </div>
   );
 };
