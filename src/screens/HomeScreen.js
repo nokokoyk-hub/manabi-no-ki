@@ -159,6 +159,7 @@ const HomeScreen = ({
             size={80}
             petName={petName}
             equippedItem={equippedItem}
+            messagePosition="right"
           />
         </div>
       </div>
