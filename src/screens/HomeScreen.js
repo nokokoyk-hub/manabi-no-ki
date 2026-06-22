@@ -141,12 +141,10 @@ const HomeScreen = ({
       {/* 木 + キャラエリア */}
       <div style={{
         display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
-        padding: '0 20px', marginTop: 8, position: 'relative',
+        padding: '0 10px', marginTop: 8,
       }}>
         {/* ロボットくんは木の左に */}
-        <div style={{
-          position: 'absolute', left: 16, bottom: 0,
-        }}>
+        <div style={{ flexShrink: 0, marginRight: -12, zIndex: 1 }}>
           <RobotCharacter
             pose={todayDone ? 'cheer' : 'wave'}
             size={72}
@@ -154,9 +152,7 @@ const HomeScreen = ({
         </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
         {/* まめは木の右に */}
-        <div style={{
-          position: 'absolute', right: 20, bottom: 0,
-        }}>
+        <div style={{ flexShrink: 0, marginLeft: -12, zIndex: 1 }}>
           <MameCharacter
             pose={todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal')}
             message={mameMessage}
