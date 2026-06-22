@@ -19,5 +19,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        flowType: 'implicit',        // PWA互換: PKCEだとstandalone→ブラウザ間でカギが消えるため
+        detectSessionInUrl: true,     // リダイレクト後のURL内トークンを自動検知
+        persistSession: true,         // localStorageにセッション保持（明示）
+        autoRefreshToken: true,       // トークン自動更新（明示）
+      }
+    })
   : null;
