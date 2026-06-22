@@ -152,14 +152,46 @@ const HomeScreen = ({
         </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
         {/* まめは木の右に */}
-        <div style={{ flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible' }}>
+        <div style={{ flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible', position: 'relative' }}>
+          {/* ホーム専用吹き出し（まめの左上・コメントに合わせて伸縮） */}
+          {mameMessage && (
+            <div style={{
+              position: 'absolute',
+              bottom: '100%',
+              right: -4,
+              marginBottom: 4,
+              background: 'white',
+              borderRadius: 14,
+              padding: '6px 14px',
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#5D4037',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              maxWidth: '55vw',
+              width: 'max-content',
+              textAlign: 'center',
+              lineHeight: 1.5,
+              zIndex: 3,
+              animation: 'mame-fadeIn 0.3s ease-out',
+            }}>
+              {mameMessage}
+              <div style={{
+                position: 'absolute',
+                bottom: -7,
+                right: 18,
+                width: 0, height: 0,
+                borderLeft: '7px solid transparent',
+                borderRight: '7px solid transparent',
+                borderTop: '7px solid white',
+              }} />
+            </div>
+          )}
           <MameCharacter
             pose={todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal')}
-            message={mameMessage}
+            message=""
             size={80}
             petName={petName}
             equippedItem={equippedItem}
-            messagePosition="top-left"
           />
         </div>
       </div>
