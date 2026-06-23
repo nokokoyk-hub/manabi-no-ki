@@ -25,14 +25,14 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v1.0.0** 🎉 |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.0'` |
-| version.json | `public/version.json` → `"version": "1.0.0"` |
-| docs/version.json | `docs/version.json` → `"version": "1.0.0"` |
-| package.json | `"version": "1.0.0"` |
-| 最終更新日 | 2026年6月22日（日） |
+| 現在のバージョン | **v1.0.1** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.1'` |
+| version.json | `public/version.json` → `"version": "1.0.1"` |
+| docs/version.json | `docs/version.json` → `"version": "1.0.1"` |
+| package.json | `"version": "1.0.1"` |
+| 最終更新日 | 2026年6月24日（火） |
 
-> ※ v1.0.0 は **PWA化完了（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
+> ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
 > ※ 4箇所すべてv1.0.0に統一済み。
 
 ---
@@ -43,7 +43,7 @@
 |----------|------|------|
 | フロントエンド | React（Create React App） | ✅ 稼働中 |
 | バックエンド | Supabase | ✅ 稼働中 |
-| 認証 | Supabase Auth（Google OAuth + マジックリンク） | ✅ 稼働中（v0.9.7〜） |
+| 認証 | Supabase Auth（Google OAuth + メールOTP） | ✅ 稼働中（v0.9.7〜） |
 | メール送信 | Resend SMTP（マジックリンク用） | ✅ 稼働中（6/19開通） |
 | 問題データ | Supabase questionsテーブル | ✅ 587問DB管理 |
 | ユーザー管理 | Supabase profilesテーブル | ✅ 稼働中（v0.9.9〜） |
@@ -89,7 +89,9 @@
 - **robots.txt**: Allow: / / Disallow: /api/ / Sitemap指定
 - **sitemap.xml**: トップページ + changelog
 - **manifest.json**: description, lang, orientation追加
-- ⚠️ **Google Search Console未登録**（次回タスク）
+- ✅ **Google Search Console**メタタグ設置済み（クロール待ち）
+- ✅ **OG画像**: og-image.png（ロボットくん1200×630）設定済み
+- ✅ **Twitter Card**: summary_large_image に変更済み
 
 ### questionsテーブル主要カラム
 | カラム | 型 | 説明 |
@@ -154,7 +156,7 @@
 | 方式 | 状態 | 技術 |
 |------|------|------|
 | Googleログイン | ✅ 稼働中 | Supabase Auth（リダイレクト方式） |
-| メールログイン（マジックリンク） | ✅ 稼働中 | Supabase Auth + Resend SMTP |
+| メールログイン（OTPコード） | ✅ 稼働中 | Supabase Auth + Resend SMTP（v1.0.1〜OTP方式） |
 
 ### 認証フロー
 - 未ログイン → AuthScreen.js（ログイン画面）表示
@@ -250,9 +252,9 @@
 3. ~~利用規約・プライバシーポリシー・特商法表記ページ~~ ✅ **完了（v0.9.9）**
 4. ~~Stripe本番切替 + 解約機能~~ ✅ **完了（6/19）**
 5. ~~**PWA化（ロボットくんアイコン活用）**~~ ✅ **完了（v1.0.0）**
-6. **Google Search Console 登録・サイトマップ送信** 🔴 ← **次の実装ステップ**
-7. **OG画像をロボットくんに設定** 🔴
-8. **UpdateBannerの自動消去タイミング調整** 🔴
+6. ~~**Google Search Console 登録**~~ ✅ **メタタグ設置済み・クロール待ち（v1.0.1）**
+7. ~~**OG画像をロボットくんに設定**~~ ✅ **完了（v1.0.1）**
+8. ~~**UpdateBannerの自動消去タイミング調整**~~ ✅ **15秒に延長（v1.0.1）**
 9. **ストア掲載素材（スクリーンショット・説明文・フィーチャーグラフィック）** 🔴
 10. **TWAビルド + Digital Asset Links** 🔴
 11. Phase A-4: device_id → user_id 移行 🟡
@@ -320,9 +322,9 @@
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
 | デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
 | device_id / user_id 二重管理 | storage.jsはまだdevice_idベース。Phase A-4で移行予定 | 🟡 |
-| UpdateBanner 6秒自動消去 | 更新完了バナーが6秒で消えるため見逃しやすい。表示時間延長 or タップ消去のみに変更を検討 | 🟡 |
+| ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
-| OG画像未設定 | og:imageが未設定。ロボットくんの画像をOG画像に活用予定 | 🟡 |
+| ~~OG画像未設定~~ | ✅ **og-image.png設定済み（v1.0.1）** | ✅ |
 
 ### 🔒 soul-backup同居対策（v1.0.0〜）
 - **profilesトリガー二重ガード**実装済み: ①app_tagチェック + ②soul_usersチェック + ON CONFLICT DO NOTHING
@@ -419,6 +421,6 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 
 ---
 
-> 最終更新: 2026年6月22日（日）JST
-> 更新者: ちゃぴ（スレッド20）
-> バージョン: v1.0.0（PWA化完了、soul-backup混入対策、ストア公開準備、ロボットくんアイコン統一）
+> 最終更新: 2026年6月24日（火）JST
+> 更新者: ちゃぴ（スレッド21）
+> バージョン: v1.0.1（メール認証OTP化、PWAログイン修正、OG画像設定、キャラ配置改善、ストア素材準備）
