@@ -4,7 +4,7 @@
 // v1.0.1: OTPコード方式に変更（2026/06/24）
 // ============================================
 // Googleログイン（メイン推奨）
-// + メールOTP（6桁コード入力・PWA対応）
+// + メールOTP（8桁コード入力・PWA対応）
 // ============================================
 
 import React, { useState, useRef } from 'react';
@@ -57,7 +57,7 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
   };
 
   // ------------------------------------------
-  // OTPコード送信（メールで6桁コード）
+  // OTPコード送信（メールで8桁コード）
   // ------------------------------------------
   const handleSendOtp = async () => {
     if (!email.trim()) {
@@ -89,7 +89,7 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
   };
 
   // ------------------------------------------
-  // OTPコード確認（6桁入力して認証）
+  // OTPコード確認（8桁入力して認証）
   // ------------------------------------------
   const handleVerifyOtp = async () => {
     const code = otpCode.trim();
@@ -144,6 +144,9 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
   const isSuccess = message.startsWith('OK_');
   const displayMessage = message.replace('OK_', '');
 
+  // OTP入力完了判定
+  const otpReady = otpCode.length === 8;
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -184,7 +187,7 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
               </p>
             </div>
 
-            {/* 6桁コード入力 */}
+            {/* 8桁コード入力 */}
             <input
               ref={otpInputRef}
               type="text"
@@ -193,21 +196,34 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
               maxLength={8}
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="00000000"
-              style={styles.otpInput}
+              placeholder="● ● ● ● ● ● ● ●"
+              style={{
+                ...styles.otpInput,
+                borderColor: otpReady ? '#2E7D32' : '#4CAF50',
+                boxShadow: otpReady ? '0 0 0 3px rgba(46,125,50,0.15)' : 'none',
+              }}
               disabled={isLoading}
               onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
               autoComplete="one-time-code"
             />
 
+            {/* 桁数カウンター */}
+            <p style={styles.otpCounter}>
+              <span style={{ color: otpReady ? '#2E7D32' : '#999' }}>
+                {otpReady ? '✅ ' : ''}{otpCode.length} / 8 けた
+              </span>
+            </p>
+
             {/* 確認ボタン */}
             <button
               onClick={handleVerifyOtp}
-              disabled={isLoading || otpCode.length < 8}
+              disabled={isLoading || !otpReady}
               style={{
                 ...styles.verifyButton,
-                opacity: (isLoading || otpCode.length < 8) ? 0.5 : 1,
-                cursor: (isLoading || otpCode.length < 8) ? 'not-allowed' : 'pointer',
+                opacity: (isLoading || !otpReady) ? 0.5 : 1,
+                cursor: (isLoading || !otpReady) ? 'not-allowed' : 'pointer',
+                transform: otpReady && !isLoading ? 'scale(1.03)' : 'scale(1)',
+                boxShadow: otpReady && !isLoading ? '0 4px 12px rgba(67,160,71,0.3)' : 'none',
               }}
             >
               {isLoading ? 'かくにん中...' : '✅ ログイン！'}
@@ -517,23 +533,31 @@ const styles = {
   },
   otpInput: {
     width: '100%',
-    maxWidth: 240,
-    padding: '16px 20px',
-    fontSize: 32,
+    maxWidth: 300,
+    padding: '16px 16px',
+    fontSize: 26,
     fontWeight: 800,
     fontFamily: "'Courier New', monospace",
     textAlign: 'center',
-    letterSpacing: 12,
+    letterSpacing: 8,
     border: '3px solid #4CAF50',
     borderRadius: 16,
     outline: 'none',
     background: '#F1F8E9',
     color: '#2E7D32',
     boxSizing: 'border-box',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  },
+  otpCounter: {
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#999',
+    margin: '0 0 4px 0',
+    textAlign: 'center',
   },
   verifyButton: {
     width: '100%',
-    maxWidth: 240,
+    maxWidth: 300,
     padding: '14px 20px',
     fontSize: 17,
     fontWeight: 800,
