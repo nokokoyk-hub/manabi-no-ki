@@ -219,6 +219,15 @@ const HowToScreen = ({ onBack }) => {
             </p>
           </div>
           <div style={styles.faqItem}>
+            <p style={styles.faqQ}>Q. ログイン画面に表示される「supabase.co」とは？</p>
+            <p style={styles.faqA}>
+              Googleログイン時に「ndq...supabase.co に移動」と表示されることがあります。
+              これはまなびの木が利用している認証基盤（Supabase社）のアドレスで、
+              安全なサービスです。お客さまのパスワードがまなびの木に共有されることはありません。
+              Supabaseは世界中の多くのアプリで採用されている信頼性の高いサービスです。
+            </p>
+          </div>
+          <div style={styles.faqItem}>
             <p style={styles.faqQ}>Q. ホーム画面に追加できません</p>
             <p style={styles.faqA}>
               iPhoneの場合はSafariで開いてください（Chromeでは追加できません）。
