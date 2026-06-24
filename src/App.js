@@ -44,6 +44,8 @@ import {
   loadCostumeData,
   incrementMissionCount,
   checkCostumeUnlocks,
+  setCurrentUserId,
+  migrateDeviceDataToUser,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
@@ -88,12 +90,25 @@ function App() {
   // プロフィール取得（subscription_status + trial判定）
   useEffect(() => {
     if (!supabase || !user) {
+      setCurrentUserId(null); // Phase A-4: ログアウト時クリア
       setUserPlan('premium'); // ローカルモード → 制限なし
       return;
     }
 
+    // Phase A-4: user_id設定（以降のDB操作はuser_idベース）
+    setCurrentUserId(user.id);
+
     const fetchProfile = async () => {
       try {
+        // Phase A-4: デバイスデータをuser_idに紐付け + 進捗再読み込み
+        await migrateDeviceDataToUser(user.id);
+        const migrated = await loadProgress();
+        setLeaves(migrated.leaves);
+        setFlowers(migrated.flowers);
+        setFruits(migrated.fruits);
+        setStreak(migrated.streak);
+        setTodayDone(migrated.todayDone);
+
         const { data, error } = await supabase
           .from('profiles')
           .select('subscription_status, trial_started_at, stripe_customer_id')
