@@ -23,6 +23,7 @@ import SubjectMenuScreen from './screens/SubjectMenuScreen';
 import TermsScreen from './screens/TermsScreen';
 import PrivacyScreen from './screens/PrivacyScreen';
 import TokushohoScreen from './screens/TokushohoScreen';
+import HowToScreen from './screens/HowToScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
 import {
@@ -372,12 +373,13 @@ function App() {
   }
 
   // 📜 利用規約等は認証不要で表示（ログイン前でもアクセス可能）
-  if (['terms', 'privacy', 'tokushoho'].includes(screen)) {
+  if (['terms', 'privacy', 'tokushoho', 'howto'].includes(screen)) {
     const legalOnBack = () => setScreen('home');
     switch (screen) {
       case 'terms': return <TermsScreen onBack={legalOnBack} />;
       case 'privacy': return <PrivacyScreen onBack={legalOnBack} />;
       case 'tokushoho': return <TokushohoScreen onBack={legalOnBack} />;
+      case 'howto': return <HowToScreen onBack={legalOnBack} />;
       default: break;
     }
   }
@@ -389,6 +391,7 @@ function App() {
         onOpenTerms={() => setScreen('terms')}
         onOpenPrivacy={() => setScreen('privacy')}
         onOpenTokushoho={() => setScreen('tokushoho')}
+        onOpenHowTo={() => setScreen('howto')}
       />
     );
   }
@@ -528,6 +531,8 @@ function App() {
         return <PrivacyScreen onBack={() => setScreen('home')} />;
       case 'tokushoho':
         return <TokushohoScreen onBack={() => setScreen('home')} />;
+      case 'howto':
+        return <HowToScreen onBack={() => setScreen('home')} />;
       default:
         return (
           <HomeScreen
