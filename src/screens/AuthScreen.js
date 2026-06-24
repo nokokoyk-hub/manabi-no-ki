@@ -18,7 +18,7 @@ const isWebView = () => {
   return /Line|FBAV|FB_IAB|FBAN|Instagram|YJApp|Yahoo/i.test(ua);
 };
 
-function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
+function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho, onOpenHowTo }) {
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -353,6 +353,11 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho }) {
           アカウントが できます！
         </p>
 
+        {/* ===== つかいかたガイド ===== */}
+        <button onClick={onOpenHowTo} style={styles.howtoButton}>
+          📱 つかいかたガイド — はじめての方はこちら
+        </button>
+
         {/* ===== 利用規約等リンク ===== */}
         <div style={styles.legalLinks}>
           <button onClick={onOpenTerms} style={styles.legalLink}>利用規約</button>
@@ -650,6 +655,23 @@ const styles = {
     lineHeight: 1.6,
     marginTop: 12,
     marginBottom: 0,
+  },
+  // --- つかいかたガイドボタン ---
+  howtoButton: {
+    display: 'block',
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: 14,
+    fontWeight: 700,
+    fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+    color: '#43A047',
+    background: '#F1F8E9',
+    border: '2px solid #C8E6C9',
+    borderRadius: 12,
+    cursor: 'pointer',
+    textAlign: 'center',
+    marginTop: 8,
+    transition: 'all 0.2s',
   },
   // --- 利用規約等リンク ---
   legalLinks: {
