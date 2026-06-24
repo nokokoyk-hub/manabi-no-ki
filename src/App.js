@@ -47,6 +47,7 @@ import {
   checkCostumeUnlocks,
   setCurrentUserId,
   migrateDeviceDataToUser,
+  checkAndSwitchUser,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
@@ -101,6 +102,17 @@ function App() {
 
     const fetchProfile = async () => {
       try {
+        // ⛑️ v1.0.2: アカウント切替検出（前のユーザーのlocalStorageをクリア）
+        const userSwitched = checkAndSwitchUser(user.id);
+        if (userSwitched) {
+          // localStorageクリア済み → stateもデフォルトに戻す
+          setPetName(null);
+          setCostumeData({ equippedItem: null, unlockedItems: ['item_none'], missionCount: 0 });
+          setPuzzleData({ completed: [], current: null });
+          setSubjectLevels({});
+          console.log('🔄 アカウント変更: stateもリセット完了');
+        }
+
         // Phase A-4: デバイスデータをuser_idに紐付け + 進捗再読み込み
         await migrateDeviceDataToUser(user.id);
         const migrated = await loadProgress();
