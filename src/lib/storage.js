@@ -1,18 +1,15 @@
 // ============================================
-// 💾 storage.js - データアクセスレイヤー
-// Supabaseへの読み書き + 端末ごとの設定を一元管理
-// Supabase未設定時はローカルstateで動作（フォールバック）
-// v0.6.0: ペット名（キャラ名カスタマイズ）追加
-// v0.6.3: 更新時の名前復元バックアップに対応
+// 📦 storage.js - データ保存・読み込みモジュール
+// まなびの木
+// Supabase + localStorage ハイブリッド
+// v1.0.2: Phase A-4 device_id → user_id 移行対応
 // ============================================
 
 import { supabase } from './supabase';
-import { DEFAULT_SUBJECT_LEVELS, normalizeSubjectLevels } from '../constants/learningLevels';
 import COSTUME_ITEMS_DATA from '../data/costumeItems';
 
 // ------------------------------------------
-// デバイスID管理
-// ブラウザのlocalStorageに保存して端末を識別
+// 🆔 デバイスID管理（レガシー・フォールバック用）
 // ------------------------------------------
 const DEVICE_ID_KEY = 'manabi_device_id';
 const SUBJECT_LEVELS_KEY = 'manabi_subject_levels';
@@ -28,76 +25,186 @@ export const getDeviceId = () => {
   return deviceId;
 };
 
+// ============================================
+// 🔑 Phase A-4: user_id 管理
+// ログイン時にsetCurrentUserIdでセット
+// 以降すべてのDB操作はuser_id優先（未ログイン時はdevice_idフォールバック）
+// ============================================
+let currentUserId = null;
+
+export const setCurrentUserId = (userId) => {
+  currentUserId = userId;
+  console.log('🆔 ユーザーID設定:', userId ? '✅' : '❌ (未ログイン)');
+};
+
+export const getCurrentUserId = () => currentUserId;
+
+/**
+ * Supabaseクエリに user_id or device_id フィルタを適用
+ * ログイン中 → user_id で検索（クロスデバイス対応）
+ * 未ログイン → device_id で検索（従来互換）
+ */
+const applyIdFilter = (query) => {
+  if (currentUserId) {
+    return query.eq('user_id', currentUserId);
+  }
+  return query.eq('device_id', getDeviceId());
+};
+
+/**
+ * INSERT時に付与するID情報
+ * device_idは常にセット（トレーサビリティ用）
+ * user_idはログイン中のみセット
+ */
+const getInsertIds = () => ({
+  device_id: getDeviceId(),
+  ...(currentUserId ? { user_id: currentUserId } : {}),
+});
+
+/**
+ * 初回ログイン時のデータ移行
+ * 現デバイスのdevice_idデータにuser_idを紐付ける
+ * + 複数デバイスのuser_progressをマージ（大きい方の値を採用）
+ */
+export const migrateDeviceDataToUser = async (userId) => {
+  if (!supabase || !userId) return;
+
+  try {
+    const deviceId = getDeviceId();
+    console.log('🔄 データ移行開始:', { userId: userId.slice(0, 8) + '...', deviceId: deviceId.slice(0, 20) + '...' });
+
+    // 1. 現デバイスの全データにuser_idを書き込む
+    await supabase.from('user_progress')
+      .update({ user_id: userId })
+      .eq('device_id', deviceId)
+      .is('user_id', null);
+
+    await supabase.from('learning_sessions')
+      .update({ user_id: userId })
+      .eq('device_id', deviceId)
+      .is('user_id', null);
+
+    await supabase.from('answer_history')
+      .update({ user_id: userId })
+      .eq('device_id', deviceId)
+      .is('user_id', null);
+
+    // 2. user_progressの複数レコード統合（B案: 大きい方を採用）
+    const { data: allProgress } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (allProgress && allProgress.length > 1) {
+      console.log(`🔀 user_progress ${allProgress.length}件を統合中...`);
+
+      // 各値の最大値を採用（ユーザーの努力を消さない）
+      const merged = {
+        leaves: Math.max(...allProgress.map(p => p.leaves || 0)),
+        flowers: Math.max(...allProgress.map(p => p.flowers || 0)),
+        fruits: Math.max(...allProgress.map(p => p.fruits || 0)),
+        streak: Math.max(...allProgress.map(p => p.streak || 0)),
+        today_done: allProgress.some(p => p.today_done),
+      };
+
+      // last_study_dateは最新を採用
+      const dates = allProgress
+        .map(p => p.last_study_date)
+        .filter(Boolean)
+        .sort()
+        .reverse();
+      if (dates.length > 0) merged.last_study_date = dates[0];
+
+      // メインレコード（最初の1件）を統合値で更新
+      const mainId = allProgress[0].id;
+      await supabase.from('user_progress')
+        .update(merged)
+        .eq('id', mainId);
+
+      // サブレコードのuser_idをクリア（データは残す、紐付きだけ外す）
+      for (let i = 1; i < allProgress.length; i++) {
+        await supabase.from('user_progress')
+          .update({ user_id: null })
+          .eq('id', allProgress[i].id);
+      }
+
+      console.log('✅ user_progress統合完了:', merged);
+    }
+
+    console.log('✅ データ移行完了');
+  } catch (err) {
+    console.error('⚠️ データ移行エラー（続行可能）:', err);
+  }
+};
+
 // ------------------------------------------
-// 教科別レベル設定
-// まずは端末localStorageで保存。DBスキーマ変更なしで安全に導入する。
+// 📐 教科別レベル設定（localStorage）
 // ------------------------------------------
 export const loadSubjectLevels = () => {
   try {
     const raw = localStorage.getItem(SUBJECT_LEVELS_KEY);
-    if (!raw) return DEFAULT_SUBJECT_LEVELS;
-    return normalizeSubjectLevels(JSON.parse(raw));
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    // 正規化: 値を1〜6に制限
+    const normalized = {};
+    Object.entries(parsed).forEach(([key, val]) => {
+      normalized[key] = Math.max(1, Math.min(6, Number(val) || 1));
+    });
+    return normalized;
   } catch (err) {
-    console.error('❌ レベル設定読み込みエラー:', err);
-    return DEFAULT_SUBJECT_LEVELS;
+    console.error('❌ レベル読み込みエラー:', err);
+    return {};
   }
 };
 
 export const saveSubjectLevels = (levels) => {
   try {
-    const normalized = normalizeSubjectLevels(levels);
-    localStorage.setItem(SUBJECT_LEVELS_KEY, JSON.stringify(normalized));
-    return normalized;
+    localStorage.setItem(SUBJECT_LEVELS_KEY, JSON.stringify(levels));
   } catch (err) {
-    console.error('❌ レベル設定保存エラー:', err);
-    return DEFAULT_SUBJECT_LEVELS;
+    console.error('❌ レベル保存エラー:', err);
   }
 };
 
 // ------------------------------------------
-// 🐕 ペット名（キャラ名カスタマイズ）
-// 子供が自分でキャラの名前をつけられる機能
-// localStorage保存（教科別レベルと同じ方式）
+// 🐕 ペット名管理（localStorage）
+// クリア・更新で消えないようバックアップ機構あり
 // ------------------------------------------
 export const DEFAULT_PET_NAME = 'まめ';
 
 export const loadPetName = () => {
   try {
     const name = localStorage.getItem(PET_NAME_KEY);
-    if (name) return name;
+    if (name && name.trim()) return name.trim();
 
-    // 更新直前にsessionStorageへ退避した名前があれば復元する
     const backupName = sessionStorage.getItem(PET_NAME_BACKUP_KEY);
-    if (backupName) {
+    if (backupName && backupName.trim()) {
       localStorage.setItem(PET_NAME_KEY, backupName);
-      sessionStorage.removeItem(PET_NAME_BACKUP_KEY);
-      return backupName;
+      return backupName.trim();
     }
 
-    // 既存ユーザー（端末IDやレベル設定がある）には、更新後に再命名を求めない
-    const hasExistingLocalData =
+    const hasAnyData =
       localStorage.getItem(DEVICE_ID_KEY) || localStorage.getItem(SUBJECT_LEVELS_KEY);
-    if (hasExistingLocalData) {
+    if (hasAnyData) {
       localStorage.setItem(PET_NAME_KEY, DEFAULT_PET_NAME);
       return DEFAULT_PET_NAME;
     }
 
-    return null; // null = 完全新規（NamingScreen表示の判定に使う）
+    return DEFAULT_PET_NAME;
   } catch (err) {
     console.error('❌ ペット名読み込みエラー:', err);
-    return null;
+    return DEFAULT_PET_NAME;
   }
 };
 
 export const savePetName = (name) => {
   try {
-    const trimmed = (name || '').trim();
-    const safeName = trimmed || DEFAULT_PET_NAME;
+    const safeName = (name && name.trim()) ? name.trim() : DEFAULT_PET_NAME;
     localStorage.setItem(PET_NAME_KEY, safeName);
+    sessionStorage.setItem(PET_NAME_BACKUP_KEY, safeName);
     return safeName;
   } catch (err) {
     console.error('❌ ペット名保存エラー:', err);
-    return DEFAULT_PET_NAME;
+    return name;
   }
 };
 
@@ -105,27 +212,24 @@ export const backupPetNameForUpdate = () => {
   try {
     const name = localStorage.getItem(PET_NAME_KEY);
     if (name) sessionStorage.setItem(PET_NAME_BACKUP_KEY, name);
-  } catch (err) {
-    console.warn('ペット名バックアップをスキップしました');
-  }
+  } catch {}
 };
 
 // ------------------------------------------
-// 日付ヘルパー（日本時間）
+// 📅 日付ユーティリティ
 // ------------------------------------------
 export const getTodayJST = () => {
   const now = new Date();
-  // UTC+9 で日本時間の日付を取得
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return jst.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+  return jst.toISOString().split('T')[0];
 };
 
 // ------------------------------------------
-// 進捗データの初期値
+// 🌳 進捗データのデフォルト値
 // ------------------------------------------
 export const DEFAULT_PROGRESS = {
-  leaves: 5,
-  flowers: 2,
+  leaves: 0,
+  flowers: 0,
   fruits: 0,
   streak: 0,
   todayDone: false,
@@ -133,7 +237,7 @@ export const DEFAULT_PROGRESS = {
 };
 
 // ------------------------------------------
-// 進捗を読み込む
+// 🌳 進捗の読み込み（user_id優先・device_idフォールバック）
 // ------------------------------------------
 export const loadProgress = async () => {
   if (!supabase) {
@@ -144,44 +248,66 @@ export const loadProgress = async () => {
   try {
     const deviceId = getDeviceId();
     const today = getTodayJST();
+    let data = null;
 
-    const { data, error } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('device_id', deviceId)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      // レコードなし → 新規作成
-      console.log('🌱 初回アクセス: 進捗データを新規作成');
-      const { data: newData, error: insertError } = await supabase
+    // user_idがあればuser_idで検索（クロスデバイス対応）
+    if (currentUserId) {
+      const { data: rows, error } = await supabase
         .from('user_progress')
-        .insert({ device_id: deviceId })
-        .select()
+        .select('*')
+        .eq('user_id', currentUserId)
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .limit(1);
+
+      if (!error && rows && rows.length > 0) {
+        data = rows[0];
+      }
+    }
+
+    // user_idで見つからなければdevice_idで検索
+    if (!data) {
+      const { data: row, error } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('device_id', deviceId)
         .single();
 
-      if (insertError) {
-        console.error('❌ 進捗作成エラー:', insertError);
+      if (error && error.code === 'PGRST116') {
+        // レコードなし → 新規作成
+        console.log('🌱 初回アクセス: 進捗データを新規作成');
+        const { data: newData, error: insertError } = await supabase
+          .from('user_progress')
+          .insert({
+            device_id: deviceId,
+            ...(currentUserId ? { user_id: currentUserId } : {}),
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('❌ 進捗作成エラー:', insertError);
+          return DEFAULT_PROGRESS;
+        }
+
+        return {
+          leaves: newData.leaves,
+          flowers: newData.flowers,
+          fruits: newData.fruits,
+          streak: newData.streak,
+          todayDone: newData.today_done,
+          lastStudyDate: newData.last_study_date,
+        };
+      }
+
+      if (error) {
+        console.error('❌ 進捗読み込みエラー:', error);
         return DEFAULT_PROGRESS;
       }
 
-      return {
-        leaves: newData.leaves,
-        flowers: newData.flowers,
-        fruits: newData.fruits,
-        streak: newData.streak,
-        todayDone: newData.today_done,
-        lastStudyDate: newData.last_study_date,
-      };
-    }
-
-    if (error) {
-      console.error('❌ 進捗読み込みエラー:', error);
-      return DEFAULT_PROGRESS;
+      data = row;
     }
 
     // ストリークの日付チェック
-    // 昨日でも今日でもない → ストリークリセット
     let streak = data.streak;
     let todayDone = data.today_done;
 
@@ -194,19 +320,17 @@ export const loadProgress = async () => {
       if (lastDate !== today && lastDate !== yesterdayStr) {
         // 2日以上空いた → ストリークリセット
         streak = 0;
-        await supabase
-          .from('user_progress')
-          .update({ streak: 0, today_done: false })
-          .eq('device_id', deviceId);
+        await applyIdFilter(
+          supabase.from('user_progress').update({ streak: 0, today_done: false })
+        );
       }
 
       // 日付が変わった → todayDoneリセット
       if (lastDate !== today) {
         todayDone = false;
-        await supabase
-          .from('user_progress')
-          .update({ today_done: false })
-          .eq('device_id', deviceId);
+        await applyIdFilter(
+          supabase.from('user_progress').update({ today_done: false })
+        );
       }
     }
 
@@ -234,12 +358,10 @@ export const saveProgress = async (progress) => {
   }
 
   try {
-    const deviceId = getDeviceId();
     const today = getTodayJST();
 
-    const { error } = await supabase
-      .from('user_progress')
-      .update({
+    const { error } = await applyIdFilter(
+      supabase.from('user_progress').update({
         leaves: progress.leaves,
         flowers: progress.flowers,
         fruits: progress.fruits,
@@ -247,7 +369,7 @@ export const saveProgress = async (progress) => {
         today_done: progress.todayDone,
         last_study_date: today,
       })
-      .eq('device_id', deviceId);
+    );
 
     if (error) {
       console.error('❌ 進捗保存エラー:', error);
@@ -260,7 +382,7 @@ export const saveProgress = async (progress) => {
 };
 
 // ------------------------------------------
-// 学習セッションを記録
+// 📝 学習セッション記録
 // ------------------------------------------
 export const recordSession = async (mode, score, totalQuestions) => {
   if (!supabase) {
@@ -269,12 +391,10 @@ export const recordSession = async (mode, score, totalQuestions) => {
   }
 
   try {
-    const deviceId = getDeviceId();
-
     const { error } = await supabase
       .from('learning_sessions')
       .insert({
-        device_id: deviceId,
+        ...getInsertIds(),
         mode,
         score,
         total_questions: totalQuestions,
@@ -300,14 +420,13 @@ export const getRecentSessions = async (days = 7) => {
   }
 
   try {
-    const deviceId = getDeviceId();
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const { data, error } = await supabase
-      .from('learning_sessions')
-      .select('*')
-      .eq('device_id', deviceId)
+    const { data, error } = await applyIdFilter(
+      supabase.from('learning_sessions')
+        .select('*')
+    )
       .gte('completed_at', since.toISOString())
       .order('completed_at', { ascending: false });
 
@@ -340,12 +459,10 @@ export const recordAnswer = async (questionId, isCorrect) => {
   }
 
   try {
-    const deviceId = getDeviceId();
-
     const { error } = await supabase
       .from('answer_history')
       .insert({
-        device_id: deviceId,
+        ...getInsertIds(),
         question_id: questionId,
         is_correct: isCorrect,
       });
@@ -367,14 +484,12 @@ export const getRecentQuestionIds = async (days = 3) => {
   if (!supabase) return [];
 
   try {
-    const deviceId = getDeviceId();
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const { data, error } = await supabase
-      .from('answer_history')
-      .select('question_id')
-      .eq('device_id', deviceId)
+    const { data, error } = await applyIdFilter(
+      supabase.from('answer_history').select('question_id')
+    )
       .gte('answered_at', since.toISOString());
 
     if (error) throw error;
@@ -400,14 +515,12 @@ export const getWeakQuestions = async (days = 30, limit = 20) => {
   }
 
   try {
-    const deviceId = getDeviceId();
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const { data, error } = await supabase
-      .from('answer_history')
-      .select('question_id, is_correct')
-      .eq('device_id', deviceId)
+    const { data, error } = await applyIdFilter(
+      supabase.from('answer_history').select('question_id, is_correct')
+    )
       .gte('answered_at', since.toISOString());
 
     if (error) throw error;
@@ -647,15 +760,13 @@ export const getSubjectAccuracy = async (days = 30) => {
   if (!supabase) return [];
 
   try {
-    const deviceId = getDeviceId();
     const since = new Date();
     since.setDate(since.getDate() - days);
 
     // answer_historyから期間内のデータ取得
-    const { data: answers, error: aErr } = await supabase
-      .from('answer_history')
-      .select('question_id, is_correct')
-      .eq('device_id', deviceId)
+    const { data: answers, error: aErr } = await applyIdFilter(
+      supabase.from('answer_history').select('question_id, is_correct')
+    )
       .gte('answered_at', since.toISOString());
 
     if (aErr) throw aErr;
@@ -727,14 +838,12 @@ export const getDailyAccuracyTrend = async (days = 14) => {
   if (!supabase) return [];
 
   try {
-    const deviceId = getDeviceId();
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const { data: answers, error } = await supabase
-      .from('answer_history')
-      .select('is_correct, answered_at')
-      .eq('device_id', deviceId)
+    const { data: answers, error } = await applyIdFilter(
+      supabase.from('answer_history').select('is_correct, answered_at')
+    )
       .gte('answered_at', since.toISOString())
       .order('answered_at', { ascending: true });
 
