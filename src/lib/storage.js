@@ -15,6 +15,43 @@ const DEVICE_ID_KEY = 'manabi_device_id';
 const SUBJECT_LEVELS_KEY = 'manabi_subject_levels';
 const PET_NAME_KEY = 'manabi_pet_name';
 const PET_NAME_BACKUP_KEY = 'manabi_pet_name_backup';
+const CURRENT_USER_KEY = 'manabi_current_user_id';
+
+// ============================================
+// ⛑️ アカウント切替検出 + localStorageクリア（v1.0.2）
+// 同じデバイスで別アカウントにログインしたら
+// 前のユーザーのlocalStorageデータをクリアする
+// ============================================
+const USER_LOCAL_KEYS = [
+  'manabi_subject_levels',
+  'manabi_pet_name',
+  'manabi_puzzle',
+  'manabi_costume',
+  'manabi_display_mode',
+  'manabi_guardian_pin',
+  'manabi_selected_character',
+];
+
+export const checkAndSwitchUser = (userId) => {
+  try {
+    const prevUserId = localStorage.getItem(CURRENT_USER_KEY);
+    if (prevUserId && prevUserId !== userId) {
+      // 別アカウントに切り替わった → 学習データをクリア
+      console.log('🔄 アカウント変更検出！localStorageをクリアします');
+      USER_LOCAL_KEYS.forEach(k => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+      console.log('🧹 クリア完了');
+      localStorage.setItem(CURRENT_USER_KEY, userId);
+      return true; // 切り替え発生
+    }
+    localStorage.setItem(CURRENT_USER_KEY, userId);
+    return false; // 切り替えなし
+  } catch (e) {
+    console.warn('⚠️ アカウント切替チェックエラー:', e.message);
+    return false;
+  }
+};
 
 export const getDeviceId = () => {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
