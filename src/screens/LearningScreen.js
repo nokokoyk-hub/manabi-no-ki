@@ -3,6 +3,7 @@
 // v0.7.0: 新画像10枚を活用した演出強化
 // v0.9.1: 結果画面追加（ミッション完了→スコア表示→ホームへ）
 // v0.9.2: しゃかい🗾・どうとく💛モード追加
+// v1.0.2: キャラ選択対応（まめ/ロボちゃん切替）（2026/06/26）
 //   - 正解: happy→jump→medal（コンボ段階）
 //   - 不正解: sad（ぶるぶる）
 //   - 出題: cheer（わくわく）
@@ -14,6 +15,7 @@ import React, { useState, useEffect } from 'react';
 import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
 import MameCharacter from '../components/MameCharacter';
+import RobotCharacter from '../components/RobotCharacter';
 import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../lib/questionLoader';
 import { getMameMessage } from '../constants/mameMessages';
@@ -65,7 +67,7 @@ const getResultPose = (score, total) => {
   return 'cheer';
 };
 
-const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, onBack, displayMode = 'hiragana' }) => {
+const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedCharacter = 'mame', onComplete, onBack, displayMode = 'hiragana' }) => {
   const [questions, setQuestions] = useState([]);
   const [isLoadingQ, setIsLoadingQ] = useState(true);
 
@@ -104,6 +106,10 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
 
   const displayName = petName || 'まめ';
 
+  // 🤖 v1.0.2: キャラ選択に応じた表示切替ヘルパー
+  const CharaComponent = selectedCharacter === 'robot' ? RobotCharacter : MameCharacter;
+  const charaNameProp = selectedCharacter === 'robot' ? 'robotName' : 'petName';
+
   const [mamePose, setMamePose] = useState('cheer');
   const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
 
@@ -116,7 +122,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', padding: 24,
       }}>
-        <MameCharacter pose="dash" message={`${displayName}が もんだいを さがしてるよ！`} size={90} petName={displayName} />
+        <CharaComponent pose="dash" message={`${displayName}が もんだいを さがしてるよ！`} size={90} {...{[charaNameProp]: displayName}} />
         <div style={{ marginTop: 16, fontSize: 14, color: COLORS.textLight, fontWeight: 700 }}>
           じゅんび ちゅう...
         </div>
@@ -135,7 +141,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         color: COLORS.text,
       }}>
         <div style={{ background: 'white', borderRadius: 20, padding: 24, textAlign: 'center' }}>
-          <MameCharacter pose="sad" message="もんだいが たりないよ…" size={80} petName={displayName} />
+          <CharaComponent pose="sad" message="もんだいが たりないよ…" size={80} {...{[charaNameProp]: displayName}} />
           <div style={{ fontSize: 18, fontWeight: 800, marginTop: 12, marginBottom: 8 }}>問題を じゅんび中です</div>
           <div style={{ color: COLORS.textLight, lineHeight: 1.6, marginBottom: 16 }}>
             このレベルの問題が まだ少ないみたい。<br />
@@ -189,11 +195,11 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
 
         {/* キャラクター */}
-        <MameCharacter
+        <CharaComponent
           pose={resultPose}
           message={resultMsg}
           size={100}
-          petName={displayName}
+          {...{[charaNameProp]: displayName}}
         />
 
         {/* スコア表示 */}
@@ -400,7 +406,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, onComplete, 
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <MameCharacter pose={mamePose} message={mameMsg} size={70} petName={displayName} />
+          <CharaComponent pose={mamePose} message={mameMsg} size={70} {...{[charaNameProp]: displayName}} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
