@@ -75,6 +75,18 @@ export const migrateDeviceDataToUser = async (userId) => {
     const deviceId = getDeviceId();
     console.log('🔄 データ移行開始:', { userId: userId.slice(0, 8) + '...', deviceId: deviceId.slice(0, 20) + '...' });
 
+    // ⛑️ ガード: このデバイスに別ユーザーのデータがあるならスキップ
+    const { data: existing } = await supabase.from('user_progress')
+      .select('user_id')
+      .eq('device_id', deviceId)
+      .not('user_id', 'is', null)
+      .neq('user_id', userId)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      console.log('⚠️ このデバイスに別ユーザーのデータあり。移行スキップ（データ保護）');
+      return;
+    }
+
     // 1. 現デバイスの全データにuser_idを書き込む
     await supabase.from('user_progress')
       .update({ user_id: userId })
@@ -260,19 +272,30 @@ export const loadProgress = async () => {
     if (currentUserId && !deviceMigrated) {
       deviceMigrated = true;
       try {
-        await supabase.from('user_progress')
-          .update({ user_id: currentUserId })
+        // ⛑️ ガード: 別ユーザーのデータがあるなら刻印しない
+        const { data: otherUser } = await supabase.from('user_progress')
+          .select('user_id')
           .eq('device_id', deviceId)
-          .is('user_id', null);
-        await supabase.from('learning_sessions')
-          .update({ user_id: currentUserId })
-          .eq('device_id', deviceId)
-          .is('user_id', null);
-        await supabase.from('answer_history')
-          .update({ user_id: currentUserId })
-          .eq('device_id', deviceId)
-          .is('user_id', null);
-        console.log('🔄 デバイスデータ自動刻印完了');
+          .not('user_id', 'is', null)
+          .neq('user_id', currentUserId)
+          .limit(1);
+        if (otherUser && otherUser.length > 0) {
+          console.log('⚠️ 別ユーザーのデバイスデータあり。自動刻印スキップ');
+        } else {
+          await supabase.from('user_progress')
+            .update({ user_id: currentUserId })
+            .eq('device_id', deviceId)
+            .is('user_id', null);
+          await supabase.from('learning_sessions')
+            .update({ user_id: currentUserId })
+            .eq('device_id', deviceId)
+            .is('user_id', null);
+          await supabase.from('answer_history')
+            .update({ user_id: currentUserId })
+            .eq('device_id', deviceId)
+            .is('user_id', null);
+          console.log('🔄 デバイスデータ自動刻印完了');
+        }
       } catch (e) {
         console.warn('⚠️ 自動刻印エラー（続行可能）:', e.message);
       }
@@ -322,6 +345,7 @@ export const loadProgress = async () => {
 
     // ============================================
     // user_idで見つからなければdevice_idで検索
+    // ⛑️ ただし別ユーザーのデータは使わない（同一デバイス複数アカウント対策）
     // ============================================
     if (!data) {
       const { data: row, error } = await supabase
@@ -330,9 +354,16 @@ export const loadProgress = async () => {
         .eq('device_id', deviceId)
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        // レコードなし → 新規作成
-        console.log('🌱 初回アクセス: 進捗データを新規作成');
+      // 別ユーザーのデータ or レコードなし → 新規作成
+      const isOtherUserData = !error && row && row.user_id && currentUserId && row.user_id !== currentUserId;
+      const isNoRecord = error && error.code === 'PGRST116';
+
+      if (isOtherUserData || isNoRecord) {
+        if (isOtherUserData) {
+          console.log('⚠️ device_idフォールバック: 別ユーザーのデータのため新規作成');
+        } else {
+          console.log('🌱 初回アクセス: 進捗データを新規作成');
+        }
         const { data: newData, error: insertError } = await supabase
           .from('user_progress')
           .insert({
