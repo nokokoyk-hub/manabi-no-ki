@@ -2,6 +2,7 @@
 // 🔐 AuthScreen - ログイン画面
 // まなびの木 - Phase A 認証基盤
 // v1.0.1: OTPコード方式に変更（2026/06/24）
+// v1.0.2: ロボちゃん＆まめ お出迎え配置（2026/06/26）
 // ============================================
 // Googleログイン（メイン推奨）
 // + メールOTP（8桁コード入力・PWA対応）
@@ -9,6 +10,7 @@
 
 import React, { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import RobotCharacter from '../components/RobotCharacter';
 
 // ------------------------------------------
 // WebView判定
@@ -152,11 +154,25 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho, onOpenHowTo }
       <div style={styles.card}>
         {/* ===== ロゴ・タイトル ===== */}
         <div style={styles.logoSection}>
-          <img
-            src="/public/images/mame/mame_happy.png"
-            alt="まなびの木"
-            style={styles.logo}
-          />
+          {/* ロボちゃん＆まめ お出迎え */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            gap: 12,
+            marginBottom: 8,
+          }}>
+            <RobotCharacter pose="wave" size={64} />
+            <img
+              src="/public/images/mame/mame_happy.png"
+              alt="まめ"
+              style={{
+                width: 64,
+                height: 64,
+                objectFit: 'contain',
+              }}
+            />
+          </div>
           <h1 style={styles.title}>🌳 まなびの木</h1>
           <p style={styles.subtitle}>まなぶほど 木が そだつ</p>
         </div>
