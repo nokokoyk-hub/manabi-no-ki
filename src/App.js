@@ -47,6 +47,7 @@ import {
   checkCostumeUnlocks,
   setCurrentUserId,
   migrateDeviceDataToUser,
+  checkAndSwitchUser,
 } from './lib/storage';
 import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
@@ -101,6 +102,17 @@ function App() {
 
     const fetchProfile = async () => {
       try {
+        // ⛑️ v1.0.2: アカウント切替検出（前のユーザーのlocalStorageをクリア）
+        const userSwitched = checkAndSwitchUser(user.id);
+        if (userSwitched) {
+          // localStorageクリア済み → stateもデフォルトに戻す
+          setPetName(null);
+          setCostumeData({ equippedItem: null, unlockedItems: ['item_none'], missionCount: 0 });
+          setPuzzleData({ completed: [], current: null });
+          setSubjectLevels({});
+          console.log('🔄 アカウント変更: stateもリセット完了');
+        }
+
         // Phase A-4: デバイスデータをuser_idに紐付け + 進捗再読み込み
         await migrateDeviceDataToUser(user.id);
         const migrated = await loadProgress();
@@ -116,17 +128,29 @@ function App() {
           .eq('id', user.id)
           .single();
 
+        // ⛑️ profile自動作成フォールバック（トリガー不発対策 v1.0.2）
+        let profileData = data;
         if (error || !data) {
-          console.error('Profile取得エラー:', error);
-          setUserPlan('trial');
-          return;
+          console.log('⚠️ Profile未発見 → 自動作成を試みます');
+          const { data: newProfile, error: createErr } = await supabase
+            .from('profiles')
+            .upsert({ id: user.id, trial_started_at: new Date().toISOString() })
+            .select('subscription_status, trial_started_at, stripe_customer_id')
+            .single();
+          if (createErr || !newProfile) {
+            console.error('Profile自動作成エラー:', createErr);
+            setUserPlan('trial');
+            return;
+          }
+          profileData = newProfile;
+          console.log('✅ Profile自動作成完了');
         }
 
-        let status = data.subscription_status;
+        let status = profileData.subscription_status;
         let daysLeft = null;
 
-        if (status === 'trial' && data.trial_started_at) {
-          const trialStart = new Date(data.trial_started_at);
+        if (status === 'trial' && profileData.trial_started_at) {
+          const trialStart = new Date(profileData.trial_started_at);
           const now = new Date();
           const daysPassed = Math.floor((now - trialStart) / (1000 * 60 * 60 * 24));
           daysLeft = Math.max(0, 5 - daysPassed);
@@ -144,7 +168,7 @@ function App() {
 
         setUserPlan(status);
         setTrialDaysLeft(daysLeft);
-        setHasStripeCustomer(!!data.stripe_customer_id);
+        setHasStripeCustomer(!!profileData.stripe_customer_id);
       } catch (err) {
         console.error('Profile取得例外:', err);
         setUserPlan('trial');
@@ -173,6 +197,16 @@ function App() {
 
   // 🐕 ペット名（キャラ名カスタマイズ）
   const [petName, setPetName] = useState(() => loadPetName());
+
+  // 🤖 出題キャラ選択（'mame' or 'robot'）v1.0.2
+  const [selectedCharacter, setSelectedCharacter] = useState(() => {
+    try { return localStorage.getItem('manabi_selected_character') || 'mame'; }
+    catch { return 'mame'; }
+  });
+  const handleCharacterChange = (char) => {
+    setSelectedCharacter(char);
+    try { localStorage.setItem('manabi_selected_character', char); } catch {}
+  };
 
   // 🧩 パズルデータ
   const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
@@ -435,6 +469,7 @@ function App() {
             mode={learningMode}
             subjectLevels={subjectLevels}
             petName={displayName}
+            selectedCharacter={selectedCharacter}
             onComplete={handleLearningComplete}
             onBack={() => setScreen('home')}
             displayMode={displayMode}
@@ -547,6 +582,8 @@ function App() {
             equippedItem={costumeData.equippedItem}
             userPlan={userPlan}
             trialDaysLeft={trialDaysLeft}
+            selectedCharacter={selectedCharacter}
+            onCharacterChange={handleCharacterChange}
             onStartLearning={() => startLearning('mission')}
             onOpenMath={() => setScreen('subject-math')}
             onOpenKokugo={() => setScreen('subject-kokugo')}

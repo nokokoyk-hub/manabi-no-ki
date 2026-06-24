@@ -1,8 +1,9 @@
 // ============================================
 // 🏠 HomeScreen - メインホーム画面
-// まなびの木 + キャラ🐕 + ミッションボタン + ナビ
+// まなびの木 + キャラ🐕🤖 + ミッションボタン + ナビ
 // v0.6.0: petName対応（キャラ名カスタマイズ）
 // v0.9.2: 教科再構成（しゃかい🗾・どうとく💛追加、2×3グリッド化）
+// v1.0.2: キャラ選択機能（まめ/ロボちゃん切替）（2026/06/26）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -15,7 +16,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
-  userPlan, trialDaysLeft,
+  userPlan, trialDaysLeft, selectedCharacter, onCharacterChange,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
 }) => {
   const isFree = userPlan === 'free';
@@ -143,16 +144,47 @@ const HomeScreen = ({
         display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
         padding: '0 10px', marginTop: 8,
       }}>
-        {/* ロボットくんは木の左に */}
-        <div style={{ flexShrink: 0, width: 72, marginRight: -8, zIndex: 1, overflow: 'visible' }}>
+        {/* ロボットくんは木の左に（タップで出題キャラ選択） */}
+        <div
+          onClick={() => onCharacterChange && onCharacterChange('robot')}
+          style={{
+            flexShrink: 0, width: 72, marginRight: -8, zIndex: 1, overflow: 'visible',
+            position: 'relative', cursor: 'pointer',
+          }}
+        >
+          {selectedCharacter === 'robot' && (
+            <div style={{
+              position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+              fontSize: 10, fontWeight: 800, color: '#FF9800',
+              background: '#FFF8E1', borderRadius: 8, padding: '2px 6px',
+              whiteSpace: 'nowrap', zIndex: 5,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            }}>🎯 せんせい</div>
+          )}
           <RobotCharacter
             pose={todayDone ? 'cheer' : 'wave'}
             size={72}
+            enableTap={false}
           />
         </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
-        {/* まめは木の右に */}
-        <div style={{ flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible', position: 'relative' }}>
+        {/* まめは木の右に（タップで出題キャラ選択） */}
+        <div
+          onClick={() => onCharacterChange && onCharacterChange('mame')}
+          style={{
+            flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible',
+            position: 'relative', cursor: 'pointer',
+          }}
+        >
+          {selectedCharacter === 'mame' && (
+            <div style={{
+              position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+              fontSize: 10, fontWeight: 800, color: '#FF9800',
+              background: '#FFF8E1', borderRadius: 8, padding: '2px 6px',
+              whiteSpace: 'nowrap', zIndex: 5,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            }}>🎯 せんせい</div>
+          )}
           {/* ホーム専用吹き出し（まめの左上・コメントに合わせて伸縮） */}
           {mameMessage && (
             <div style={{
