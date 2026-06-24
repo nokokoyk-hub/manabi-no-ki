@@ -382,9 +382,39 @@ export const loadProgress = async () => {
 
     // ============================================
     // user_idで見つからなければdevice_idで検索
-    // ⛑️ ただし別ユーザーのデータは使わない（同一デバイス複数アカウント対策）
+    // ⛑️ v1.0.2: ログイン中はdevice_idフォールバック完全スキップ
+    //    → migrateDeviceDataToUserが先に紐付け済み
+    //    → ここでdevice_id検索すると他人のマージ残骸を拾うリスクあり
     // ============================================
-    if (!data) {
+    if (!data && currentUserId) {
+      // ログイン済みだがuser_idでデータが見つからない → 新規作成
+      console.log('🌱 ログイン済み・データなし → 新規作成');
+      const { data: newData, error: insertError } = await supabase
+        .from('user_progress')
+        .insert({
+          device_id: deviceId,
+          user_id: currentUserId,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ 進捗作成エラー:', insertError);
+        return DEFAULT_PROGRESS;
+      }
+
+      return {
+        leaves: newData.leaves,
+        flowers: newData.flowers,
+        fruits: newData.fruits,
+        streak: newData.streak,
+        todayDone: newData.today_done,
+        lastStudyDate: newData.last_study_date,
+      };
+    }
+
+    // 未ログイン時のみdevice_idフォールバック
+    if (!data && !currentUserId) {
       const { data: row, error } = await supabase
         .from('user_progress')
         .select('*')
