@@ -257,12 +257,13 @@
 8. ~~**UpdateBannerの自動消去タイミング調整**~~ ✅ **15秒に延長（v1.0.1）**
 9. **ストア掲載素材（スクリーンショット・説明文・フィーチャーグラフィック）** 🔴
 10. **TWAビルド + Digital Asset Links** 🔴
-11. Phase A-4: device_id → user_id 移行 🟡
+11. ~~Phase A-4: device_id → user_id 移行~~ ✅ **完了（6/25）**
 12. Google Play Store 公開（TWA） 🟡
 13. FukushuScreen改修 🟡
 14. 問題追加（とけいLv2補強、りかLv4-5等） 🟡
-15. ロボットくん名前機能 🟡
+15. ロボットくん名前機能 + キャラ選択（出題時キャラ交代/ランダム） 🟡
 16. UI調整 🟡
+17. **Supabase Pro Plan移行（auth.manabinoki.net化）** 🟡
 
 ---
 
@@ -321,7 +322,7 @@
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
 | デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
-| device_id / user_id 二重管理 | storage.jsはまだdevice_idベース。Phase A-4で移行予定 | 🟡 |
+| ~~device_id / user_id 二重管理~~ | ✅ **Phase A-4で解決済み（6/25）。学習データ3テーブルにuser_idカラム追加、loadProgressに自動刻印+マージ内蔵** | ✅ |
 | ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
 | ~~OG画像未設定~~ | ✅ **og-image.png設定済み（v1.0.1）** | ✅ |
@@ -372,6 +373,7 @@
 | 利用規約 | `src/screens/TermsScreen.js` | 認証前からアクセス可能 |
 | プライバシーポリシー | `src/screens/PrivacyScreen.js` | 認証前からアクセス可能 |
 | 特商法表記 | `src/screens/TokushohoScreen.js` | 認証前からアクセス可能 |
+| つかいかたガイド | `src/screens/HowToScreen.js` | 認証前からアクセス可能（v1.0.2〜） |
 
 - AuthScreen（ログイン画面）下部にリンク配置
 - MimamoriScreen（保護者画面）下部にリンク配置
@@ -395,7 +397,7 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - [x] **Phase C: トライアル制限ロジック** ✅（v0.9.9）
 - [x] **Phase D: Stripe Checkout連携** ✅（v0.9.9・テスト→6/19本番切替完了）
 - [x] **Phase D-2: 解約機能（Customer Portal）** ✅（6/19実装）
-- [ ] Phase A-4: device_id → user_id 移行（別途）
+- [x] **Phase A-4: device_id → user_id 移行** ✅（6/25実装・テスト完了）
 
 ---
 
@@ -418,9 +420,10 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - **Edge Function認証**: `getUser()`はES256 JWT互換性問題あり→JWT直接Base64デコード方式を使用。`verify_jwt: false`で自前認証
 - **Edge Function呼び出し**: `supabase.functions.invoke()`ではなく`fetch`直接+`getSession()`でトークン明示送信が確実
 - **Stripeアカウント**: まなびの木専用（`acct_1TjaQSDVjCZnmwjF`）。お受験マネージャーとは完全分離
+- **学習データ同期（Phase A-4）**: storage.jsはuser_id優先（未ログイン時はdevice_idフォールバック）。loadProgressに自動刻印+複数デバイスマージが内蔵済み。`setCurrentUserId()`はApp.jsのfetchProfile useEffectで呼ぶ
 
 ---
 
-> 最終更新: 2026年6月24日（火）JST
-> 更新者: ちゃぴ（スレッド21）
-> バージョン: v1.0.1（メール認証OTP化、PWAログイン修正、OG画像設定、キャラ配置改善、ストア素材準備）
+> 最終更新: 2026年6月25日（水）JST
+> 更新者: ちゃぴ（スレッド22）
+> バージョン: v1.0.1（v1.0.2候補: OTP改善、Phase A-4完了、つかいかたガイドLP追加）
