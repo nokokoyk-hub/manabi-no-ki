@@ -116,17 +116,29 @@ function App() {
           .eq('id', user.id)
           .single();
 
+        // ⛑️ profile自動作成フォールバック（トリガー不発対策 v1.0.2）
+        let profileData = data;
         if (error || !data) {
-          console.error('Profile取得エラー:', error);
-          setUserPlan('trial');
-          return;
+          console.log('⚠️ Profile未発見 → 自動作成を試みます');
+          const { data: newProfile, error: createErr } = await supabase
+            .from('profiles')
+            .upsert({ id: user.id, trial_started_at: new Date().toISOString() })
+            .select('subscription_status, trial_started_at, stripe_customer_id')
+            .single();
+          if (createErr || !newProfile) {
+            console.error('Profile自動作成エラー:', createErr);
+            setUserPlan('trial');
+            return;
+          }
+          profileData = newProfile;
+          console.log('✅ Profile自動作成完了');
         }
 
-        let status = data.subscription_status;
+        let status = profileData.subscription_status;
         let daysLeft = null;
 
-        if (status === 'trial' && data.trial_started_at) {
-          const trialStart = new Date(data.trial_started_at);
+        if (status === 'trial' && profileData.trial_started_at) {
+          const trialStart = new Date(profileData.trial_started_at);
           const now = new Date();
           const daysPassed = Math.floor((now - trialStart) / (1000 * 60 * 60 * 24));
           daysLeft = Math.max(0, 5 - daysPassed);
@@ -144,7 +156,7 @@ function App() {
 
         setUserPlan(status);
         setTrialDaysLeft(daysLeft);
-        setHasStripeCustomer(!!data.stripe_customer_id);
+        setHasStripeCustomer(!!profileData.stripe_customer_id);
       } catch (err) {
         console.error('Profile取得例外:', err);
         setUserPlan('trial');
