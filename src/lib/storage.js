@@ -2,7 +2,7 @@
 // 📦 storage.js - データ保存・読み込みモジュール
 // まなびの木
 // Supabase + localStorage ハイブリッド
-// v1.0.2: Phase A-4 device_id → user_id 移行対応
+// v1.0.3: user_id一本化。device_idフォールバック完全廃止（2026/06/26）
 // ============================================
 
 import { supabase } from './supabase';
@@ -65,127 +65,44 @@ export const getDeviceId = () => {
 // ============================================
 // 🔑 Phase A-4: user_id 管理
 // ログイン時にsetCurrentUserIdでセット
-// 以降すべてのDB操作はuser_id優先（未ログイン時はdevice_idフォールバック）
+// v1.0.3: user_idのみで管理
 // ============================================
 let currentUserId = null;
-let deviceMigrated = false; // セッション中1回だけauto-migrateするフラグ
 
 export const setCurrentUserId = (userId) => {
   currentUserId = userId;
-  deviceMigrated = false; // ユーザー切替時にリセット
   console.log('🆔 ユーザーID設定:', userId ? '✅' : '❌ (未ログイン)');
 };
 
 export const getCurrentUserId = () => currentUserId;
 
 /**
- * Supabaseクエリに user_id or device_id フィルタを適用
- * ログイン中 → user_id で検索（クロスデバイス対応）
- * 未ログイン → device_id で検索（従来互換）
+ * Supabaseクエリに user_id フィルタを適用
+ * v1.0.3: user_idのみ。device_idフォールバック廃止
  */
 const applyIdFilter = (query) => {
-  if (currentUserId) {
-    return query.eq('user_id', currentUserId);
+  if (!currentUserId) {
+    console.warn('⚠️ applyIdFilter: 未ログイン状態');
+    return query.eq('user_id', 'NONE'); // 未ログイン時は何もヒットさせない
   }
-  return query.eq('device_id', getDeviceId());
+  return query.eq('user_id', currentUserId);
 };
 
 /**
  * INSERT時に付与するID情報
- * device_idは常にセット（トレーサビリティ用）
- * user_idはログイン中のみセット
+ * v1.0.3: user_id必須。device_idはトレーサビリティ用に残す
  */
 const getInsertIds = () => ({
   device_id: getDeviceId(),
-  ...(currentUserId ? { user_id: currentUserId } : {}),
+  user_id: currentUserId || null,
 });
 
 /**
- * 初回ログイン時のデータ移行
- * 現デバイスのdevice_idデータにuser_idを紐付ける
- * + 複数デバイスのuser_progressをマージ（大きい方の値を採用）
+ * v1.0.3: 廃止（互換性のためexportは残す）
+ * device_id→user_id移行はもう不要。ログイン時はuser_idで直接検索する
  */
 export const migrateDeviceDataToUser = async (userId) => {
-  if (!supabase || !userId) return;
-
-  try {
-    const deviceId = getDeviceId();
-    console.log('🔄 データ移行開始:', { userId: userId.slice(0, 8) + '...', deviceId: deviceId.slice(0, 20) + '...' });
-
-    // ⛑️ ガード: このデバイスに別ユーザーのデータがあるならスキップ
-    const { data: existing } = await supabase.from('user_progress')
-      .select('user_id')
-      .eq('device_id', deviceId)
-      .not('user_id', 'is', null)
-      .neq('user_id', userId)
-      .limit(1);
-    if (existing && existing.length > 0) {
-      console.log('⚠️ このデバイスに別ユーザーのデータあり。移行スキップ（データ保護）');
-      return;
-    }
-
-    // 1. 現デバイスの全データにuser_idを書き込む
-    await supabase.from('user_progress')
-      .update({ user_id: userId })
-      .eq('device_id', deviceId)
-      .is('user_id', null);
-
-    await supabase.from('learning_sessions')
-      .update({ user_id: userId })
-      .eq('device_id', deviceId)
-      .is('user_id', null);
-
-    await supabase.from('answer_history')
-      .update({ user_id: userId })
-      .eq('device_id', deviceId)
-      .is('user_id', null);
-
-    // 2. user_progressの複数レコード統合（B案: 大きい方を採用）
-    const { data: allProgress } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (allProgress && allProgress.length > 1) {
-      console.log(`🔀 user_progress ${allProgress.length}件を統合中...`);
-
-      // 各値の最大値を採用（ユーザーの努力を消さない）
-      const merged = {
-        leaves: Math.max(...allProgress.map(p => p.leaves || 0)),
-        flowers: Math.max(...allProgress.map(p => p.flowers || 0)),
-        fruits: Math.max(...allProgress.map(p => p.fruits || 0)),
-        streak: Math.max(...allProgress.map(p => p.streak || 0)),
-        today_done: allProgress.some(p => p.today_done),
-      };
-
-      // last_study_dateは最新を採用
-      const dates = allProgress
-        .map(p => p.last_study_date)
-        .filter(Boolean)
-        .sort()
-        .reverse();
-      if (dates.length > 0) merged.last_study_date = dates[0];
-
-      // メインレコード（最初の1件）を統合値で更新
-      const mainId = allProgress[0].id;
-      await supabase.from('user_progress')
-        .update(merged)
-        .eq('id', mainId);
-
-      // サブレコードのuser_idをクリア（データは残す、紐付きだけ外す）
-      for (let i = 1; i < allProgress.length; i++) {
-        await supabase.from('user_progress')
-          .update({ user_id: null })
-          .eq('id', allProgress[i].id);
-      }
-
-      console.log('✅ user_progress統合完了:', merged);
-    }
-
-    console.log('✅ データ移行完了');
-  } catch (err) {
-    console.error('⚠️ データ移行エラー（続行可能）:', err);
-  }
+  // 何もしない（v1.0.3で廃止）
 };
 
 // ------------------------------------------
@@ -288,111 +205,34 @@ export const DEFAULT_PROGRESS = {
 };
 
 // ------------------------------------------
-// 🌳 進捗の読み込み（user_id優先・device_idフォールバック）
+// 🌳 進捗の読み込み（v1.0.3: user_idのみ。シンプル設計）
 // ------------------------------------------
 export const loadProgress = async () => {
-  if (!supabase) {
-    console.log('📦 ローカルモード: デフォルト値を使用');
-    return DEFAULT_PROGRESS;
-  }
+  if (!supabase) return DEFAULT_PROGRESS;
 
   try {
-    const deviceId = getDeviceId();
     const today = getTodayJST();
-    let data = null;
 
-    // ============================================
-    // 🔄 自動刻印（セッション中1回）
-    // このデバイスのdevice_idデータにuser_idを自動的に刻印
-    // App.jsのmigrateが走らなかった場合の安全ネット
-    // ============================================
-    if (currentUserId && !deviceMigrated) {
-      deviceMigrated = true;
-      try {
-        // ⛑️ ガード: 別ユーザーのデータがあるなら刻印しない
-        const { data: otherUser } = await supabase.from('user_progress')
-          .select('user_id')
-          .eq('device_id', deviceId)
-          .not('user_id', 'is', null)
-          .neq('user_id', currentUserId)
-          .limit(1);
-        if (otherUser && otherUser.length > 0) {
-          console.log('⚠️ 別ユーザーのデバイスデータあり。自動刻印スキップ');
-        } else {
-          await supabase.from('user_progress')
-            .update({ user_id: currentUserId })
-            .eq('device_id', deviceId)
-            .is('user_id', null);
-          await supabase.from('learning_sessions')
-            .update({ user_id: currentUserId })
-            .eq('device_id', deviceId)
-            .is('user_id', null);
-          await supabase.from('answer_history')
-            .update({ user_id: currentUserId })
-            .eq('device_id', deviceId)
-            .is('user_id', null);
-          console.log('🔄 デバイスデータ自動刻印完了');
-        }
-      } catch (e) {
-        console.warn('⚠️ 自動刻印エラー（続行可能）:', e.message);
-      }
+    // 未ログインならデフォルト（認証必須なので通常は到達しない）
+    if (!currentUserId) {
+      console.log('📦 未ログイン: デフォルト値を使用');
+      return DEFAULT_PROGRESS;
     }
 
-    // ============================================
-    // 🔍 user_idで全レコード取得（複数デバイス対応）
-    // ============================================
-    if (currentUserId) {
-      const { data: rows, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', currentUserId);
+    // user_idで検索（これだけ！）
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', currentUserId)
+      .single();
 
-      if (!error && rows && rows.length > 0) {
-        if (rows.length === 1) {
-          data = rows[0];
-        } else {
-          // 複数デバイスのデータ → マージ（B案: 大きい方を採用）
-          console.log(`🔀 ${rows.length}件のデバイスデータを統合中...`);
-          const merged = {
-            leaves: Math.max(...rows.map(r => r.leaves || 0)),
-            flowers: Math.max(...rows.map(r => r.flowers || 0)),
-            fruits: Math.max(...rows.map(r => r.fruits || 0)),
-            streak: Math.max(...rows.map(r => r.streak || 0)),
-            today_done: rows.some(r => r.today_done),
-          };
-          const dates = rows.map(r => r.last_study_date).filter(Boolean).sort().reverse();
-          if (dates.length > 0) merged.last_study_date = dates[0];
-
-          // メインレコードを統合値で更新
-          await supabase.from('user_progress')
-            .update(merged)
-            .eq('id', rows[0].id);
-
-          // サブレコードのuser_idをクリア（データは保持、紐付きだけ外す）
-          for (let i = 1; i < rows.length; i++) {
-            await supabase.from('user_progress')
-              .update({ user_id: null })
-              .eq('id', rows[i].id);
-          }
-          console.log('✅ デバイスデータ統合完了:', merged);
-          data = { ...rows[0], ...merged };
-        }
-      }
-    }
-
-    // ============================================
-    // user_idで見つからなければdevice_idで検索
-    // ⛑️ v1.0.2: ログイン中はdevice_idフォールバック完全スキップ
-    //    → migrateDeviceDataToUserが先に紐付け済み
-    //    → ここでdevice_id検索すると他人のマージ残骸を拾うリスクあり
-    // ============================================
-    if (!data && currentUserId) {
-      // ログイン済みだがuser_idでデータが見つからない → 新規作成
-      console.log('🌱 ログイン済み・データなし → 新規作成');
+    // レコードなし → 新規作成
+    if (error && error.code === 'PGRST116') {
+      console.log('🌱 新規ユーザー: 進捗データを作成');
       const { data: newData, error: insertError } = await supabase
         .from('user_progress')
         .insert({
-          device_id: deviceId,
+          device_id: getDeviceId(),
           user_id: currentUserId,
         })
         .select()
@@ -413,57 +253,12 @@ export const loadProgress = async () => {
       };
     }
 
-    // 未ログイン時のみdevice_idフォールバック
-    if (!data && !currentUserId) {
-      const { data: row, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('device_id', deviceId)
-        .single();
-
-      // 別ユーザーのデータ or レコードなし → 新規作成
-      const isOtherUserData = !error && row && row.user_id && currentUserId && row.user_id !== currentUserId;
-      const isNoRecord = error && error.code === 'PGRST116';
-
-      if (isOtherUserData || isNoRecord) {
-        if (isOtherUserData) {
-          console.log('⚠️ device_idフォールバック: 別ユーザーのデータのため新規作成');
-        } else {
-          console.log('🌱 初回アクセス: 進捗データを新規作成');
-        }
-        const { data: newData, error: insertError } = await supabase
-          .from('user_progress')
-          .insert({
-            device_id: deviceId,
-            ...(currentUserId ? { user_id: currentUserId } : {}),
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('❌ 進捗作成エラー:', insertError);
-          return DEFAULT_PROGRESS;
-        }
-
-        return {
-          leaves: newData.leaves,
-          flowers: newData.flowers,
-          fruits: newData.fruits,
-          streak: newData.streak,
-          todayDone: newData.today_done,
-          lastStudyDate: newData.last_study_date,
-        };
-      }
-
-      if (error) {
-        console.error('❌ 進捗読み込みエラー:', error);
-        return DEFAULT_PROGRESS;
-      }
-
-      data = row;
+    if (error) {
+      console.error('❌ 進捗読み込みエラー:', error);
+      return DEFAULT_PROGRESS;
     }
 
-    // ストリークの日付チェック
+    // ストリークの日付チェック（既存ロジック維持）
     let streak = data.streak;
     let todayDone = data.today_done;
 
@@ -474,14 +269,12 @@ export const loadProgress = async () => {
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
       if (lastDate !== today && lastDate !== yesterdayStr) {
-        // 2日以上空いた → ストリークリセット
         streak = 0;
         await applyIdFilter(
           supabase.from('user_progress').update({ streak: 0, today_done: false })
         );
       }
 
-      // 日付が変わった → todayDoneリセット
       if (lastDate !== today) {
         todayDone = false;
         await applyIdFilter(
