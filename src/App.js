@@ -174,6 +174,16 @@ function App() {
   // 🐕 ペット名（キャラ名カスタマイズ）
   const [petName, setPetName] = useState(() => loadPetName());
 
+  // 🤖 出題キャラ選択（'mame' or 'robot'）v1.0.2
+  const [selectedCharacter, setSelectedCharacter] = useState(() => {
+    try { return localStorage.getItem('manabi_selected_character') || 'mame'; }
+    catch { return 'mame'; }
+  });
+  const handleCharacterChange = (char) => {
+    setSelectedCharacter(char);
+    try { localStorage.setItem('manabi_selected_character', char); } catch {}
+  };
+
   // 🧩 パズルデータ
   const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
 
@@ -435,6 +445,7 @@ function App() {
             mode={learningMode}
             subjectLevels={subjectLevels}
             petName={displayName}
+            selectedCharacter={selectedCharacter}
             onComplete={handleLearningComplete}
             onBack={() => setScreen('home')}
             displayMode={displayMode}
@@ -547,6 +558,8 @@ function App() {
             equippedItem={costumeData.equippedItem}
             userPlan={userPlan}
             trialDaysLeft={trialDaysLeft}
+            selectedCharacter={selectedCharacter}
+            onCharacterChange={handleCharacterChange}
             onStartLearning={() => startLearning('mission')}
             onOpenMath={() => setScreen('subject-math')}
             onOpenKokugo={() => setScreen('subject-kokugo')}
