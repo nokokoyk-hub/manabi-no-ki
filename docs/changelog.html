@@ -20,6 +20,17 @@
 </head>
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
+   <div class="version">
+    <h2>v1.0.2 — クロスデバイス同期 + つかいかたガイド + OTP改善 🔄📱🔢</h2>
+    <p class="date">2026年6月26日（木）</p>
+    <ul>
+      <li><span class="tag new">NEW</span> 🔄 学習データのクロスデバイス同期 — PC・スマホ・タブレット間で学習進捗が自動同期されるようになりました（Phase A-4: device_id → user_id移行）</li>
+      <li><span class="tag new">NEW</span> 📱 つかいかたガイド追加 — はじめての方向けにSTEP1〜4の利用手順ガイドページを追加。iPhone/Android別の導入方法・料金表・FAQも掲載</li>
+      <li><span class="tag fix">FIX</span> 🔢 OTP入力画面の改善 — 8桁コードの入力欄にプレースホルダー（●●●●●●●●）追加、桁数カウンター表示、入力完了時の視覚フィードバックで見やすく</li>
+      <li><span class="tag new">NEW</span> ❓ FAQ追加 — supabase.coドメインの安全性に関する質問など、よくある質問と回答を追加</li>
+      <li><span class="tag infra">INFRA</span> 🗄️ DBマイグレーション — user_progress・learning_sessions・answer_historyにuser_idカラム追加。ログイン時自動刻印+複数デバイスマージ内蔵</li>
+    </ul>
+  </div>
   <div class="version">
     <h2>v1.0.1 — メール認証OTP化 + PWA改善 + OG画像 🔐📧🎨</h2>
     <p class="date">2026年6月24日（火）</p>
