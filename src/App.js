@@ -476,9 +476,10 @@ function App() {
           />
         );
       case 'mimamori':
+        if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} user={user} />;
         return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
       case 'level-settings':
-        if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} user={user} />;
         return (
           <LevelSettingsScreen
             levels={subjectLevels}
@@ -487,7 +488,7 @@ function App() {
           />
         );
       case 'fukushu':
-        if (!canAccessPremium) return <PremiumGate featureName="ふくしゅう" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="ふくしゅう" onBack={() => setScreen('home')} user={user} />;
         return (
           <FukushuScreen
             onBack={() => setScreen('home')}
@@ -506,7 +507,7 @@ function App() {
           />
         );
       case 'zukan':
-        if (!canAccessPremium) return <PremiumGate featureName="げんそずかん" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="げんそずかん" onBack={() => setScreen('home')} user={user} />;
         return (
           <ZukanScreen
             onBack={() => setScreen('home')}
@@ -514,7 +515,7 @@ function App() {
           />
         );
       case 'subject-kokugo':
-        if (!canAccessPremium) return <PremiumGate featureName="こくご れんしゅう" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="こくご れんしゅう" onBack={() => setScreen('home')} user={user} />;
         return (
           <SubjectMenuScreen
             subject="kokugo"
@@ -525,7 +526,7 @@ function App() {
           />
         );
       case 'subject-genso':
-        if (!canAccessPremium) return <PremiumGate featureName="げんそ" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="げんそ" onBack={() => setScreen('home')} user={user} />;
         return (
           <SubjectMenuScreen
             subject="genso"
@@ -537,7 +538,7 @@ function App() {
           />
         );
       case 'subject-math':
-        if (!canAccessPremium) return <PremiumGate featureName="さんすう れんしゅう" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="さんすう れんしゅう" onBack={() => setScreen('home')} user={user} />;
         return (
           <SubjectMenuScreen
             subject="math"
@@ -548,7 +549,7 @@ function App() {
           />
         );
       case 'subject-rika':
-        if (!canAccessPremium) return <PremiumGate featureName="りか れんしゅう" onBack={() => setScreen('home')} />;
+        if (!canAccessPremium) return <PremiumGate featureName="りか れんしゅう" onBack={() => setScreen('home')} user={user} />;
         return (
           <SubjectMenuScreen
             subject="rika"
@@ -559,7 +560,7 @@ function App() {
           />
         );
       case 'premium-gate':
-        return <PremiumGate featureName="この きのう" onBack={() => setScreen('home')} />;
+        return <PremiumGate featureName="この きのう" onBack={() => setScreen('home')} user={user} />;
       case 'terms':
         return <TermsScreen onBack={() => setScreen('home')} />;
       case 'privacy':
