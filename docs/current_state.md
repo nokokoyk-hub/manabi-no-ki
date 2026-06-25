@@ -30,10 +30,12 @@
 | version.json | `public/version.json` → `"version": "1.0.1"` |
 | docs/version.json | `docs/version.json` → `"version": "1.0.1"` |
 | package.json | `"version": "1.0.1"` |
-| 最終更新日 | 2026年6月24日（火） |
+| 最終更新日 | 2026年6月26日（木） |
 
 > ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
-> ※ 4箇所すべてv1.0.0に統一済み。
+> ※ v1.0.2候補: OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能
+> ※ v1.0.3（DB設計刷新 6/26）: storage.js user_id一本化、device_idフォールバック完全廃止、ゴーストレコード大掃除、profile自動作成フォールバック、checkAndSwitchUser実装
+> ※ 4箇所すべてv1.0.1のまま（バンプはDB再構築完了後にまとめて実施予定）。
 
 ---
 
@@ -272,13 +274,37 @@
 ### ロボットくん
 - 水彩タッチのかわいいロボット。頭にアンテナ、お腹に水色ライト。
 - コンポーネント: `src/components/RobotCharacter.js`
-- 画像: `public/public/images/robot/` に3枚配置
+- 画像: `public/public/images/robot/` に18枚配置（v1.0.2で15枚追加）
+- MameCharacterと同じpose名に対応（キャラ選択時に同じ変数で切替可能）
+- 吹き出しメッセージ機能・きらきらパーティクル搭載
 
 | ファイル | ポーズ | 用途 |
 |----------|--------|------|
 | robot_wave.png | 👋 手振り | ホーム画面・通常 |
 | robot_cheer.png | 💪 ガッツポーズ | ミッションクリア後 |
-| robot_icon.png | 📱 アイコン | favicon・PWA用（将来） |
+| robot_icon.png | 📱 アイコン | favicon・PWA用 |
+| robot_happy.png | 😊 にっこり | 正解時 |
+| robot_sad.png | 😢 しょんぼり | 不正解時 |
+| robot_question.png | ❓ はてな | 出題中 |
+| robot_jump.png | 🦘 ジャンプ | 2コンボ |
+| robot_medal.png | 🏅 メダル | 4コンボ以上 |
+| robot_cry_happy.png | 😭 嬉し泣き | 全問正解 |
+| robot_dash.png | 💨 ダッシュ | 問題読み込み中 |
+| robot_touched.png | 🥺 感動 | 復習画面 |
+| robot_flag.png | 🚩 旗 | ストリーク |
+| robot_heart.png | 💕 ハート | 好感度 |
+| robot_sleep.png | 💤 おやすみ | 休憩 |
+| robot_eat.png | 🔩 もぐもぐ | ボルト食べ |
+| robot_relax.png | ☕ リラックス | OIL缶 |
+| robot_sparkle.png | ✨ きらきら | 3コンボ |
+| robot_bow.png | 🙇 おじぎ | 挨拶 |
+
+### キャラ選択機能（v1.0.2〜 mainマージ済み）
+- App.js: `selectedCharacter` state（localStorage保存）
+- HomeScreen: まめ/ロボちゃんタップで切替 + 🎯せんせいバッジ
+- LearningScreen: CharaComponent切替ヘルパー（出題キャラ交代対応）
+- 対応済み画面: HomeScreen, LearningScreen
+- 未対応画面: FukushuScreen, GohoubiScreen, SubjectMenuScreen, LevelSettingsScreen（次回）
 
 ### 配置状況
 - **ホーム画面**: 木の左にロボットくん、右にまめ ✅
@@ -322,7 +348,12 @@
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
 | デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
-| ~~device_id / user_id 二重管理~~ | ✅ **Phase A-4で解決済み（6/25）。学習データ3テーブルにuser_idカラム追加、loadProgressに自動刻印+マージ内蔵** | ✅ |
+| ~~device_id / user_id 二重管理~~ | ✅ **v1.0.3でuser_id一本化完了（6/26）。device_idフォールバック完全廃止。storage.js 1,030行→823行** | ✅ |
+| RLS未強化 | user_progress/learning_sessions/answer_historyのRLSが`true`（全員閲覧可能）→ `auth.uid()=user_id`に要修正 | 🔴 |
+| ログアウト機能 | 未実装。同一デバイスで別アカウント切替ができない。兄弟利用に必要 | 🔴 |
+| signInWithOtp shouldCreateUser | 未指定のため未登録メールでauth.usersが自動作成される（孤児ユーザーの原因） | 🔴 |
+| auth孤児ユーザー | profilesにもsoul_usersにもないauth.usersが6件存在。掃除必要 | 🟡 |
+| appタグ未設定 | auth.users 15件中13件にappタグなし。トリガー振り分けが不十分 | 🟡 |
 | ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
 | ~~OG画像未設定~~ | ✅ **og-image.png設定済み（v1.0.1）** | ✅ |
@@ -420,10 +451,14 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - **Edge Function認証**: `getUser()`はES256 JWT互換性問題あり→JWT直接Base64デコード方式を使用。`verify_jwt: false`で自前認証
 - **Edge Function呼び出し**: `supabase.functions.invoke()`ではなく`fetch`直接+`getSession()`でトークン明示送信が確実
 - **Stripeアカウント**: まなびの木専用（`acct_1TjaQSDVjCZnmwjF`）。お受験マネージャーとは完全分離
-- **学習データ同期（Phase A-4）**: storage.jsはuser_id優先（未ログイン時はdevice_idフォールバック）。loadProgressに自動刻印+複数デバイスマージが内蔵済み。`setCurrentUserId()`はApp.jsのfetchProfile useEffectで呼ぶ
+- **学習データ同期（v1.0.3）**: storage.jsはuser_id一本化（1,030行→823行）。device_idフォールバック完全廃止。migrateDeviceDataToUserは空関数化。loadProgress: user_idで1件取得のシンプル設計。アカウント切替検出（checkAndSwitchUser）＋localStorage自動クリア＋stateリセット実装済
+- **profile自動作成**: App.jsのfetchProfile内にupsertフォールバック追加済（トリガー不発対策）
+- **DB構造ドキュメント**: `docs/supabase_structure.md` に全テーブルスキーマ・RLS・トリガー・依存マップ・既知問題・DontTouchリスト記載
+- **Supabase Pro**: お受験マネージャーのみPro組織（$25/月）。まなびの木は別Free組織（DB再構築中）。再構築完了後にPro合流予定
 
 ---
 
-> 最終更新: 2026年6月25日（水）JST
-> 更新者: ちゃぴ（スレッド22）
-> バージョン: v1.0.1（v1.0.2候補: OTP改善、Phase A-4完了、つかいかたガイドLP追加）
+> 最終更新: 2026年6月26日（木）JST
+> 更新者: ちゃぴ（スレッド23）
+> バージョン: v1.0.1（v1.0.3相当の変更済み。バンプはDB再構築完了後）
+> DB構造ドキュメント: `docs/supabase_structure.md`
