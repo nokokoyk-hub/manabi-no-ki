@@ -96,7 +96,7 @@ const AccuracyChart = ({ data }) => {
   );
 };
 
-const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, userPlan, hasStripeCustomer, onOpenTerms, onOpenPrivacy, onOpenTokushoho }) => {
+const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, user, userPlan, hasStripeCustomer, onOpenTerms, onOpenPrivacy, onOpenTokushoho, onLogout }) => {
   // ===== 🔐 PINゲート（Phase B）=====
   const [pinVerified, setPinVerified] = useState(false);
 
@@ -112,11 +112,11 @@ const MimamoriScreen = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettin
   }
 
   // ===== ここから通常のみまもり画面 =====
-  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} />;
+  return <MimamoriContent onBack={onBack} streak={streak} appVersion={appVersion} onOpenLevelSettings={onOpenLevelSettings} displayMode={displayMode} onChangeDisplayMode={onChangeDisplayMode} onOpenTerms={onOpenTerms} onOpenPrivacy={onOpenPrivacy} onOpenTokushoho={onOpenTokushoho} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onLogout={onLogout} />;
 };
 
 // --- 既存のみまもり画面コンテンツ（PINゲート通過後に表示）---
-const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho, user, userPlan, hasStripeCustomer }) => {
+const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSettings, displayMode = 'hiragana', onChangeDisplayMode, onOpenTerms, onOpenPrivacy, onOpenTokushoho, user, userPlan, hasStripeCustomer, onLogout }) => {
   const [sessions, setSessions] = useState([]);
   const [subjectStats, setSubjectStats] = useState([]);
   const [dailyTrend, setDailyTrend] = useState([]);
@@ -662,6 +662,26 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
             </div>
           )}
         </div>
+
+        {/* 🔓 ログアウト（v1.0.2）*/}
+        {onLogout && (
+          <div style={{ textAlign: 'center', paddingBottom: 16 }}>
+            <button
+              onClick={onLogout}
+              style={{
+                background: 'none', border: '1px solid #E57373',
+                borderRadius: 20, padding: '10px 28px',
+                fontSize: 13, color: '#E57373',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              🔓 ログアウト
+            </button>
+            <div style={{ fontSize: 11, color: '#BDBDBD', marginTop: 6 }}>
+              べつの アカウントに きりかえられます
+            </div>
+          </div>
+        )}
 
         {/* ⑨ 更新履歴 + バージョン */}
         <div style={{ textAlign: 'center', paddingBottom: 16 }}>
