@@ -25,17 +25,16 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v1.0.1** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.1'` |
-| version.json | `public/version.json` → `"version": "1.0.1"` |
-| docs/version.json | `docs/version.json` → `"version": "1.0.1"` |
-| package.json | `"version": "1.0.1"` |
-| 最終更新日 | 2026年6月25日（木） |
+| 現在のバージョン | **v1.0.2** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.2'` |
+| version.json | `public/version.json` → `"version": "1.0.2"` |
+| docs/version.json | `docs/version.json` → `"version": "1.0.2"` |
+| package.json | `"version": "1.0.2"` |
+| 最終更新日 | 2026年6月26日（金） |
 
 > ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
-> ※ v1.0.2候補: OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能、PremiumGate課金ボタン追加、みまもりロック化
-> ※ v1.0.3（DB設計刷新 6/25-26）: storage.js user_id一本化、device_idフォールバック完全廃止、ゴーストレコード大掃除、profile自動作成フォールバック、checkAndSwitchUser実装、RLS強化（12ポリシー）、CASCADE追加（3テーブル）、管理ビュー刷新、delete_manabi_user()関数、孤児掃除
-> ※ 4箇所すべてv1.0.1のまま（ログアウト機能完了後にまとめてv1.0.2バンプ予定）。
+> ※ v1.0.2（6/26リリース）: ログアウト機能、appタグ自動付与、PremiumGate課金ボタン追加、みまもりロック化、キャラ別名前機能（NamingScreen 2キャラ対応）、ロボちゃん専用セリフ分離、吹き出しサイズ修正、OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能、DB設計刷新（user_id一本化・RLS強化12ポリシー・CASCADE追加）
+> ※ 4箇所すべてv1.0.2で同期済み。
 
 ---
 
@@ -306,6 +305,15 @@
 - 対応済み画面: HomeScreen, LearningScreen
 - 未対応画面: FukushuScreen, GohoubiScreen, SubjectMenuScreen, LevelSettingsScreen（次回）
 
+### キャラ別名前機能（v1.0.2〜）
+- NamingScreen.js: 2キャラ対応（まめ→ロボちゃんの順に名前入力）
+- storage.js: `loadRobotName` / `saveRobotName` / `DEFAULT_ROBOT_NAME` 追加
+- App.js: `robotName` state追加。`displayName` はselectedCharacterに応じて切替
+- mameMessages.js: `getCharaMessage(scene, name, character)` でキャラ別セリフ取得
+- ロボちゃん専用セリフ: ROBOT_HOME/QUESTION/CORRECT/WRONG/COMPLETE_MESSAGES（各6〜8個）
+- `loadPetName`: 初回・ログアウト後はnullを返す（NamingScreen表示のため）
+- 名前変更機能: 🔲 未実装（次回）
+
 ### 配置状況
 - **ホーム画面**: 木の左にロボットくん、右にまめ ✅
 - **ふわふわ浮遊アニメーション** ✅
@@ -350,8 +358,8 @@
 | デカいファイル | App.js(612行)・storage.js(823行)・MimamoriScreen.js(712行)・LearningScreen.js(462行)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
 | ~~device_id / user_id 二重管理~~ | ✅ **v1.0.3でuser_id一本化完了（6/25-26）。device_idフォールバック完全廃止。storage.js 1,030行→823行** | ✅ |
 | ~~RLS未強化~~ | ✅ **3テーブル12ポリシー設定完了（6/25）。auth.uid()=user_id。匿名アクセス完全遮断** | ✅ |
-| ログアウト機能 | 未実装。同一デバイスで別アカウント切替ができない。兄弟利用に必要 | 🔴 |
-| appタグ未設定 | auth.users 11件中9件にappタグなし。トリガー振り分けが不十分 | 🟡 |
+| ~~ログアウト機能~~ | ✅ **v1.0.2で実装完了（6/26）。みまもり画面＋PremiumGate両方にボタン。freeプランでもログアウト可能** | ✅ |
+| ~~appタグ未設定~~ | ✅ **SQL一括付与＋AuthScreen OTP＋App.jsフォールバックの3方面カバー（6/26）** | ✅ |
 | ~~auth孤児ユーザー~~ | ✅ **5件削除完了（6/25）。orphan_user_viewで監視可能。delete_manabi_user()で安全削除可能** | ✅ |
 | ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
@@ -459,7 +467,7 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 
 ---
 
-> 最終更新: 2026年6月25日（木）JST
-> 更新者: ちゃぴ（スレッド24）
-> バージョン: v1.0.1（v1.0.3相当のDB変更済み + RLS強化 + 課金導線改善。バンプはログアウト機能完了後）
+> 最終更新: 2026年6月26日（金）JST
+> 更新者: ちゃぴ（スレッド25）
+> バージョン: v1.0.2（ログアウト機能 + appタグ + キャラ別名前 + ロボちゃんセリフ分離 + DB設計刷新）
 > DB構造ドキュメント: `docs/supabase_structure.md`（正本）

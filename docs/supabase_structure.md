@@ -2,7 +2,7 @@
 
 > このファイルはSupabaseのDB設計の正本です。
 > テーブル変更・RLS変更・トリガー変更時は必ずこのファイルも更新すること。
-> 最終更新: 2026-06-25（JST）
+> 最終更新: 2026-06-26（JST）
 
 ---
 
@@ -14,7 +14,7 @@
 | 共有アプリ | **まなびの木**（学習アプリ）+ **soul-backup**（魂保存アプリ） |
 | auth.users | 両アプリで共有（同一認証基盤） |
 | アプリ識別方法 | `profiles` に存在 → まなびの木 / `soul_users` に存在 → soul-backup |
-| appタグ | `auth.users.raw_user_meta_data.app`（理想だが未設定が多い。13/15件がnull） |
+| appタグ | `auth.users.raw_user_meta_data.app`（まなびの木ユーザー全員に`manabi-no-ki`付与済み。新規はAuthScreen OTP＋App.jsフォールバックで自動付与） |
 
 ### ⚠️ 共有DBの絶対ルール
 - **まなびの木のコードからsoul_*テーブルに触らない**
@@ -247,15 +247,15 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 
 ## 7. 現在の問題点（調査結果 2026-06-25）
 
-### auth.users 11件の内訳
+### auth.users 9件の内訳
 
 | 状態 | 件数 | 説明 |
 |---|---|---|
-| 🌳 まなびの木のみ | 5件 | 正常 |
+| 🌳 まなびの木のみ | 4件 | 正常（appタグ付与済み） |
 | 👻 soulのみ | 3件 | 正常 |
-| ⚠️ 両方に所属 | 3件 | のんのテスト用。構造的に混線リスク |
+| ⚠️ 両方に所属 | 2件 | のんのテスト用。構造的に混線リスク |
 | 🔴 孤児 | **0件** | ✅ 6/25に5件削除完了 |
-| appタグ未設定 | 9/11件 | 振り分け機能が実質無効 |
+| appタグ設定済み | まなびの木全員 | ✅ 6/26にSQL一括＋自動付与設定完了 |
 
 ### 改善計画
 
@@ -264,8 +264,8 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 | RLS強化 | user_progress/learning_sessions/answer_history を auth.uid()=user_id に | ✅ **完了（6/25）** |
 | signInWithOtp修正 | shouldCreateUser: false 追加 | 🔴 次回 |
 | 孤児ユーザー掃除 | profilesにもsoul_usersにもないauth.users削除 | 🔴 次回 |
-| ログアウト機能 | みまもり画面にログアウトボタン追加 | 🔴 次回 |
-| appタグ付与の徹底 | AuthScreenでsignUp時にraw_user_meta_dataにappタグ設定 | 🔴 次回 |
+| ログアウト機能 | みまもり画面＋PremiumGateにログアウトボタン追加 | ✅ **完了（6/26）** |
+| appタグ付与の徹底 | SQL一括＋AuthScreen OTP＋App.jsフォールバック | ✅ **完了（6/26）** |
 | 重複所属の解消 | profiles＋soul_users両方にいる3件の整理 | 🟡 将来 |
 
 ---
@@ -300,5 +300,5 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 ---
 
 > 作成: ちゃぴ
-> 日時: 2026-06-25（木）スレッド24
-> 次回更新: ログアウト実装・孤児掃除・shouldCreateUser修正の実行後
+> 日時: 2026-06-26（金）スレッド25
+> 次回更新: 実の収穫機能実装・コレクションテーブル追加等
