@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 1.0.4
-// 最終更新: 2026/06/26
+// バージョン: 1.0.1
+// 最終更新: 2026/06/23
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -36,6 +36,9 @@ import {
   loadPetName,
   savePetName,
   DEFAULT_PET_NAME,
+  loadRobotName,
+  saveRobotName,
+  DEFAULT_ROBOT_NAME,
   loadPuzzleData,
   addPuzzlePiece,
   savePuzzleData,
@@ -53,7 +56,7 @@ import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '1.0.4';
+export const APP_VERSION = '1.0.2';
 
 function App() {
   // ===== 🔐 認証状態（Phase A）=====
@@ -204,6 +207,7 @@ function App() {
 
   // 🐕 ペット名（キャラ名カスタマイズ）
   const [petName, setPetName] = useState(() => loadPetName());
+  const [robotName, setRobotName] = useState(() => loadRobotName());
 
   // 🤖 出題キャラ選択（'mame' or 'robot'）v1.0.2
   const [selectedCharacter, setSelectedCharacter] = useState(() => {
@@ -220,12 +224,14 @@ function App() {
     if (!window.confirm('ログアウトしますか？\nべつの アカウントで ログインできます')) return;
     try {
       // localStorageクリア（ユーザー固有データ）
-      ['manabi_subject_levels', 'manabi_pet_name', 'manabi_puzzle',
+      ['manabi_subject_levels', 'manabi_pet_name', 'manabi_robot_name', 'manabi_puzzle',
        'manabi_costume', 'manabi_display_mode', 'manabi_guardian_pin',
        'manabi_selected_character', 'manabi_current_user_id'].forEach(k => {
         try { localStorage.removeItem(k); } catch {}
       });
       await supabase.auth.signOut();
+      setPetName(null);
+      setRobotName(null);
       setScreen('home');
     } catch (e) {
       console.error('ログアウトエラー:', e);
@@ -326,10 +332,14 @@ function App() {
     };
   }, []);
 
-  // ペット名決定ハンドラ
-  const handleNameDecided = useCallback((name) => {
-    const saved = savePetName(name);
-    setPetName(saved);
+  // キャラ名決定ハンドラ（v1.0.2: 2キャラ対応）
+  const handleNameDecided = useCallback((mameName, robotNameInput) => {
+    const savedMame = savePetName(mameName);
+    setPetName(savedMame);
+    if (robotNameInput) {
+      const savedRobot = saveRobotName(robotNameInput);
+      setRobotName(savedRobot);
+    }
   }, []);
 
   // 表示モード変更ハンドラ
@@ -409,7 +419,10 @@ function App() {
   };
 
   // 表示用のペット名（未設定時のフォールバック）
-  const displayName = petName || DEFAULT_PET_NAME;
+  // 🎯 v1.0.2: 選択中のキャラの名前を表示名にする
+  const displayName = selectedCharacter === 'robot'
+    ? (robotName || DEFAULT_ROBOT_NAME)
+    : (petName || DEFAULT_PET_NAME);
 
   // ===== 🔐 認証チェック（Phase A）=====
   // 認証ローディング中

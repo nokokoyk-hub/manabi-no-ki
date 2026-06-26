@@ -15,6 +15,8 @@ const DEVICE_ID_KEY = 'manabi_device_id';
 const SUBJECT_LEVELS_KEY = 'manabi_subject_levels';
 const PET_NAME_KEY = 'manabi_pet_name';
 const PET_NAME_BACKUP_KEY = 'manabi_pet_name_backup';
+const ROBOT_NAME_KEY = 'manabi_robot_name';
+const ROBOT_NAME_BACKUP_KEY = 'manabi_robot_name_backup';
 const CURRENT_USER_KEY = 'manabi_current_user_id';
 
 // ============================================
@@ -25,6 +27,7 @@ const CURRENT_USER_KEY = 'manabi_current_user_id';
 const USER_LOCAL_KEYS = [
   'manabi_subject_levels',
   'manabi_pet_name',
+  'manabi_robot_name',
   'manabi_puzzle',
   'manabi_costume',
   'manabi_display_mode',
@@ -157,7 +160,8 @@ export const loadPetName = () => {
       return DEFAULT_PET_NAME;
     }
 
-    return DEFAULT_PET_NAME;
+    // 完全な初回 or ログアウト後 → null を返してNamingScreen表示
+    return null;
   } catch (err) {
     console.error('❌ ペット名読み込みエラー:', err);
     return DEFAULT_PET_NAME;
@@ -181,6 +185,41 @@ export const backupPetNameForUpdate = () => {
     const name = localStorage.getItem(PET_NAME_KEY);
     if (name) sessionStorage.setItem(PET_NAME_BACKUP_KEY, name);
   } catch {}
+};
+
+// ============================================
+// 🤖 ロボちゃん名前（v1.0.2）
+// ============================================
+export const DEFAULT_ROBOT_NAME = 'ロボちゃん';
+
+export const loadRobotName = () => {
+  try {
+    const name = localStorage.getItem(ROBOT_NAME_KEY);
+    if (name && name.trim()) return name.trim();
+
+    const backupName = sessionStorage.getItem(ROBOT_NAME_BACKUP_KEY);
+    if (backupName && backupName.trim()) {
+      localStorage.setItem(ROBOT_NAME_KEY, backupName);
+      return backupName.trim();
+    }
+
+    return null;
+  } catch (err) {
+    console.error('❌ ロボちゃん名読み込みエラー:', err);
+    return null;
+  }
+};
+
+export const saveRobotName = (name) => {
+  try {
+    const safeName = (name && name.trim()) ? name.trim() : DEFAULT_ROBOT_NAME;
+    localStorage.setItem(ROBOT_NAME_KEY, safeName);
+    sessionStorage.setItem(ROBOT_NAME_BACKUP_KEY, safeName);
+    return safeName;
+  } catch (err) {
+    console.error('❌ ロボちゃん名保存エラー:', err);
+    return name;
+  }
 };
 
 // ------------------------------------------
