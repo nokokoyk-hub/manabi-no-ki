@@ -160,7 +160,8 @@ export const loadPetName = () => {
       return DEFAULT_PET_NAME;
     }
 
-    return DEFAULT_PET_NAME;
+    // 完全な初回 or ログアウト後 → null を返してNamingScreen表示
+    return null;
   } catch (err) {
     console.error('❌ ペット名読み込みエラー:', err);
     return DEFAULT_PET_NAME;
