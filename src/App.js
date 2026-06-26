@@ -230,6 +230,8 @@ function App() {
         try { localStorage.removeItem(k); } catch {}
       });
       await supabase.auth.signOut();
+      setPetName(null);
+      setRobotName(null);
       setScreen('home');
     } catch (e) {
       console.error('ログアウトエラー:', e);
