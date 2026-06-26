@@ -494,7 +494,7 @@ function App() {
           />
         );
       case 'mimamori':
-        if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} user={user} />;
+        if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} user={user} onLogout={handleLogout} />;
         return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} onLogout={handleLogout} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} user={user} />;
