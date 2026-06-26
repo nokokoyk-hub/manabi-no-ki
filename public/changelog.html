@@ -21,14 +21,21 @@
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
   <div class="version">
-    <h2>v1.0.2 — クロスデバイス同期 + つかいかたガイド + OTP改善 🔄📱🔢</h2>
-    <p class="date">2026年6月26日（木）</p>
+    <h2>v1.0.2 — ログアウト機能 + DB安全強化 + 課金導線改善 🔓🛡️💰</h2>
+    <p class="date">2026年6月26日（金）</p>
     <ul>
-      <li><span class="tag new">NEW</span> 🔄 学習データのクロスデバイス同期 — PC・スマホ・タブレット間で学習進捗が自動同期されるようになりました（Phase A-4: device_id → user_id移行）</li>
-      <li><span class="tag new">NEW</span> 📱 つかいかたガイド追加 — はじめての方向けにSTEP1〜4の利用手順ガイドページを追加。iPhone/Android別の導入方法・料金表・FAQも掲載</li>
-      <li><span class="tag fix">FIX</span> 🔢 OTP入力画面の改善 — 8桁コードの入力欄にプレースホルダー（●●●●●●●●）追加、桁数カウンター表示、入力完了時の視覚フィードバックで見やすく</li>
-      <li><span class="tag new">NEW</span> ❓ FAQ追加 — supabase.coドメインの安全性に関する質問など、よくある質問と回答を追加</li>
-      <li><span class="tag infra">INFRA</span> 🗄️ DBマイグレーション — user_progress・learning_sessions・answer_historyにuser_idカラム追加。ログイン時自動刻印+複数デバイスマージ内蔵</li>
+      <li><span class="tag new">NEW</span> 🔓 ログアウト機能 — みまもり画面からログアウトできるように！兄弟でアカウントを切り替えて使えます</li>
+      <li><span class="tag new">NEW</span> 🔓 無料プランでもログアウト可能 — みまもりのロック画面（PremiumGate）からもログアウトボタンにアクセスできます</li>
+      <li><span class="tag new">NEW</span> 💰 課金ボタン追加 — すべてのロック画面に「🌟プレミアムにアップグレード」ボタンを配置。どこからでも課金導線にアクセス可能に</li>
+      <li><span class="tag new">NEW</span> 🤖 キャラ選択機能 — ホーム画面・学習画面でまめとロボちゃんを切り替えられるように</li>
+      <li><span class="tag new">NEW</span> 🤖 ロボちゃん全18ポーズ対応 — 正解・不正解・コンボなど全場面でロボちゃんが反応します</li>
+      <li><span class="tag new">NEW</span> 📱 つかいかたガイド追加 — はじめての方向けにSTEP1〜4の利用手順ガイドページを追加</li>
+      <li><span class="tag fix">FIX</span> 🔢 OTP入力画面の改善 — 8桁コードの入力欄にプレースホルダー・桁数カウンター・入力完了時の視覚フィードバック追加</li>
+      <li><span class="tag fix">FIX</span> 🔄 学習データのクロスデバイス同期 — PC・スマホ・タブレット間で学習進捗が自動同期</li>
+      <li><span class="tag infra">INFRA</span> 🛡️ RLS強化 — 全学習データテーブルに認証ベースのアクセス制御を追加（他ユーザーのデータ閲覧を完全遮断）</li>
+      <li><span class="tag infra">INFRA</span> 🏷️ appタグ自動付与 — 新規登録・ログイン時にアプリ識別タグを自動設定</li>
+      <li><span class="tag infra">INFRA</span> 🗄️ DB設計刷新 — user_id一本化でデータ管理をシンプル化。ゴーストレコード問題を根本解決</li>
+      <li><span class="tag infra">INFRA</span> 🔗 CASCADE追加 — ユーザー削除時に関連データが自動連鎖削除される安全設計に</li>
     </ul>
   </div>
   <div class="version">
