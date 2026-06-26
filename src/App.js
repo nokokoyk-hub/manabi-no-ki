@@ -208,6 +208,24 @@ function App() {
     try { localStorage.setItem('manabi_selected_character', char); } catch {}
   };
 
+  // ===== 🔓 ログアウト（v1.0.2）=====
+  const handleLogout = async () => {
+    if (!window.confirm('ログアウトしますか？\nべつの アカウントで ログインできます')) return;
+    try {
+      // localStorageクリア（ユーザー固有データ）
+      ['manabi_subject_levels', 'manabi_pet_name', 'manabi_puzzle',
+       'manabi_costume', 'manabi_display_mode', 'manabi_guardian_pin',
+       'manabi_selected_character', 'manabi_current_user_id'].forEach(k => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+      await supabase.auth.signOut();
+      setScreen('home');
+    } catch (e) {
+      console.error('ログアウトエラー:', e);
+      alert('ログアウトに失敗しました。もう一度お試しください。');
+    }
+  };
+
   // 🧩 パズルデータ
   const [puzzleData, setPuzzleData] = useState(() => loadPuzzleData());
 
@@ -477,7 +495,7 @@ function App() {
         );
       case 'mimamori':
         if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} user={user} />;
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} onLogout={handleLogout} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} user={user} />;
         return (
