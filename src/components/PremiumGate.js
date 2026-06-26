@@ -17,7 +17,7 @@ import { COLORS } from '../constants/colors';
 
 const PAYMENT_LINK = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00';
 
-const PremiumGate = ({ onBack, featureName, user }) => {
+const PremiumGate = ({ onBack, featureName, user, onLogout }) => {
   const handleUpgrade = () => {
     const url = PAYMENT_LINK + (user?.id ? `?client_reference_id=${user.id}` : '');
     window.open(url, '_blank');
@@ -75,6 +75,26 @@ const PremiumGate = ({ onBack, featureName, user }) => {
         <div style={styles.benefitItem}>✅ レベルせってい</div>
         <div style={styles.benefitItem}>✅ げんそずかん</div>
       </div>
+
+      {/* 🔓 ログアウト（みまもりPremiumGate限定・v1.0.2）*/}
+      {onLogout && (
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button
+            onClick={onLogout}
+            style={{
+              background: 'none', border: '1px solid #E57373',
+              borderRadius: 20, padding: '10px 28px',
+              fontSize: 13, color: '#E57373',
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            🔓 ログアウト
+          </button>
+          <div style={{ fontSize: 11, color: '#BDBDBD', marginTop: 6 }}>
+            べつの アカウントに きりかえられます
+          </div>
+        </div>
+      )}
     </div>
   );
 };
