@@ -115,6 +115,13 @@ function App() {
 
         // Phase A-4: デバイスデータをuser_idに紐付け + 進捗再読み込み
         await migrateDeviceDataToUser(user.id);
+
+        // 🏷️ v1.0.2: appタグ自動付与（未設定のユーザーに付与。OAuth新規ユーザー対策）
+        if (!user.user_metadata?.app) {
+          supabase.auth.updateUser({ data: { app: 'manabi-no-ki' } })
+            .then(() => console.log('🏷️ appタグ付与完了'))
+            .catch(e => console.warn('⚠️ appタグ付与エラー:', e.message));
+        }
         const migrated = await loadProgress();
         setLeaves(migrated.leaves);
         setFlowers(migrated.flowers);
