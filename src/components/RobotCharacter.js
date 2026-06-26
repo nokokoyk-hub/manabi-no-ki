@@ -108,14 +108,11 @@ const RobotCharacter = ({
 
   return (
     <div
-      onClick={handleTap}
       style={{
-        position: 'relative',
-        width: size,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        cursor: enableTap ? 'pointer' : 'default',
+        gap: 4,
         ...style,
       }}
     >
@@ -129,12 +126,12 @@ const RobotCharacter = ({
           fontWeight: 700,
           color: '#37474F',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          marginBottom: 6,
           maxWidth: 200,
           textAlign: 'center',
           lineHeight: 1.5,
           position: 'relative',
           whiteSpace: 'pre-wrap',
+          flexShrink: 0,
         }}>
           {message}
           <div style={{
@@ -150,8 +147,17 @@ const RobotCharacter = ({
         </div>
       )}
 
-      {/* ロボットくん本体 */}
-      <div style={{ position: 'relative', width: size, height: size }}>
+      {/* ロボちゃん本体 */}
+      <div
+        onClick={handleTap}
+        style={{
+          position: 'relative',
+          width: size,
+          height: size,
+          cursor: enableTap ? 'pointer' : 'default',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
         <img
           src={imageSrc}
           alt={robotName}
@@ -194,12 +200,12 @@ const RobotCharacter = ({
           fontWeight: 700,
           color: '#37474F',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          marginTop: 6,
           maxWidth: 200,
           textAlign: 'center',
           lineHeight: 1.5,
           position: 'relative',
           whiteSpace: 'pre-wrap',
+          flexShrink: 0,
         }}>
           <div style={{
             position: 'absolute',
