@@ -72,6 +72,9 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho, onOpenHowTo }
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
+        options: {
+          data: { app: 'manabi-no-ki' },
+        },
       });
       if (error) {
         console.error('OTP send error:', error);
