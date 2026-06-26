@@ -30,12 +30,12 @@
 | version.json | `public/version.json` → `"version": "1.0.1"` |
 | docs/version.json | `docs/version.json` → `"version": "1.0.1"` |
 | package.json | `"version": "1.0.1"` |
-| 最終更新日 | 2026年6月26日（木） |
+| 最終更新日 | 2026年6月25日（木） |
 
 > ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
-> ※ v1.0.2候補: OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能
-> ※ v1.0.3（DB設計刷新 6/26）: storage.js user_id一本化、device_idフォールバック完全廃止、ゴーストレコード大掃除、profile自動作成フォールバック、checkAndSwitchUser実装
-> ※ 4箇所すべてv1.0.1のまま（バンプはDB再構築完了後にまとめて実施予定）。
+> ※ v1.0.2候補: OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能、PremiumGate課金ボタン追加、みまもりロック化
+> ※ v1.0.3（DB設計刷新 6/25-26）: storage.js user_id一本化、device_idフォールバック完全廃止、ゴーストレコード大掃除、profile自動作成フォールバック、checkAndSwitchUser実装、RLS強化（12ポリシー）、CASCADE追加（3テーブル）、管理ビュー刷新、delete_manabi_user()関数、孤児掃除
+> ※ 4箇所すべてv1.0.1のまま（ログアウト機能完了後にまとめてv1.0.2バンプ予定）。
 
 ---
 
@@ -65,7 +65,7 @@
 - GCP: プロジェクト `manabinoki`（OAuth Client ID発行済み）
 - GA4: 測定ID `G-64GLZZQC24`（プロパティ「まなびの木」）
 - テーブル: user_progress, learning_sessions, questions(587問), answer_history, **profiles(v0.9.9〜)**
-- ビュー: **user_management_view**（Google Sheets連携用）
+- ビュー: **manabi_user_view**（まなびの木ユーザー管理用）、**orphan_user_view**（孤児チェック用）、soul_user_management_view
 
 ### SMTP設定（マジックリンク用・6/19開通）
 | 項目 | 値 |
@@ -204,7 +204,7 @@
 | パズル・きせかえ | ✅ | ✅ | ✅ |
 | 教科別モード（7教科） | 🔒 | ✅ | ✅ |
 | ふくしゅう | 🔒 | ✅ | ✅ |
-| みまもり | ✅ | ✅ | ✅ |
+| みまもり | 🔒 | ✅ | ✅ |
 | レベル設定 | 🔒 | ✅ | ✅ |
 | げんそずかん | 🔒 | ✅ | ✅ |
 
@@ -213,8 +213,8 @@
 - trial開始から5日経過 → 自動でsubscription_status='free'に更新
 - canAccessPremium判定: premium or trial → OK / free → ロック
 - HomeScreenにトライアルバナー＋無料プランバナー＋ボタンロックアイコン表示
-- ロック機能タップ → PremiumGate画面（「おうちのひとに そうだんしてね🌳」）
-- コンポーネント: `src/components/PremiumGate.js`
+- ロック機能タップ → PremiumGate画面（「おうちのひとに そうだんしてね🌳」+ 🌟アップグレードボタン + 特典リスト）
+- コンポーネント: `src/components/PremiumGate.js`（課金ボタン付き・Stripe Payment Link + client_reference_id）
 
 ### 開発用アカウント
 - `nokoko.yk@gmail.com` → **premium**（制限なし）
@@ -347,13 +347,12 @@
 |------|------|--------|
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
 | changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
-| デカいファイル | App.js(555行)・storage.js(22KB)・MimamoriScreen.js(712行)・LearningScreen.js(18KB)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
-| ~~device_id / user_id 二重管理~~ | ✅ **v1.0.3でuser_id一本化完了（6/26）。device_idフォールバック完全廃止。storage.js 1,030行→823行** | ✅ |
-| RLS未強化 | user_progress/learning_sessions/answer_historyのRLSが`true`（全員閲覧可能）→ `auth.uid()=user_id`に要修正 | 🔴 |
+| デカいファイル | App.js(612行)・storage.js(823行)・MimamoriScreen.js(712行)・LearningScreen.js(462行)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
+| ~~device_id / user_id 二重管理~~ | ✅ **v1.0.3でuser_id一本化完了（6/25-26）。device_idフォールバック完全廃止。storage.js 1,030行→823行** | ✅ |
+| ~~RLS未強化~~ | ✅ **3テーブル12ポリシー設定完了（6/25）。auth.uid()=user_id。匿名アクセス完全遮断** | ✅ |
 | ログアウト機能 | 未実装。同一デバイスで別アカウント切替ができない。兄弟利用に必要 | 🔴 |
-| signInWithOtp shouldCreateUser | 未指定のため未登録メールでauth.usersが自動作成される（孤児ユーザーの原因） | 🔴 |
-| auth孤児ユーザー | profilesにもsoul_usersにもないauth.usersが6件存在。掃除必要 | 🟡 |
-| appタグ未設定 | auth.users 15件中13件にappタグなし。トリガー振り分けが不十分 | 🟡 |
+| appタグ未設定 | auth.users 11件中9件にappタグなし。トリガー振り分けが不十分 | 🟡 |
+| ~~auth孤児ユーザー~~ | ✅ **5件削除完了（6/25）。orphan_user_viewで監視可能。delete_manabi_user()で安全削除可能** | ✅ |
 | ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
 | ~~OG画像未設定~~ | ✅ **og-image.png設定済み（v1.0.1）** | ✅ |
@@ -389,7 +388,7 @@
 | テスト決済 | ✅ テスト環境で成功確認済み |
 
 > ※ お受験マネージャーとは別のStripeアカウント。お受験マネージャーのサンドボックスでテスト後、まなびの木専用アカウントの本番に移行。
-> ※ みまもり画面はPINロックで保護されているため、freeプランでもアクセス可能。課金ボタンがPINロック内にあるので子どもの誤課金を防止。
+> ※ みまもり画面はPremiumGateでロック（freeプランはアクセス不可・6/25変更）。PremiumGateに課金ボタンを配置し、どのロック画面からでも課金導線にアクセス可能。
 > ※ Customer Portalは「請求期間の終了時にキャンセル」設定（払った分は最後まで使える）。
 
 ### Edge Function技術ノート
@@ -454,11 +453,13 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - **学習データ同期（v1.0.3）**: storage.jsはuser_id一本化（1,030行→823行）。device_idフォールバック完全廃止。migrateDeviceDataToUserは空関数化。loadProgress: user_idで1件取得のシンプル設計。アカウント切替検出（checkAndSwitchUser）＋localStorage自動クリア＋stateリセット実装済
 - **profile自動作成**: App.jsのfetchProfile内にupsertフォールバック追加済（トリガー不発対策）
 - **DB構造ドキュメント**: `docs/supabase_structure.md` に全テーブルスキーマ・RLS・トリガー・依存マップ・既知問題・DontTouchリスト記載
-- **Supabase Pro**: お受験マネージャーのみPro組織（$25/月）。まなびの木は別Free組織（DB再構築中）。再構築完了後にPro合流予定
+- **Supabase Pro**: 全3プロジェクトが同一Pro組織（$25/月）に合流済み（6/25）。MCP経由でSQL実行可能。keep-alive不要
+- **正本ルール**: ①docs/current_state.md（北極星）②docs/supabase_structure.md（DB設計正本）。DB変更時は必ず②も同時更新
+- **ユーザー管理**: `manabi_user_view`（まなびの木専用）/ `orphan_user_view`（孤児監視）/ `delete_manabi_user(email)`（安全削除関数・soulユーザーガード付き）
 
 ---
 
-> 最終更新: 2026年6月26日（木）JST
-> 更新者: ちゃぴ（スレッド23）
-> バージョン: v1.0.1（v1.0.3相当の変更済み。バンプはDB再構築完了後）
-> DB構造ドキュメント: `docs/supabase_structure.md`
+> 最終更新: 2026年6月25日（木）JST
+> 更新者: ちゃぴ（スレッド24）
+> バージョン: v1.0.1（v1.0.3相当のDB変更済み + RLS強化 + 課金導線改善。バンプはログアウト機能完了後）
+> DB構造ドキュメント: `docs/supabase_structure.md`（正本）

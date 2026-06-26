@@ -2,7 +2,7 @@
 
 > このファイルはSupabaseのDB設計の正本です。
 > テーブル変更・RLS変更・トリガー変更時は必ずこのファイルも更新すること。
-> 最終更新: 2026-06-26（JST）
+> 最終更新: 2026-06-25（JST）
 
 ---
 
@@ -31,9 +31,9 @@
 | テーブル | 用途 | RLS | 危険度 |
 |---|---|---|---|
 | `profiles` | ユーザー情報・課金状態 | ✅ `auth.uid()=id` | 安全 |
-| `user_progress` | 学習進捗（葉・花・実・ストリーク） | ⚠️ `true`（全員閲覧可能） | 🔴 要修正 |
-| `learning_sessions` | 学習セッション記録 | ⚠️ `true`（全員閲覧可能） | 🔴 要修正 |
-| `answer_history` | 回答履歴 | ⚠️ `true`（全員閲覧可能） | 🔴 要修正 |
+| `user_progress` | 学習進捗（葉・花・実・ストリーク） | ✅ `auth.uid()=user_id` | 安全（6/25修正） |
+| `learning_sessions` | 学習セッション記録 | ✅ `auth.uid()=user_id` | 安全（6/25修正） |
+| `answer_history` | 回答履歴 | ✅ `auth.uid()=user_id` | 安全（6/25修正） |
 | `questions` | 問題データ（587問） | ✅ `true`（読み取りのみ） | 安全（公開データ） |
 
 ### 👻 soul-backup 専用テーブル
@@ -43,12 +43,23 @@
 | `soul_users` | soulアプリユーザー管理 | ✅ `auth.uid()=user_id` | 安全 |
 | `soul_backups` | バックアップデータ(JSONB) | ✅ `auth.uid()=user_id` | 安全 |
 
-### 📊 管理用ビュー（読み取り専用）
+### 📊 管理用ビュー・関数
 
-| ビュー | 用途 |
-|---|---|
-| `user_management_view` | まなびの木ユーザー管理用 |
-| `soul_user_management_view` | soul-backupユーザー管理用 |
+| 名前 | 種別 | 用途 |
+|---|---|---|
+| `manabi_user_view` | ビュー | まなびの木ユーザー管理（メール・プラン・学習データ・最終学習日） |
+| `orphan_user_view` | ビュー | 孤児ユーザーチェック（どのアプリにも所属しないauth.users） |
+| `soul_user_management_view` | ビュー | soul-backupユーザー管理用 |
+| `delete_manabi_user(email)` | 関数 | まなびの木ユーザー安全削除（soulユーザーガード付き・CASCADE連鎖削除） |
+
+### 🔗 外部キー制約（6/25 CASCADE追加）
+
+| テーブル | 制約 | 参照先 | DELETE時 |
+|---|---|---|---|
+| profiles | profiles_id_fkey | auth.users(id) | **CASCADE** |
+| user_progress | user_progress_user_id_fkey | auth.users(id) | **CASCADE**（6/25変更） |
+| learning_sessions | learning_sessions_user_id_fkey | auth.users(id) | **CASCADE**（6/25変更） |
+| answer_history | answer_history_user_id_fkey | auth.users(id) | **CASCADE**（6/25変更） |
 
 ---
 
@@ -89,14 +100,11 @@
 | `created_at` | timestamptz | YES | now() | 作成日時 |
 | `updated_at` | timestamptz | YES | now() | 更新日時 |
 
-**RLSポリシー（現状）:**
-- ALL: `true` ⚠️ **全員が全レコードにアクセス可能 → 要修正**
-
-**RLSポリシー（あるべき姿）:**
-- SELECT: `auth.uid() = user_id`
-- INSERT: `auth.uid() = user_id`
-- UPDATE: `auth.uid() = user_id`
-- DELETE: `auth.uid() = user_id`
+**RLSポリシー（6/25修正済み）:**
+- SELECT: `auth.uid() = user_id` ✅
+- INSERT: `auth.uid() = user_id` ✅
+- UPDATE: `auth.uid() = user_id` ✅
+- DELETE: `auth.uid() = user_id` ✅
 
 ### learning_sessions（学習セッション）
 
@@ -110,7 +118,11 @@
 | `total_questions` | integer | NO | — | 出題数 |
 | `completed_at` | timestamptz | YES | now() | 完了日時 |
 
-**RLSポリシー: `true` ⚠️ → `auth.uid() = user_id` に要修正**
+**RLSポリシー（6/25修正済み）:**
+- SELECT: `auth.uid() = user_id` ✅
+- INSERT: `auth.uid() = user_id` ✅
+- UPDATE: `auth.uid() = user_id` ✅
+- DELETE: `auth.uid() = user_id` ✅
 
 ### answer_history（回答履歴）
 
@@ -123,7 +135,11 @@
 | `is_correct` | boolean | NO | — | 正答フラグ |
 | `answered_at` | timestamptz | YES | now() | 回答日時 |
 
-**RLSポリシー: `true` ⚠️ → `auth.uid() = user_id` に要修正**
+**RLSポリシー（6/25修正済み）:**
+- SELECT: `auth.uid() = user_id` ✅
+- INSERT: `auth.uid() = user_id` ✅
+- UPDATE: `auth.uid() = user_id` ✅
+- DELETE: `auth.uid() = user_id` ✅
 
 ### questions（問題データ）
 
@@ -171,17 +187,17 @@
 
 ---
 
-## 4. RLS設定一覧（現状と改善計画）
+## 4. RLS設定一覧（6/25更新）
 
-| テーブル | 現状 | あるべき姿 | 優先度 |
+| テーブル | 状態 | ポリシー | 更新日 |
 |---|---|---|---|
-| profiles | ✅ auth.uid()=id | そのまま | — |
-| user_progress | ⚠️ true | auth.uid()=user_id | 🔴 高 |
-| learning_sessions | ⚠️ true | auth.uid()=user_id | 🔴 高 |
-| answer_history | ⚠️ true | auth.uid()=user_id | 🔴 高 |
-| questions | ✅ SELECT true | そのまま | — |
-| soul_backups | ✅ auth.uid()=user_id | そのまま | — |
-| soul_users | ✅ auth.uid()=user_id | そのまま | — |
+| profiles | ✅ | auth.uid()=id | — |
+| user_progress | ✅ | auth.uid()=user_id（SELECT/INSERT/UPDATE/DELETE） | 6/25 |
+| learning_sessions | ✅ | auth.uid()=user_id（SELECT/INSERT/UPDATE/DELETE） | 6/25 |
+| answer_history | ✅ | auth.uid()=user_id（SELECT/INSERT/UPDATE/DELETE） | 6/25 |
+| questions | ✅ | SELECT true（読み取りのみ） | — |
+| soul_backups | ✅ | auth.uid()=user_id | — |
+| soul_users | ✅ | auth.uid()=user_id | — |
 
 ---
 
@@ -229,28 +245,28 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 
 ---
 
-## 7. 現在の問題点（調査結果 2026-06-26）
+## 7. 現在の問題点（調査結果 2026-06-25）
 
-### auth.users 15件の内訳
+### auth.users 11件の内訳
 
 | 状態 | 件数 | 説明 |
 |---|---|---|
-| 🌳 まなびの木のみ | 3件 | 正常 |
+| 🌳 まなびの木のみ | 5件 | 正常 |
 | 👻 soulのみ | 3件 | 正常 |
 | ⚠️ 両方に所属 | 3件 | のんのテスト用。構造的に混線リスク |
-| 🔴 孤児（どちらにも未所属） | 6件 | OTP自動作成 or テスト残骸 |
-| appタグ未設定 | 13/15件 | 振り分け機能が実質無効 |
+| 🔴 孤児 | **0件** | ✅ 6/25に5件削除完了 |
+| appタグ未設定 | 9/11件 | 振り分け機能が実質無効 |
 
-### 改善計画（承認待ち）
+### 改善計画
 
-| 対策 | 内容 | Phase |
+| 対策 | 内容 | 状態 |
 |---|---|---|
-| signInWithOtp修正 | shouldCreateUser: false 追加 | 次回 |
-| 孤児ユーザー掃除 | profilesにもsoul_usersにもないauth.users削除 | 次回 |
-| RLS強化 | user_progress/learning_sessions/answer_history を auth.uid()=user_id に | 次回 |
-| ログアウト機能 | みまもり画面にログアウトボタン追加 | 次回 |
-| appタグ付与の徹底 | AuthScreenでsignUp時にraw_user_meta_dataにappタグ設定 | 次回 |
-| 重複所属の解消 | profiles＋soul_users両方にいる3件の整理 | 次回 |
+| RLS強化 | user_progress/learning_sessions/answer_history を auth.uid()=user_id に | ✅ **完了（6/25）** |
+| signInWithOtp修正 | shouldCreateUser: false 追加 | 🔴 次回 |
+| 孤児ユーザー掃除 | profilesにもsoul_usersにもないauth.users削除 | 🔴 次回 |
+| ログアウト機能 | みまもり画面にログアウトボタン追加 | 🔴 次回 |
+| appタグ付与の徹底 | AuthScreenでsignUp時にraw_user_meta_dataにappタグ設定 | 🔴 次回 |
+| 重複所属の解消 | profiles＋soul_users両方にいる3件の整理 | 🟡 将来 |
 
 ---
 
@@ -284,5 +300,5 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 ---
 
 > 作成: ちゃぴ
-> 日時: 2026-06-26（木）
-> 次回更新: RLS強化・ログアウト実装・孤児掃除の実行後
+> 日時: 2026-06-25（木）スレッド24
+> 次回更新: ログアウト実装・孤児掃除・shouldCreateUser修正の実行後
