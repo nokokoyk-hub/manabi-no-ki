@@ -18,7 +18,7 @@ import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
 import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../lib/questionLoader';
-import { getMameMessage } from '../constants/mameMessages';
+import { getCharaMessage } from '../constants/mameMessages';
 import { recordAnswer } from '../lib/storage';
 
 const MODE_LABELS = {
@@ -33,12 +33,12 @@ const MODE_LABELS = {
   kokugo: '📖 こくご れんしゅう',
 };
 
-const getComboMessage = (combo, petName) => {
+const getComboMessage = (combo, petName, character = 'mame') => {
   if (combo >= 5) return `${combo}れんぞく！！もう てんさい！！🔥🔥🔥`;
   if (combo >= 4) return `${combo}れんぞく！！${petName} かんどう！！🔥🔥`;
   if (combo >= 3) return `${combo}れんぞく！${petName} おどってる！💃✨`;
   if (combo >= 2) return `${combo}れんぞく せいかい！すごーい！🌟`;
-  return getMameMessage('correct', petName);
+  return getCharaMessage('correct', petName, character);
 };
 
 // コンボに応じたポーズを返す
@@ -111,7 +111,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
   const charaNameProp = selectedCharacter === 'robot' ? 'robotName' : 'petName';
 
   const [mamePose, setMamePose] = useState('cheer');
-  const [mameMsg, setMameMsg] = useState(getMameMessage('question', displayName));
+  const [mameMsg, setMameMsg] = useState(getCharaMessage('question', displayName, selectedCharacter));
 
   // ローディング中
   if (isLoadingQ) {
@@ -273,7 +273,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
       setCombo(newCombo);
 
       setMamePose(getComboPose(newCombo));
-      setMameMsg(getComboMessage(newCombo, displayName));
+      setMameMsg(getComboMessage(newCombo, displayName, selectedCharacter));
 
       setTimeout(() => {
         setShowStar(true);
@@ -284,7 +284,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
             setSelected(null);
             setShowResult(false);
             setMamePose('cheer');
-            setMameMsg(getMameMessage('question', displayName));
+            setMameMsg(getCharaMessage('question', displayName, selectedCharacter));
           } else {
             // 🆕 最終問題完了 → 結果画面へ（自動リダイレクトしない）
             setFinished(true);
@@ -294,7 +294,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
     } else {
       setCombo(0);
       setMamePose('sad');
-      setMameMsg(getMameMessage('wrong', displayName));
+      setMameMsg(getCharaMessage('wrong', displayName, selectedCharacter));
       const delay = q.explanation ? 3500 : 1800;
       setTimeout(() => {
         setSelected(null);
@@ -303,7 +303,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
           // 次の問題へ進む（不正解でも止まらない）
           setCurrentQ(c => c + 1);
           setMamePose('cheer');
-          setMameMsg(getMameMessage('question', displayName));
+          setMameMsg(getCharaMessage('question', displayName, selectedCharacter));
         } else {
           // 最終問題が不正解でも結果画面へ
           setFinished(true);

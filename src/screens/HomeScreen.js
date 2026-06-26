@@ -11,7 +11,7 @@ import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
 import { COLORS } from '../constants/colors';
-import { getMameMessage, getStreakMessage } from '../constants/mameMessages';
+import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
@@ -30,9 +30,9 @@ const HomeScreen = ({
     } else if (streak >= 3) {
       setMameMessage(getStreakMessage(streak));
     } else {
-      setMameMessage(getMameMessage('home', petName));
+      setMameMessage(getCharaMessage('home', petName, selectedCharacter));
     }
-  }, [todayDone, streak, petName]);
+  }, [todayDone, streak, petName, selectedCharacter]);
 
   const levelSummary = SUBJECT_LEVELS
     .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
