@@ -20,6 +20,22 @@
 </head>
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
+
+  <div class="version">
+    <h2>v1.0.3 — 果実コレクション＋キャラガチャ＋永続成長サイクル 🍎🎰✨</h2>
+    <p class="date">2026年6月XX日（X）</p>
+    <ul>
+      <li><span class="tag new">NEW</span> 🍎 果実コレクション機能 — ガチャで全20種のフルーツを収穫！ノーマル/レア/スーパーレア/レジェンドの4段階レアリティ</li>
+      <li><span class="tag new">NEW</span> 🌳 永続成長サイクル刷新 — ミッション完了→葉+1→葉2枚で花→花2つで実。ミッション4回で実1つのサイクルがずっと続きます！</li>
+      <li><span class="tag new">NEW</span> 🎰 ガチャシステム — 実が成ったら収穫→ガチャ演出→レアリティ別エフェクトでフルーツ＆キャラがどーん！</li>
+      <li><span class="tag new">NEW</span> 🐱 ガチャ限定キャラクター6体登場 — ももぴ🐰/ひめにゃ🐱/にじぴよ🐥/ライドラ🐉/ガーディ🤖/ぽっけ🦊</li>
+      <li><span class="tag new">NEW</span> ✨ キャラ降臨演出 — 予兆光→ヒビ割れ→画面砕ける→光爆発→虹色稲妻→キャラドーン！の特別演出</li>
+      <li><span class="tag new">NEW</span> 📦 果実コレクション画面 — 集めたフルーツ＆キャラを一覧表示。コンプリートを目指そう！</li>
+      <li><span class="tag infra">INFRA</span> 🗂️ 新規ファイル4本追加: gachaData.js（ガチャ定義）/ fruitCollection.js（コレクション管理）/ HarvestScreen.js（収穫演出）/ CollectionScreen.js（一覧表示）</li>
+      <li><span class="tag infra">INFRA</span> 🖼️ 手描き画像40枚投入: フルーツ20枚 + フルーツエフェクト8枚 + キャラ6枚 + キャラ降臨エフェクト6枚</li>
+    </ul>
+  </div>
+
   <div class="version">
     <h2>v1.0.2 — ログアウト機能 + DB安全強化 + 課金導線改善 🔓🛡️💰</h2>
     <p class="date">2026年6月26日（金）</p>
@@ -38,7 +54,7 @@
       <li><span class="tag infra">INFRA</span> 🔗 CASCADE追加 — ユーザー削除時に関連データが自動連鎖削除される安全設計に</li>
     </ul>
   </div>
-  <div class="version">
+
   <div class="version">
     <h2>v1.0.1 — メール認証OTP化 + PWA改善 + OG画像 🔐📧🎨</h2>
     <p class="date">2026年6月24日（火）</p>
@@ -55,6 +71,7 @@
       <li><span class="tag infra">INFRA</span> 🏪 Google Play Store掲載素材準備（説明文3点セット + フィーチャーグラフィック）</li>
     </ul>
   </div>
+
   <div class="version">
     <h2>v1.0.0 — PWA化完了！ストア公開準備 🤖📱🎉</h2>
     <p class="date">2026年6月22日（日）</p>
@@ -67,15 +84,15 @@
       <li><span class="tag infra">INFRA</span> 🧹 soul-backup混入profiles 6件をクリーンアップ</li>
     </ul>
   </div>
+
   <div class="version">
     <h2>v0.9.9 — ロボットくん登場＋利用規約＋Stripe課金テスト 🤖📜💳</h2>
     <p class="date">2026年6月18日（木）</p>
-    <ul> 
+    <ul>
       <li><span class="tag new">NEW</span> 🔓 Stripe Customer Portal（解約・プラン管理）実装 — プレミアムユーザーがみまもり画面からStripeの安全なページで解約・支払い方法変更が可能に</li>
       <li><span class="tag new">NEW</span> 🌳 トライアル中アップグレードボタン追加 — トライアル期間中でも「気に入ったら今すぐプレミアムに！」で即課金可能</li>
       <li><span class="tag infra">INFRA</span> 💳 Stripe本番環境切替完了 — テスト環境から本番環境へ移行。実際の決済が可能に（2026/06/19）</li>
       <li><span class="tag infra">INFRA</span> 🔑 Edge Function「create-portal-session」新規デプロイ — JWT直接デコード方式でCustomer Portal URL生成</li>
- 
       <li><span class="tag new">NEW</span> 🤖 ロボットくんキャラクター追加 — ホーム画面の木の左側に配置。手振り＋ガッツポーズの2ポーズ、ふわふわ浮遊＋タップでぽよんアニメーション</li>
       <li><span class="tag new">NEW</span> 📜 利用規約・プライバシーポリシー・特定商取引法表記ページ追加 — ログイン画面・みまもり画面からアクセス可能。認証前でも閲覧OK</li>
       <li><span class="tag new">NEW</span> 💳 Phase D: Stripe Checkout連携（テスト環境） — みまもり画面のプラン管理セクションからPayment Linkで月額200円の決済が可能に</li>
@@ -126,7 +143,6 @@
       <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.6 → v0.9.7（3箇所同時更新）</li>
     </ul>
   </div>
-
 
   <div class="version">
     <h2>v0.9.6 追補 — こくご解説 完全制覇！全7教科×両面 100%完成 🏆🏆📝</h2>
@@ -215,6 +231,7 @@
       <li><span class="tag infra">INFRA</span> バージョンバンプ: v0.9.4 → v0.9.5</li>
     </ul>
   </div>
+
   <div class="version">
     <h2>v0.9.4 — 日跨ぎリセット＋着せ替え修正＋UpdateBanner改修 🌅👗</h2>
     <div class="date">2026年6月10日（水）</div>
@@ -242,22 +259,6 @@
       <li><span class="tag fix">FIX</span> とけい個別モードの取得ロジックを教科ベースに変更（レベル設定が全レベルで有効に）</li>
       <li><span class="tag fix">FIX</span> おくりがなモードのLv2固定対応（レベル設定に関わらず全問出題）</li>
       <li><span class="tag infra">INFRA</span> questionLoader.js: dbToAppFormatにquestionAdvanced・optionsAdvanced追加</li>
-    </ul>
-  </div>
-
-  <div class="version">
-    <h2>v0.9.3 — 表示モード完成＋漢字切り替え490問対応 ✨</h2>
-    <div class="date">2026年6月9日（火）</div>
-    <ul>
-      <li><span class="tag new">NEW</span> 表示モード Phase 2-3 完了（こうがくねんモードで漢字交じり表示）</li>
-      <li><span class="tag new">NEW</span> question_advanced カラム追加（問題文421問の漢字版投入）</li>
-      <li><span class="tag new">NEW</span> options_advanced カラム追加（選択肢304問の漢字版投入）</li>
-      <li><span class="tag new">NEW</span> NULLフォールバック設計（漢字版未設定の問題はひらがな表示を維持）</li>
-      <li><span class="tag fix">FIX</span> とけいモードでLv3以降の問題が出ない不具合修正（category NULL問題）</li>
-      <li><span class="tag fix">FIX</span> とけいのレベル設定が全レベルで正しく動作するよう修正</li>
-      <li><span class="tag fix">FIX</span> おくりがなモードでレベル設定に関わらず全問出題されるよう修正</li>
-      <li><span class="tag infra">INFRA</span> questionLoader.js: dbToAppFormatにquestionAdvanced/optionsAdvanced追加</li>
-      <li><span class="tag infra">INFRA</span> LearningScreen.js: displayMode対応（問題文+選択肢の漢字切替）</li>
     </ul>
   </div>
 
