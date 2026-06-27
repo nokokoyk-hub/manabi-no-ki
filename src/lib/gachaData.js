@@ -22,7 +22,7 @@ export const RARITY_INFO = {
 };
 
 // ==============================
-// フルーツ定義（20種）
+// フルーツ定義（30種）
 // 画像追加時はここに1行追加するだけ！
 // ==============================
 export const FRUITS = [
@@ -53,6 +53,24 @@ export const FRUITS = [
   { id: 'crown_apple',   name: 'おうかんりんご',   rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_crown_apple.png' },
   { id: 'galaxy_pear',   name: 'ぎんがなし',       rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_galaxy_pear.png' },
   { id: 'galaxy_apple',  name: 'ぎんがりんご',     rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_galaxy_apple.png' },
+
+
+  // --- 追加フルーツ（v1.0.3 Phase2: +10種）---
+  // レア（+2種）
+  { id: 'kirameki_peach', name: 'きらめきもも',     rarity: RARITY.RARE,       image: '/public/images/fruits/fruit_kirameki_peach.png' },
+  { id: 'konpeitou',      name: 'こんぺいとう',     rarity: RARITY.RARE,       image: '/public/images/fruits/fruit_konpeitou.png' },
+
+  // スーパーレア（+4種）
+  { id: 'prism_apple',    name: 'プリズムりんご',   rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/fruit_prism_apple.png' },
+  { id: 'yume_peach',     name: 'ゆめもも',         rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/fruit_yume_peach.png' },
+  { id: 'sun_apple',      name: 'たいようりんご',   rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/fruit_sun_apple.png' },
+  { id: 'dengeki_apple',  name: 'でんげきりんご',   rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/fruit_dengeki_apple.png' },
+
+  // レジェンド（+4種）
+  { id: 'aurora_pear',    name: 'オーロラなし',     rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_aurora_pear.png' },
+  { id: 'comet_berry',    name: 'すいせいベリー',   rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_comet_berry.png' },
+  { id: 'dragon_fruit',   name: 'りゅうのみ',       rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_dragon_fruit.png' },
+  { id: 'star_princess',  name: 'ほしひめ',         rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_star_princess.png' },
 
   // --- 🌟 キャラクター（ガチャ限定！）---
   // type: 'character' のアイテムは特別演出で降臨！
