@@ -53,6 +53,15 @@ export const FRUITS = [
   { id: 'crown_apple',   name: 'おうかんりんご',   rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_crown_apple.png' },
   { id: 'galaxy_pear',   name: 'ぎんがなし',       rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_galaxy_pear.png' },
   { id: 'galaxy_apple',  name: 'ぎんがりんご',     rarity: RARITY.LEGEND,     image: '/public/images/fruits/fruit_galaxy_apple.png' },
+
+  // --- 🌟 キャラクター（ガチャ限定！）---
+  // type: 'character' のアイテムは特別演出で降臨！
+  { id: 'nijipiyo',   name: 'にじぴよ',     type: 'character', rarity: RARITY.RARE,       image: '/public/images/fruits/chara_nijipiyo.png',  emoji: '🐥' },
+  { id: 'pokke',      name: 'ぽっけ',       type: 'character', rarity: RARITY.RARE,       image: '/public/images/fruits/chara_pokke.png',     emoji: '🦊' },
+  { id: 'momopi',     name: 'ももぴ',       type: 'character', rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/chara_momopi.png',     emoji: '🐰' },
+  { id: 'guardian',   name: 'ガーディ',     type: 'character', rarity: RARITY.SUPER_RARE, image: '/public/images/fruits/chara_guardian.png',   emoji: '🤖' },
+  { id: 'raidora',    name: 'ライドラ',     type: 'character', rarity: RARITY.LEGEND,     image: '/public/images/fruits/chara_raidora.png',   emoji: '🐉' },
+  { id: 'himenya',    name: 'ひめにゃ',     type: 'character', rarity: RARITY.LEGEND,     image: '/public/images/fruits/chara_himenya.png',   emoji: '🐱' },
 ];
 
 // ==============================
@@ -82,6 +91,21 @@ export const EFFECTS = {
     overlay: '/public/images/fruits/effects/effect_sparkles.png',
     duration: 4000,
     shakeIntensity: 6,
+  },
+};
+
+// キャラ降臨時の特別エフェクト（type: 'character' 用）
+export const CHARACTER_EFFECT = {
+  duration: 5500,
+  crackDelay: 800,      // 画面ヒビの溜め時間
+  revealDelay: 2500,    // キャラ登場までの時間
+  images: {
+    glow:    '/public/images/fruits/effects/chara_effect_glow.png',     // ① 予兆光
+    crack:   '/public/images/fruits/effects/chara_effect_crack.png',    // ② 小さなヒビ
+    shatter: '/public/images/fruits/effects/chara_effect_shatter.png',  // ③ 画面バリバリ
+    burst:   '/public/images/fruits/effects/chara_effect_burst.png',    // ④ ガラス破片
+    flash:   '/public/images/fruits/effects/chara_effect_flash.png',    // ⑤ 光の爆発
+    thunder: '/public/images/fruits/effects/chara_effect_thunder.png',  // ⑥ 虹色稲妻
   },
 };
 
