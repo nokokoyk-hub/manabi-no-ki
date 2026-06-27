@@ -17,7 +17,8 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
   userPlan, trialDaysLeft, selectedCharacter, onCharacterChange,
-  onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi
+  onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi,
+  canHarvest, onHarvest, onOpenCollection, fruitCollection
 }) => {
   const isFree = userPlan === 'free';
   const isTrial = userPlan === 'trial';
@@ -234,7 +235,39 @@ const HomeScreen = ({
           🌿 はっぱ {leaves}まい　🌸 おはな {flowers}こ　🍎 みのり {fruits}こ
         </div>
         <div style={{ fontSize: 12, color: COLORS.textLight, marginTop: 4 }}>
-          がくしゅうすると きが そだつよ！
+          {canHarvest ? '🍎 みのりを タップして しゅうかくしよう！' : 'がくしゅうすると きが そだつよ！'}
+        </div>
+
+        {/* 🍎 収穫ボタン（実がある時だけ表示） */}
+        {canHarvest && (
+          <button onClick={onHarvest} style={{
+            marginTop: 8,
+            background: 'linear-gradient(135deg, #FF6B6B, #FF4757)',
+            color: 'white', border: 'none', borderRadius: 30,
+            padding: '10px 28px', fontSize: 16, fontWeight: 900,
+            cursor: 'pointer', fontFamily: "'Rounded Mplus 1c', sans-serif",
+            boxShadow: '0 4px 15px rgba(255,71,87,0.4)',
+            animation: 'mame-float 2s ease-in-out infinite',
+          }}>
+            🍎 しゅうかくする！
+          </button>
+        )}
+
+        {/* 📦 果実コレクションボタン */}
+        <div style={{ marginTop: 8 }}>
+          <button onClick={onOpenCollection} style={{
+            background: 'rgba(139,195,74,0.15)', border: '2px solid #8BC34A44',
+            borderRadius: 20, padding: '6px 18px',
+            fontSize: 12, fontWeight: 700, color: '#689F38',
+            cursor: 'pointer', fontFamily: "'Rounded Mplus 1c', sans-serif",
+          }}>
+            🍎 かじつコレクション
+            {fruitCollection && Object.keys(fruitCollection.items || {}).length > 0 && (
+              <span style={{ marginLeft: 4 }}>
+                ({Object.keys(fruitCollection.items).length}しゅるい)
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
