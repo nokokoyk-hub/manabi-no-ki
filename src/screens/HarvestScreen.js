@@ -39,7 +39,6 @@ const HarvestScreen = ({ fruit, isNew, onClose }) => {
 
   // ========== キャラ降臨演出 ==========
   if (isCharacter) {
-    const showEffect = phase !== 'intro';
     const showReveal = phase === 'reveal' || phase === 'done';
 
     return (
