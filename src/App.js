@@ -24,8 +24,12 @@ import TermsScreen from './screens/TermsScreen';
 import PrivacyScreen from './screens/PrivacyScreen';
 import TokushohoScreen from './screens/TokushohoScreen';
 import HowToScreen from './screens/HowToScreen';
+import HarvestScreen from './screens/HarvestScreen';
+import CollectionScreen from './screens/CollectionScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
+import { rollGacha } from './lib/gachaData';
+import { loadFruitCollection, addFruitToCollection, isNewFruit } from './lib/fruitCollection';
 import {
   loadProgress,
   saveProgress,
@@ -226,12 +230,13 @@ function App() {
       // localStorageクリア（ユーザー固有データ）
       ['manabi_subject_levels', 'manabi_pet_name', 'manabi_robot_name', 'manabi_puzzle',
        'manabi_costume', 'manabi_display_mode', 'manabi_guardian_pin',
-       'manabi_selected_character', 'manabi_current_user_id'].forEach(k => {
+       'manabi_selected_character', 'manabi_current_user_id', 'manabi_fruit_collection'].forEach(k => {
         try { localStorage.removeItem(k); } catch {}
       });
       await supabase.auth.signOut();
       setPetName(null);
       setRobotName(null);
+      setFruitCollection({ items: {}, totalHarvests: 0, lastHarvestAt: null });
       setScreen('home');
     } catch (e) {
       console.error('ログアウトエラー:', e);
@@ -254,6 +259,11 @@ function App() {
   const [fruits, setFruits] = useState(DEFAULT_PROGRESS.fruits);
   const [todayDone, setTodayDone] = useState(DEFAULT_PROGRESS.todayDone);
   const [streak, setStreak] = useState(DEFAULT_PROGRESS.streak);
+
+  // 🍎 果実コレクション
+  const [fruitCollection, setFruitCollection] = useState(() => loadFruitCollection());
+  const [harvestedFruit, setHarvestedFruit] = useState(null);  // ガチャ結果表示用
+  const [harvestedIsNew, setHarvestedIsNew] = useState(false); // NEW!バッジ用
 
   // ローディング状態
   const [isLoading, setIsLoading] = useState(true);
@@ -355,9 +365,22 @@ function App() {
 
   // 学習完了時のハンドラ
   const handleLearningComplete = useCallback(async (score, totalQuestions) => {
-    const newLeaves = Math.min(10, leaves + 1);
-    const newFlowers = score >= 3 ? Math.min(5, flowers + 1) : flowers;
-    const newFruits = score >= 4 ? Math.min(3, fruits + 1) : fruits;
+    // 🌳 B案サイクル: 葉+1 → 葉2枚で花+1 → 花2つで実+1
+    let newLeaves = leaves + 1;
+    let newFlowers = flowers;
+    let newFruits = fruits;
+
+    // 葉2枚 → 花1つに変換
+    if (newLeaves >= 2) {
+      newFlowers += 1;
+      newLeaves -= 2;
+    }
+    // 花2つ → 実1つに変換
+    if (newFlowers >= 2) {
+      newFruits += 1;
+      newFlowers -= 2;
+    }
+
     const newTodayDone = learningMode === 'mission' ? true : todayDone;
     const newStreak = learningMode === 'mission' && !todayDone ? streak + 1 : streak;
 
@@ -406,6 +429,35 @@ function App() {
     // セッション記録
     await recordSession(learningMode, score, totalQuestions || 5);
   }, [leaves, flowers, fruits, streak, todayDone, learningMode]);
+
+  // 🍎 収穫ハンドラ: 実をタップ → ガチャ → 演出表示
+  const handleHarvest = useCallback(() => {
+    if (fruits <= 0) return;
+
+    // ガチャを引く
+    const result = rollGacha();
+    const isNew = isNewFruit(fruitCollection, result.id);
+
+    setHarvestedFruit(result);
+    setHarvestedIsNew(isNew);
+
+    // 実を1つ消費
+    const newFruits = fruits - 1;
+    setFruits(newFruits);
+
+    // Supabaseに実の減少を保存
+    saveProgress({ leaves, flowers, fruits: newFruits, streak, todayDone });
+  }, [fruits, leaves, flowers, streak, todayDone, fruitCollection]);
+
+  // 🍎 ガチャ演出を閉じる → コレクションに追加
+  const handleHarvestClose = useCallback(() => {
+    if (harvestedFruit) {
+      const updated = addFruitToCollection(harvestedFruit.id);
+      setFruitCollection(updated);
+    }
+    setHarvestedFruit(null);
+    setHarvestedIsNew(false);
+  }, [harvestedFruit]);
 
   // 学習開始ハンドラ
   const startLearning = (mode) => {
@@ -607,6 +659,8 @@ function App() {
         return <TokushohoScreen onBack={() => setScreen('home')} />;
       case 'howto':
         return <HowToScreen onBack={() => setScreen('home')} />;
+      case 'collection':
+        return <CollectionScreen collection={fruitCollection} onBack={() => setScreen('home')} />;
       default:
         return (
           <HomeScreen
@@ -635,6 +689,10 @@ function App() {
             onOpenLevelSettings={() => setScreen('level-settings')}
             onOpenFukushu={() => setScreen('fukushu')}
             onOpenGohoubi={() => setScreen('gohoubi')}
+            canHarvest={fruits > 0}
+            onHarvest={handleHarvest}
+            onOpenCollection={() => setScreen('collection')}
+            fruitCollection={fruitCollection}
           />
         );
     }
@@ -644,6 +702,13 @@ function App() {
     <>
       <UpdateBanner currentVersion={APP_VERSION} />
       {renderScreen()}
+      {harvestedFruit && (
+        <HarvestScreen
+          fruit={harvestedFruit}
+          isNew={harvestedIsNew}
+          onClose={handleHarvestClose}
+        />
+      )}
     </>
   );
 }
