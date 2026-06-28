@@ -151,7 +151,8 @@ const CollectionScreen = ({ collection, onBack }) => {
                           objectFit: 'contain',
                           filter: owned
                             ? (rarity === RARITY.LEGEND ? 'drop-shadow(0 0 6px rgba(255,215,0,0.5))' : 'none')
-                            : 'grayscale(1) brightness(0.3) opacity(0.3)',
+                            : 'brightness(0) contrast(0) drop-shadow(0 0 1px rgba(0,0,0,0.3))',
+                          opacity: owned ? 1 : 0.5,
                           transition: 'filter 0.3s ease',
                         }}
                       />
