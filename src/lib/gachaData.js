@@ -22,7 +22,7 @@ export const RARITY_INFO = {
 };
 
 // ==============================
-// フルーツ定義（30種）
+// フルーツ定義（37種）
 // 画像追加時はここに1行追加するだけ！
 // ==============================
 export const FRUITS = [
@@ -33,6 +33,15 @@ export const FRUITS = [
   { id: 'grape',         name: 'ぶどう',           rarity: RARITY.NORMAL,     image: '/public/images/fruits/fruit_grape.png' },
   { id: 'orange',        name: 'みかん',           rarity: RARITY.NORMAL,     image: '/public/images/fruits/fruit_orange.png' },
   { id: 'strawberry',    name: 'いちご',           rarity: RARITY.NORMAL,     image: '/public/images/fruits/fruit_strawberry.png' },
+
+  // --- 追加ノーマル（v1.0.3 Phase3: +7種）---
+  { id: 'kiwi',       name: 'キウイ',       rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_kiwi.png' },
+  { id: 'la_france',  name: 'ラフランス',   rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_la_france.png' },
+  { id: 'blueberry',  name: 'ブルーベリー', rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_blueberry.png' },
+  { id: 'apricot',    name: 'あんず',       rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_apricot.png' },
+  { id: 'lemon',      name: 'レモン',       rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_lemon.png' },
+  { id: 'nashi',      name: 'なし',         rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_nashi.png' },
+  { id: 'cherry',     name: 'さくらんぼ',   rarity: RARITY.NORMAL, image: '/public/images/fruits/fruit_cherry.png' },
 
   // --- レア（4種）---
   { id: 'starfruit',     name: 'ほしのみ',         rarity: RARITY.RARE,       image: '/public/images/fruits/fruit_starfruit.png' },
