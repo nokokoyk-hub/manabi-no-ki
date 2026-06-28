@@ -3,24 +3,19 @@
 // まなびの木 - Phase C
 // v1.0.0: 新規作成（2026/06/19）
 // v1.0.2: 課金ボタン追加（2026/06/25）
-//   - 🌟アップグレードボタン追加（Stripe Payment Link）
-//   - 全ロック画面から課金導線が開通
-//   - user prop追加（client_reference_id用）
-// ============================================
-// 無料ユーザーが有料機能にアクセスした時に表示
-// 子供を悲しませず、保護者に判断を委ねるUI
-// → 保護者がその場で課金できるボタンも配置
+// v1.0.3: 月額/年間プラン選択追加（2026/06/28）
 // ============================================
 
 import React from 'react';
 import { COLORS } from '../constants/colors';
 
-const PAYMENT_LINK = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00';
+const PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00';
+const PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/8x214n2hUaXNezHfRV6AM01';
 
 const PremiumGate = ({ onBack, featureName, user, onLogout }) => {
-  const handleUpgrade = () => {
-    const url = PAYMENT_LINK + (user?.id ? `?client_reference_id=${user.id}` : '');
-    window.open(url, '_blank');
+  const openPayment = (url) => {
+    const fullUrl = url + (user?.id ? `?client_reference_id=${user.id}` : '');
+    window.open(fullUrl, '_blank');
   };
 
   return (
@@ -50,20 +45,29 @@ const PremiumGate = ({ onBack, featureName, user, onLogout }) => {
         </div>
       </div>
 
-      {/* アクションボタン */}
-      <div style={styles.actions}>
-        {/* 🌟 アップグレードボタン（保護者向け） */}
-        <button onClick={handleUpgrade} style={styles.upgradeBtn}>
-          🌟 プレミアムに アップグレード
+      {/* 🌟 プラン選択（月額/年間）*/}
+      <div style={styles.planCards}>
+        {/* 月額プラン */}
+        <button onClick={() => openPayment(PAYMENT_LINK_MONTHLY)} style={styles.planCard}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF9800' }}>月額プラン</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>200<span style={{ fontSize: 13 }}>円/月</span></div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>いつでも かいやくOK</div>
         </button>
-        <button onClick={onBack} style={styles.backBtn}>
-          もどる
+
+        {/* 年間プラン（おトク！） */}
+        <button onClick={() => openPayment(PAYMENT_LINK_YEARLY)} style={{ ...styles.planCard, ...styles.planCardYearly }}>
+          <div style={styles.otokuBadge}>🉐 おトク！</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF5722' }}>年間プラン</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>2,100<span style={{ fontSize: 13 }}>円/年</span></div>
+          <div style={{ fontSize: 11, color: '#FF5722', fontWeight: 700, marginTop: 4 }}>1.5ヶ月ぶん おトク！🧃</div>
         </button>
       </div>
 
-      {/* 料金案内 */}
-      <div style={styles.priceNote}>
-        月額200円（ジュース1ぽんぶん🧃）・いつでも かいやくOK
+      {/* もどるボタン */}
+      <div style={{ marginTop: 16, width: '100%', maxWidth: 300 }}>
+        <button onClick={onBack} style={styles.backBtn}>
+          もどる
+        </button>
       </div>
 
       {/* プレミアムの特典リスト */}
@@ -150,27 +154,44 @@ const styles = {
     fontWeight: 700,
     color: COLORS.greenDark,
   },
-  actions: {
+  planCards: {
     marginTop: 24,
     display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
+    gap: 10,
     width: '100%',
     maxWidth: 300,
   },
-  upgradeBtn: {
-    padding: '14px 24px',
-    borderRadius: 24,
-    border: 'none',
-    background: 'linear-gradient(135deg, #FF9800, #FF5722)',
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 700,
+  planCard: {
+    flex: 1,
+    padding: '16px 8px',
+    borderRadius: 16,
+    border: '2px solid #FFE0B2',
+    background: 'white',
     cursor: 'pointer',
-    boxShadow: '0 3px 8px rgba(255,87,34,0.3)',
     fontFamily: 'inherit',
+    textAlign: 'center',
+    position: 'relative',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  },
+  planCardYearly: {
+    border: '2px solid #FF5722',
+    background: 'linear-gradient(180deg, #FFF3E0, #FFECB3)',
+    boxShadow: '0 3px 12px rgba(255,87,34,0.2)',
+  },
+  otokuBadge: {
+    position: 'absolute',
+    top: -10,
+    right: -6,
+    background: 'linear-gradient(135deg, #FF5722, #FF9800)',
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 900,
+    padding: '3px 8px',
+    borderRadius: 10,
+    boxShadow: '0 2px 6px rgba(255,87,34,0.4)',
   },
   backBtn: {
+    width: '100%',
     padding: '12px 24px',
     borderRadius: 24,
     border: `2px solid ${COLORS.green}`,
@@ -180,12 +201,6 @@ const styles = {
     fontWeight: 700,
     cursor: 'pointer',
     fontFamily: 'inherit',
-  },
-  priceNote: {
-    marginTop: 20,
-    fontSize: 13,
-    color: COLORS.textLight,
-    textAlign: 'center',
   },
   benefitBox: {
     marginTop: 16,
