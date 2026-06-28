@@ -25,16 +25,17 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v1.0.2** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.2'` |
-| version.json | `public/version.json` → `"version": "1.0.2"` |
-| docs/version.json | `docs/version.json` → `"version": "1.0.2"` |
-| package.json | `"version": "1.0.2"` |
-| 最終更新日 | 2026年6月26日（金） |
+| 現在のバージョン | **v1.0.3** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.3'` |
+| version.json | `public/version.json` → `"version": "1.0.3"` |
+| docs/version.json | `docs/version.json` → `"version": "1.0.3"` |
+| package.json | `"version": "1.0.3"` |
+| 最終更新日 | 2026年6月28日（日） |
 
 > ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
 > ※ v1.0.2（6/26リリース）: ログアウト機能、appタグ自動付与、PremiumGate課金ボタン追加、みまもりロック化、キャラ別名前機能（NamingScreen 2キャラ対応）、ロボちゃん専用セリフ分離、吹き出しサイズ修正、OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能、DB設計刷新（user_id一本化・RLS強化12ポリシー・CASCADE追加）
-> ※ 4箇所すべてv1.0.2で同期済み。
+> ※ v1.0.3（6/28リリース）: 果実コレクション37種（ノーマル13/レア6/スーパーレア11/レジェンド7）＋キャラガチャ6体＝全43種、永続成長サイクル、ガチャ演出＋キャラ降臨演出、年間プラン導入（月額200円/年間2,100円の2択UI）、changelog完全版、GCP OAuth同意画面設定
+> ※ 4箇所すべてv1.0.3で同期済み。
 
 ---
 
@@ -336,6 +337,56 @@
 
 ---
 
+
+### 🍎 果実コレクション＋キャラガチャ（v1.0.3 本番稼働中）
+
+#### 成長サイクル（B案）
+- 旧: 葉+1(最大10)、スコア依存で花/実 → **上限で成長ストップ**
+- 新: ミッション完了→葉+1 → 葉2枚→花+1 → 花2つ→実+1 → **永続サイクル**
+- **ミッション4回で実1つ**。収穫→ガチャ→コレクションに追加
+
+#### ガチャシステム
+- 4段階レアリティ: ノーマル(50%) / レア(30%) / スーパーレア(15%) / レジェンド(5%)
+- コレクション保存: localStorage（`manabi_fruit_collection`キー）
+- 拡張方法: gachaData.jsのFRUITS配列に1行追加するだけ。`type: 'character'`でキャラ区別
+
+#### フルーツ（37種）
+| レアリティ | 種類 |
+|---|---|
+| ノーマル(13) | りんご/もも/バナナ/ぶどう/みかん/いちご/キウイ/ラフランス/ブルーベリー/あんず/レモン/なし/さくらんぼ |
+| レア(6) | ほしのみ/うずまきのみ/ハートのみ/メロン/きらめきもも/こんぺいとう |
+| スーパーレア(11) | にじりんご/つきのみ/よぞらりんご/コズミックりんご/ジュエルもも/いかずちりんご/ほのおりんご/プリズムりんご/ゆめもも/たいようりんご/でんげきりんご |
+| レジェンド(7) | おうかんりんご/ぎんがなし/ぎんがりんご/オーロラなし/すいせいベリー/りゅうのみ/ほしひめ |
+
+#### ガチャ限定キャラクター（6体）
+| キャラ名 | 動物 | レアリティ | 画像ファイル |
+|---|---|---|---|
+| にじぴよ🐥 | ユニコーンひよこ | ⭐レア | chara_nijipiyo.png |
+| ぽっけ🦊 | 冒険キツネ | ⭐レア | chara_pokke.png |
+| ももぴ🐰 | フェアリーうさぎ | 💎スーパーレア | chara_momopi.png |
+| ガーディ🤖 | ヒーローロボット | 💎スーパーレア | chara_guardian.png |
+| ライドラ🐉 | 雷ドラゴン | 👑レジェンド | chara_raidora.png |
+| ひめにゃ🐱 | プリンセス猫 | 👑レジェンド | chara_himenya.png |
+
+#### 演出
+- フルーツ: レアリティ別エフェクト画像（8枚）→ フルーツどーん
+- キャラ降臨: 予兆光→ヒビ割れ→画面砕ける→光爆発→虹色稲妻→キャラドーン（エフェクト6枚）
+- 画像配置: `public/public/images/fruits/` (フルーツ37+キャラ6) + `effects/` (フルーツ8+キャラ6)
+- 全画像: flood-fill背景除去済み（ChatGPT生成画像はRGBモードのためflood-fill必須）
+
+#### 新規ファイル
+| ファイル | 行数 | 役割 |
+|---|---|---|
+| `src/lib/gachaData.js` | 185行 | フルーツ37種/キャラ6体定義、レアリティ、ガチャ確率 |
+| `src/lib/fruitCollection.js` | 146行 | localStorage管理、統計ヘルパー |
+| `src/screens/HarvestScreen.js` | 243行 | ガチャ演出画面（フルーツ+キャラ降臨） |
+| `src/screens/CollectionScreen.js` | 201行 | 果実コレクション一覧画面 |
+
+#### 次フェーズ（Phase 2）
+- ガチャで獲得したキャラを出題キャラ（せんせい）として選択可能に
+- 各キャラのポーズ画像（happy/sad/question等）の用意
+- キャラ別セリフ追加
+
 ## 🚀 ストア公開ロードマップ
 
 | バージョン | 内容 |
@@ -354,8 +405,8 @@
 | 項目 | 内容 | 緊急度 |
 |------|------|--------|
 | public/public/images 入れ子 | コードが `/public/images/...` 参照のため二重構造。動作はするがPWA整理時に一緒に直す | 🟡 |
-| changelog v0.9.3 重複 | public/changelog.html に v0.9.3 エントリが2つある。次回整理候補 | 🟢 |
-| デカいファイル | App.js(612行)・storage.js(823行)・MimamoriScreen.js(712行)・LearningScreen.js(462行)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
+| ~~changelog v0.9.3 重複~~ | ✅ v1.0.3のchangelog完全版作成時に解消（スレ27） | ✅ |
+| デカいファイル | App.js(716行)・storage.js(862行)・MimamoriScreen.js(732行)・LearningScreen.js(462行)。MimamoriScreen.jsが特に肥大化傾向（Stripe関連追加で増加）、将来的にファイル分割候補 | 🟡 |
 | ~~device_id / user_id 二重管理~~ | ✅ **v1.0.3でuser_id一本化完了（6/25-26）。device_idフォールバック完全廃止。storage.js 1,030行→823行** | ✅ |
 | ~~RLS未強化~~ | ✅ **3テーブル12ポリシー設定完了（6/25）。auth.uid()=user_id。匿名アクセス完全遮断** | ✅ |
 | ~~ログアウト機能~~ | ✅ **v1.0.2で実装完了（6/26）。みまもり画面＋PremiumGate両方にボタン。freeプランでもログアウト可能** | ✅ |
@@ -383,8 +434,10 @@
 | 項目 | 値 |
 |------|-----|
 | Stripeアカウント | `acct_1TjaQSDVjCZnmwjF`（まなびの木専用・本番有効化済み） |
-| Payment Link（本番） | `https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00` |
-| Product | まなびの木 プレミアム（¥200/月） |
+| Payment Link（月額・本番） | `https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00` |
+| Payment Link（年間・本番） | `https://buy.stripe.com/8x214n2hUaXNezHfRV6AM01` |
+| Product（月額） | まなびの木 プレミアム（¥200/月） |
+| Product（年間） | まなびの木 年間プレミアム（¥2,100/年・1.5ヶ月分お得） |
 | Edge Function① | `stripe-webhook`（Webhook処理） |
 | Edge Function② | `create-portal-session`（Customer Portal URL生成） |
 | Webhook URL | `https://ndqbtfahtjaafroevgwq.supabase.co/functions/v1/stripe-webhook` |
@@ -420,7 +473,8 @@
 
 ## 💰 v1.0 課金設計（2026/6/14策定）
 
-フリーミアム月額200円。5日間トライアル→無料(ミッション1日1回)→プレミアム(全機能)。
+フリーミアム月額200円 / 年間2,100円（1.5ヶ月分お得）。5日間トライアル→無料(ミッション1日1回)→プレミアム(全機能)。
+みまもり画面＋PremiumGateに月額/年間2択カードUI（v1.0.3〜）。Google Pay / Apple Payは Stripe Dynamic Payment Methodsで自動対応。
 認証: ✅ Googleログイン + マジックリンク **実装済み（v0.9.7）**
 PIN: ✅ 保護者PINロック **実装済み（v0.9.9）**
 トライアル制限: ✅ 自動切り替え **実装済み（v0.9.9）**
@@ -463,11 +517,16 @@ SMTP: ✅ Resend経由マジックリンク **開通済み（6/19）**
 - **DB構造ドキュメント**: `docs/supabase_structure.md` に全テーブルスキーマ・RLS・トリガー・依存マップ・既知問題・DontTouchリスト記載
 - **Supabase Pro**: 全3プロジェクトが同一Pro組織（$25/月）に合流済み（6/25）。MCP経由でSQL実行可能。keep-alive不要
 - **正本ルール**: ①docs/current_state.md（北極星）②docs/supabase_structure.md（DB設計正本）。DB変更時は必ず②も同時更新
+- **GitHubバルクアップロードの罠**: Web UIで多数画像を一括アップロードするとファイル名と中身がズレる。5〜6枚ずつバッチ投入＋各コミット後に目視確認が必要
+- **ChatGPT生成画像の罠**: .png拡張子でもRGBモード（アルファチャンネルなし＝透過なし）で出力される。必ずflood-fill背景除去してからリポジトリに入れること。透過がないとCollectionScreenのシルエット表示が□になる
+- **GCP OAuth同意画面**: アプリ名「まなびの木」、ロゴ（robot-icon-192.png）、ホームページ・プラポリ・利用規約URL設定済み（v1.0.3）。バニティサブドメイン（manabinoki.supabase.co）は未実施（CLI操作必要）
+- **ガチャ拡張**: gachaData.jsのFRUITS配列に1行追加で新フルーツ/キャラ追加可能。type:'character'でキャラとフルーツを区別
+- **果実コレクション**: localStorageキー `manabi_fruit_collection`。handleLogoutのクリアリストに含まれる
 - **ユーザー管理**: `manabi_user_view`（まなびの木専用）/ `orphan_user_view`（孤児監視）/ `delete_manabi_user(email)`（安全削除関数・soulユーザーガード付き）
 
 ---
 
-> 最終更新: 2026年6月26日（金）JST
-> 更新者: ちゃぴ（スレッド25）
-> バージョン: v1.0.2（ログアウト機能 + appタグ + キャラ別名前 + ロボちゃんセリフ分離 + DB設計刷新）
+> 最終更新: 2026年6月28日（日）JST
+> 更新者: ちゃぴ（スレッド27）
+> バージョン: v1.0.3（果実コレクション37種＋キャラガチャ6体＝全43種・年間プラン導入・GCP OAuth設定）
 > DB構造ドキュメント: `docs/supabase_structure.md`（正本）
