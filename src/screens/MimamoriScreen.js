@@ -614,22 +614,41 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 10 }}>
                 🎫 トライアル期間中（全機能お試し中）
               </div>
-              <button
-                onClick={() => {
-                  const paymentUrl = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
-                    + (user?.id ? `?client_reference_id=${user.id}` : '');
-                  window.open(paymentUrl, '_blank');
-                }}
-                style={{
-                  width: '100%', padding: '10px 0',
-                  borderRadius: 20, border: '2px solid #FF9800',
-                  background: 'white', color: '#FF9800',
-                  fontSize: 13, fontWeight: 700,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >
-                🌳 気に入ったら今すぐプレミアムに！（月額200円）
-              </button>
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button
+                  onClick={() => {
+                    const url = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
+                      + (user?.id ? `?client_reference_id=${user.id}` : '');
+                    window.open(url, '_blank');
+                  }}
+                  style={{
+                    flex: 1, padding: '12px 6px', borderRadius: 14,
+                    border: '2px solid #FFE0B2', background: 'white',
+                    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FF9800' }}>月額プラン</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: '#333', marginTop: 2 }}>200<span style={{ fontSize: 11 }}>円/月</span></div>
+                </button>
+                <button
+                  onClick={() => {
+                    const url = 'https://buy.stripe.com/8x214n2hUaXNezHfRV6AM01'
+                      + (user?.id ? `?client_reference_id=${user.id}` : '');
+                    window.open(url, '_blank');
+                  }}
+                  style={{
+                    flex: 1, padding: '12px 6px', borderRadius: 14,
+                    border: '2px solid #FF5722', background: 'linear-gradient(180deg, #FFF3E0, #FFECB3)',
+                    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                    position: 'relative', boxShadow: '0 2px 8px rgba(255,87,34,0.15)',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: -8, right: -4, background: 'linear-gradient(135deg, #FF5722, #FF9800)', color: 'white', fontSize: 9, fontWeight: 900, padding: '2px 6px', borderRadius: 8 }}>🉐 おトク</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FF5722' }}>年間プラン</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: '#333', marginTop: 2 }}>2,100<span style={{ fontSize: 11 }}>円/年</span></div>
+                  <div style={{ fontSize: 9, color: '#FF5722', fontWeight: 700, marginTop: 2 }}>1.5ヶ月ぶんおトク🧃</div>
+                </button>
+              </div>
               <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
                 トライアル終了を待たずにいつでも切り替えOK
               </div>
@@ -639,25 +658,44 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 12 }}>
                 無料プランをご利用中です。プレミアム（月額200円）にアップグレードすると、全教科の学習モード・ふくしゅう・みまもり機能がすべて使えるようになります。
               </div>
-              <button
-                onClick={() => {
-                  const paymentUrl = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
-                    + (user?.id ? `?client_reference_id=${user.id}` : '');
-                  window.open(paymentUrl, '_blank');
-                }}
-                style={{
-                  width: '100%', padding: '12px 0',
-                  borderRadius: 24, border: 'none',
-                  background: 'linear-gradient(135deg, #FF9800, #FF5722)',
-                  color: 'white', fontSize: 15, fontWeight: 700,
-                  cursor: 'pointer', boxShadow: '0 3px 8px rgba(255,87,34,0.3)',
-                  fontFamily: 'inherit',
-                }}
-              >
-                🌟 プレミアムにアップグレード（月額200円）
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => {
+                    const url = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00'
+                      + (user?.id ? `?client_reference_id=${user.id}` : '');
+                    window.open(url, '_blank');
+                  }}
+                  style={{
+                    flex: 1, padding: '14px 6px', borderRadius: 16,
+                    border: '2px solid #FFE0B2', background: 'white',
+                    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FF9800' }}>月額プラン</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: '#333', marginTop: 4 }}>200<span style={{ fontSize: 12 }}>円/月</span></div>
+                  <div style={{ fontSize: 10, color: '#999', marginTop: 4 }}>いつでも かいやくOK</div>
+                </button>
+                <button
+                  onClick={() => {
+                    const url = 'https://buy.stripe.com/8x214n2hUaXNezHfRV6AM01'
+                      + (user?.id ? `?client_reference_id=${user.id}` : '');
+                    window.open(url, '_blank');
+                  }}
+                  style={{
+                    flex: 1, padding: '14px 6px', borderRadius: 16,
+                    border: '2px solid #FF5722', background: 'linear-gradient(180deg, #FFF3E0, #FFECB3)',
+                    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                    position: 'relative', boxShadow: '0 2px 8px rgba(255,87,34,0.15)',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: -10, right: -6, background: 'linear-gradient(135deg, #FF5722, #FF9800)', color: 'white', fontSize: 10, fontWeight: 900, padding: '3px 8px', borderRadius: 10, boxShadow: '0 2px 6px rgba(255,87,34,0.4)' }}>🉐 おトク！</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FF5722' }}>年間プラン</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: '#333', marginTop: 4 }}>2,100<span style={{ fontSize: 12 }}>円/年</span></div>
+                  <div style={{ fontSize: 10, color: '#FF5722', fontWeight: 700, marginTop: 4 }}>1.5ヶ月ぶん おトク！🧃</div>
+                </button>
+              </div>
               <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
-                いつでも解約OK・ジュース1本分🧃
+                いつでも解約OK
               </div>
             </div>
           )}
