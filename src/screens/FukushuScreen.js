@@ -2,10 +2,11 @@
 // 📚 FukushuScreen - ふくしゅう画面
 // 最近の学習セッションから、やさしく復習メニューをすすめる
 // v0.6.0: petName対応
+// v1.0.4: CharacterDisplay対応（先生キャラ切替）（2026/06/29）
 // ============================================
 
 import React, { useEffect, useMemo, useState } from 'react';
-import MameCharacter from '../components/MameCharacter';
+import CharacterDisplay from '../components/CharacterDisplay';
 import { COLORS } from '../constants/colors';
 import { getRecentSessions } from '../lib/storage';
 
@@ -135,7 +136,7 @@ const buildRecommendations = (analysis) => {
   return recommendations.slice(0, 6);
 };
 
-const FukushuScreen = ({ onBack, onStartReview, petName }) => {
+const FukushuScreen = ({ onBack, onStartReview, petName, selectedCharacter = 'mame' }) => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -194,11 +195,12 @@ const FukushuScreen = ({ onBack, onStartReview, petName }) => {
           boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
           display: 'flex', alignItems: 'center', gap: 14,
         }}>
-          <MameCharacter
+          <CharacterDisplay
+            character={selectedCharacter}
             pose={hasStudyData ? 'touched' : 'cheer'}
             message={hasStudyData ? 'にがてを そっと 見つけるよ' : 'まずは できるところから！'}
             size={72}
-            petName={displayName}
+            name={displayName}
           />
           <div style={{ fontSize: 13, lineHeight: 1.7, color: COLORS.textLight, fontWeight: 700 }}>
             {isLoading ? (

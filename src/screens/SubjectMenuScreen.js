@@ -2,11 +2,12 @@
 // 📂 SubjectMenuScreen - 教科内カテゴリ選択画面
 // 教科ボタン → このメニュー → カテゴリ選んで問題 or ずかん
 // v0.9.5: 新規作成（りか/げんそ分離対応）
+// v1.0.4: CharacterDisplay対応（先生キャラ切替）（2026/06/29）
 // ============================================
 
 import React from 'react';
 import { COLORS } from '../constants/colors';
-import MameCharacter from '../components/MameCharacter';
+import CharacterDisplay from '../components/CharacterDisplay';
 
 // 教科ごとのカテゴリ定義
 // ※ 将来カテゴリ追加時はここに追記するだけ
@@ -47,7 +48,7 @@ const SUBJECT_CATEGORIES = {
   },
 };
 
-const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName, equippedItem }) => {
+const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName, equippedItem, selectedCharacter = 'mame' }) => {
   const config = SUBJECT_CATEGORIES[subject];
 
   if (!config) {
@@ -83,11 +84,12 @@ const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName,
 
       {/* キャラクター */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0 16px' }}>
-        <MameCharacter
+        <CharacterDisplay
+          character={selectedCharacter}
           pose="cheer"
           message={`なにを れんしゅうする？`}
           size={80}
-          petName={petName}
+          name={petName}
           equippedItem={equippedItem}
         />
       </div>

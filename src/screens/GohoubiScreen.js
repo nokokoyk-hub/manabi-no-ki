@@ -2,17 +2,20 @@
 // 🎁 GohoubiScreen - ごほうびパズル画面
 // パズルのピースを集めて絵を完成させる！
 // v0.7.1: 新規作成
+// v1.0.4: CharacterDisplay対応（先生キャラ切替）（2026/06/29）
+//         着せ替えプレビューはまめ専用のため MameCharacter を維持
 // ============================================
 
 import React, { useState, useEffect } from 'react';
 import MameCharacter from '../components/MameCharacter';
+import CharacterDisplay from '../components/CharacterDisplay';
 import { COLORS } from '../constants/colors';
 import { loadPuzzleData } from '../lib/storage';
 import { loadCostumeData, equipItem } from '../lib/storage';
 import { getPuzzleById } from '../data/puzzles';
 import COSTUME_ITEMS from '../data/costumeItems';
 
-const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeData: propsCostumeData, onEquipChange }) => {
+const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeData: propsCostumeData, onEquipChange, selectedCharacter = 'mame' }) => {
   const [puzzleData] = useState(propsPuzzleData || loadPuzzleData());
   const [showArchive, setShowArchive] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -148,7 +151,7 @@ const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeDa
               background: 'white', borderRadius: 20, padding: 32, textAlign: 'center',
               boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
             }}>
-              <MameCharacter pose="touched" message="まだ かんせいした パズルは ないよ" size={80} petName={displayName} />
+              <CharacterDisplay character={selectedCharacter} pose="touched" message="まだ かんせいした パズルは ないよ" size={80} name={displayName} />
               <div style={{ marginTop: 16, fontSize: 14, color: COLORS.textLight, fontWeight: 700, lineHeight: 1.7 }}>
                 ミッションを クリアして
                 <br />ピースを あつめよう！
@@ -215,15 +218,16 @@ const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeDa
       </div>
 
       <div style={{ padding: 20 }}>
-        {/* まめ + メッセージ */}
+        {/* キャラ + メッセージ */}
         <div style={{
           display: 'flex', justifyContent: 'center', marginBottom: 16,
         }}>
-          <MameCharacter
+          <CharacterDisplay
+            character={selectedCharacter}
             pose={getPose()}
             message={getMessage()}
             size={80}
-            petName={displayName}
+            name={displayName}
           />
         </div>
 
