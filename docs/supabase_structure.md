@@ -84,6 +84,20 @@
 - INSERT: `auth.uid() = id` ✅
 - UPDATE: `auth.uid() = id` ✅
 
+**📋 追加予定カラム（localStorage→Supabase移行計画 / App Store出店に向けて）:**
+| カラム | 型 | 説明 | 優先度 |
+|---|---|---|---|
+| `fruit_collection` | jsonb | 果実コレクション（現localStorage `manabi_fruit_collection`） | 🔴 最重要 |
+| `subject_levels` | jsonb | 教科レベル設定（現localStorage `manabi_subject_levels`） | 🟠 |
+| `pet_name` | text | まめの名前（現localStorage `manabi_pet_name`） | 🟡 |
+| `robot_name` | text | ロボちゃんの名前（現localStorage `manabi_robot_name`） | 🟡 |
+| `selected_character` | text | 選択中キャラ（現localStorage `manabi_selected_character`） | 🟡 |
+| `puzzle_data` | jsonb | パズルデータ（現localStorage `manabi_puzzle`） | 🟡 |
+| `costume_data` | jsonb | 着せ替えデータ（現localStorage `manabi_costume`） | 🟡 |
+
+> ※ 移行時は初回ログインでlocalStorage→Supabase自動マイグレーション機能を実装し、既存ユーザーのデータを保全すること。
+> ※ App Store出店前に最低限 `fruit_collection` の移行は必須（デバイス間同期がないと審査で指摘される可能性）。
+
 ### user_progress（学習進捗）
 
 | カラム | 型 | NULL | デフォルト | 説明 |

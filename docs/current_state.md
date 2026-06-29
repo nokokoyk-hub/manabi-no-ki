@@ -25,17 +25,18 @@
 
 | 項目 | 値 |
 |------|-----|
-| 現在のバージョン | **v1.0.3** |
-| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.3'` |
-| version.json | `public/version.json` → `"version": "1.0.3"` |
-| docs/version.json | `docs/version.json` → `"version": "1.0.3"` |
-| package.json | `"version": "1.0.3"` |
-| 最終更新日 | 2026年6月28日（日） |
+| 現在のバージョン | **v1.0.4** |
+| APP_VERSION | `src/App.js` → `APP_VERSION = '1.0.4'` |
+| version.json | `public/version.json` → `"version": "1.0.4"` |
+| docs/version.json | `docs/version.json` → `"version": "1.0.4"` |
+| package.json | `"version": "1.0.4"` |
+| 最終更新日 | 2026年6月30日（月） |
 
 > ※ v1.0.0〜v1.0.1 は **PWA化完了 + メール認証OTP化 + PWAログイン修正（implicit flow）（ロボットくんアイコン・Service Worker・ホーム画面追加対応）+ soul-backup混入対策 + ストア公開準備**を含む。
 > ※ v1.0.2（6/26リリース）: ログアウト機能、appタグ自動付与、PremiumGate課金ボタン追加、みまもりロック化、キャラ別名前機能（NamingScreen 2キャラ対応）、ロボちゃん専用セリフ分離、吹き出しサイズ修正、OTP改善、つかいかたガイドLP追加、AuthScreenロボちゃん配置、ロボちゃん全18ポーズ、キャラ選択機能、DB設計刷新（user_id一本化・RLS強化12ポリシー・CASCADE追加）
 > ※ v1.0.3（6/28リリース）: 果実コレクション37種（ノーマル13/レア6/スーパーレア11/レジェンド7）＋キャラガチャ6体＝全43種、永続成長サイクル、ガチャ演出＋キャラ降臨演出、年間プラン導入（月額200円/年間2,100円の2択UI）、changelog完全版、GCP OAuth同意画面設定
-> ※ 4箇所すべてv1.0.3で同期済み。
+> ※ v1.0.4（6/30リリース）: SEO対策（Search Console https修正・静的HTML3ページ新設・sitemap 5URL化）、キャラ名変更機能（長押しダイアログ）、CharacterDisplay汎用コンポーネント（将来のガチャキャラ先生対応設計）、全画面キャラ切替対応（SubjectMenu/Fukushu/Gohoubi）、レベル設定バグ修正（saveSubjectLevels return欠落 v0.4.1〜）
+> ※ 4箇所すべてv1.0.4で同期済み。
 
 ---
 
@@ -54,7 +55,7 @@
 | バージョン管理 | GitHub | ✅ 稼働中（Public） |
 | アクセス解析 | Google Analytics 4（GA4） | ✅ 稼働中（v0.9.9〜） |
 | ユーザー管理シート | Google Sheets + Apps Script | ✅ 稼働中（v0.9.9〜） |
-| SEO | OGP・JSON-LD・sitemap・robots | ✅ 設定済み（6/19） |
+| SEO | OGP・JSON-LD・sitemap・robots・静的HTML | ✅ 強化済み（6/30） |
 
 ### インフラ情報
 - **独自ドメイン: `manabinoki.net`**（お名前.com取得、Vercelネームサーバー接続、SSL自動）
@@ -83,17 +84,19 @@
 > ※ Brevoは無料プランのSMTPリレー制限により不採用。Brevo APIは使える（テストメール送信確認済み）がSMTP経由は不可だった。
 > ※ お受験マネージャーのResendとは別アカウント（1アカウント1ドメイン制限のため）。
 
-### SEO設定（6/19設定）
+### SEO設定（6/19設定 → 6/30強化）
 - **OGPタグ**: og:title, og:description, og:type, og:url, og:site_name, og:locale
-- **Twitter Card**: summary
+- **Twitter Card**: summary_large_image
 - **canonical URL**: https://manabinoki.net/
-- **JSON-LD構造化データ**: WebApplication（EducationalApplication）
+- **JSON-LD構造化データ**: WebApplication（EducationalApplication）+ HowTo（howto.html）
 - **robots.txt**: Allow: / / Disallow: /api/ / Sitemap指定
-- **sitemap.xml**: トップページ + changelog
+- **sitemap.xml**: **5URL**（トップ / howto.html / terms.html / privacy.html / changelog.html）
 - **manifest.json**: description, lang, orientation追加
-- ✅ **Google Search Console**メタタグ設置済み（クロール待ち）
+- ✅ **Google Search Console**: **httpsプロパティ追加済み**（6/30修正 ← 旧httpプロパティがインデックスされない根本原因だった）
 - ✅ **OG画像**: og-image.png（ロボットくん1200×630）設定済み
-- ✅ **Twitter Card**: summary_large_image に変更済み
+- ✅ **静的HTMLページ**: howto.html / terms.html / privacy.html（React SPAはHTMLボディが空のためGooglebotが読めない → 静的HTMLで補完）
+- ✅ **GCP OAuth同意画面**: アプリ名「まなびの木」+ ロゴ + ドメイン認証済み
+- 📌 **教訓**: React SPAはHTMLが`<div id="root">`のみのためGooglebotがコンテンツを読めない。静的HTMLページで補完する戦略が有効。Search Consoleのプロパティはhttpとhttpsで別サイト扱い。
 
 ### questionsテーブル主要カラム
 | カラム | 型 | 説明 |
@@ -347,7 +350,8 @@
 
 #### ガチャシステム
 - 4段階レアリティ: ノーマル(50%) / レア(30%) / スーパーレア(15%) / レジェンド(5%)
-- コレクション保存: localStorage（`manabi_fruit_collection`キー）
+- コレクション保存: **現状localStorage**（`manabi_fruit_collection`キー）→ **Supabase移行予定**（profilesテーブルに`fruit_collection` jsonbカラム追加）
+- ⚠️ **localStorage依存問題**: デバイス間で同期されない＋ログアウトで消える → ユーザー喪失体験。**次スレで最優先対応**
 - 拡張方法: gachaData.jsのFRUITS配列に1行追加するだけ。`type: 'character'`でキャラ区別
 
 #### フルーツ（37種）
@@ -377,10 +381,23 @@
 #### 新規ファイル
 | ファイル | 行数 | 役割 |
 |---|---|---|
+| `src/components/CharacterDisplay.js` | 62行 | 汎用キャラ表示（selectedCharacterで切替、将来のガチャキャラ先生対応） |
 | `src/lib/gachaData.js` | 185行 | フルーツ37種/キャラ6体定義、レアリティ、ガチャ確率 |
 | `src/lib/fruitCollection.js` | 146行 | localStorage管理、統計ヘルパー |
 | `src/screens/HarvestScreen.js` | 243行 | ガチャ演出画面（フルーツ+キャラ降臨） |
 | `src/screens/CollectionScreen.js` | 201行 | 果実コレクション一覧画面 |
+
+#### キャラ名変更（v1.0.4〜）
+- ホーム画面でキャラを **長押し（0.5秒）** → 名前変更ダイアログ表示
+- タップ（短押し）は出題キャラ切替のまま
+- 最大10文字、文字数カウント表示
+- App.jsの `displayName` 経由で全画面のセリフに即反映
+- `rawPetName` prop: App.jsがdisplayName（選択中キャラ名）をpetNameで渡すため、名前変更ダイアログ用にまめの実際の名前を別propで渡す
+
+#### 汎用キャラ表示 CharacterDisplay（v1.0.4〜）
+- `src/components/CharacterDisplay.js` がselectedCharacterに応じてMameCharacter/RobotCharacterを切替
+- SubjectMenuScreen / FukushuScreen / GohoubiScreen で使用（GohoubiScreenの着せ替えプレビューのみMameCharacter固定）
+- **将来のガチャキャラ先生対応**: CharacterDisplay.jsにcase追加するだけで全画面が自動対応
 
 #### 次フェーズ（Phase 2）
 - ガチャで獲得したキャラを出題キャラ（せんせい）として選択可能に
@@ -393,10 +410,14 @@
 |-----------|------|
 | **v0.9.9** | ✅ キャラクター追加 + 利用規約・プラポリ・特商法 + Stripe本番切替 + 解約機能 |
 | **v1.0.0** | ✅ PWA化完了 + ストア審査準備 🎉 |
-| **v1.0.1〜** | Google Play Store 公開（TWA）+ OG画像 + UpdateBanner調整 + フィードバック反映 |
+| **v1.0.3** | ✅ 果実コレクション43種 + 年間プラン + ガチャ演出 |
+| **v1.0.4** | ✅ SEO強化 + キャラ名変更 + CharacterDisplay汎用化 + レベル設定バグ修正 |
+| **v1.0.5（予定）** | 🔴 果実コレクションSupabase移行 + localStorage依存削減 |
+| **v1.1.0（予定）** | Google Play Store 公開（TWAビルド） |
 
 > Google Play Developerアカウントはお受験マネージャーで登録済み。新規アプリ追加でまなびの木を出店予定。
 > ストア公開には利用規約・プライバシーポリシーが審査で必須。課金ありで出す方が審査やり直し不要。
+> **App Store出店を視野に入れた設計方針**: データのSupabase集約（localStorage依存削減）、CharacterDisplayによる拡張性確保、静的HTMLによるSEO基盤整備。
 
 ---
 
@@ -414,6 +435,20 @@
 | ~~auth孤児ユーザー~~ | ✅ **5件削除完了（6/25）。orphan_user_viewで監視可能。delete_manabi_user()で安全削除可能** | ✅ |
 | ~~UpdateBanner 6秒自動消去~~ | ✅ **15秒に延長済み（v1.0.1）** | ✅ |
 | auth ゴーストユーザー | SMTP テスト時にnokoko333@gmail.com等の未認証ユーザーが大量作成された可能性。要掃除 | 🟢 |
+| **localStorage依存データ（Supabase移行予定）** | 下記参照。デバイス間で同期されない＋ログアウトで消える。App Store出店前に対応必須 | 🔴 |
+
+#### 📦 localStorage依存データ一覧と移行計画
+| データ | localStorageキー | 移行先（計画） | 優先度 |
+|---|---|---|---|
+| **果実コレクション** | `manabi_fruit_collection` | profiles.fruit_collection (jsonb) | 🔴 最重要（喪失体験） |
+| 教科レベル設定 | `manabi_subject_levels` | profiles.subject_levels (jsonb) | 🟠 |
+| まめの名前 | `manabi_pet_name` | profiles.pet_name (text) | 🟡 |
+| ロボちゃんの名前 | `manabi_robot_name` | profiles.robot_name (text) | 🟡 |
+| 選択中キャラ | `manabi_selected_character` | profiles.selected_character (text) | 🟡 |
+| パズルデータ | `manabi_puzzle` | profiles.puzzle_data (jsonb) | 🟡 |
+| 着せ替えデータ | `manabi_costume` | profiles.costume_data (jsonb) | 🟡 |
+
+> ※ 移行時は初回ログインでlocalStorage→Supabase自動マイグレーション機能を実装し、既存ユーザーのデータを保全すること。
 | ~~OG画像未設定~~ | ✅ **og-image.png設定済み（v1.0.1）** | ✅ |
 
 ### 🔒 soul-backup同居対策（v1.0.0〜）
