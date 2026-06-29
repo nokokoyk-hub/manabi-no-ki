@@ -4,9 +4,10 @@
 // v0.6.0: petName対応（キャラ名カスタマイズ）
 // v0.9.2: 教科再構成（しゃかい🗾・どうとく💛追加、2×3グリッド化）
 // v1.0.2: キャラ選択機能（まめ/ロボちゃん切替）（2026/06/26）
+// v1.0.4: キャラ名変更機能（長押しで名前変更ダイアログ）（2026/06/29）
 // ============================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
@@ -15,8 +16,8 @@ import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, puzzleData, equippedItem,
-  userPlan, trialDaysLeft, selectedCharacter, onCharacterChange,
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, robotName, puzzleData, equippedItem,
+  userPlan, trialDaysLeft, selectedCharacter, onCharacterChange, onRenameCharacter,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi,
   canHarvest, onHarvest, onOpenCollection, fruitCollection
 }) => {
@@ -34,6 +35,42 @@ const HomeScreen = ({
       setMameMessage(getCharaMessage('home', petName, selectedCharacter));
     }
   }, [todayDone, streak, petName, selectedCharacter]);
+
+  // ===== 🏷️ キャラ名変更（長押し） =====
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameTarget, setRenameTarget] = useState(null); // 'mame' or 'robot'
+  const [renameInput, setRenameInput] = useState('');
+  const longPressTimer = useRef(null);
+  const longPressTriggered = useRef(false);
+
+  const handlePressStart = useCallback((target) => {
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setRenameTarget(target);
+      setRenameInput(target === 'robot' ? (robotName || 'ロボちゃん') : (petName || 'まめ'));
+      setShowRenameModal(true);
+    }, 500);
+  }, [robotName, petName]);
+
+  const handlePressEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleCharaTap = useCallback((char) => {
+    if (longPressTriggered.current) return; // 長押し後はタップ無視
+    onCharacterChange && onCharacterChange(char);
+  }, [onCharacterChange]);
+
+  const handleRenameSubmit = useCallback(() => {
+    const trimmed = renameInput.trim();
+    if (!trimmed || !onRenameCharacter) return;
+    onRenameCharacter(renameTarget, trimmed);
+    setShowRenameModal(false);
+  }, [renameInput, renameTarget, onRenameCharacter]);
 
   const levelSummary = SUBJECT_LEVELS
     .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
@@ -145,9 +182,15 @@ const HomeScreen = ({
         display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
         padding: '0 10px', marginTop: 8,
       }}>
-        {/* ロボットくんは木の左に（タップで出題キャラ選択） */}
+        {/* ロボットくんは木の左に（タップで出題キャラ選択 / 長押しで名前変更） */}
         <div
-          onClick={() => onCharacterChange && onCharacterChange('robot')}
+          onClick={() => handleCharaTap('robot')}
+          onTouchStart={() => handlePressStart('robot')}
+          onTouchEnd={handlePressEnd}
+          onTouchCancel={handlePressEnd}
+          onMouseDown={() => handlePressStart('robot')}
+          onMouseUp={handlePressEnd}
+          onMouseLeave={handlePressEnd}
           style={{
             flexShrink: 0, width: 72, marginRight: -8, zIndex: 1, overflow: 'visible',
             position: 'relative', cursor: 'pointer',
@@ -169,9 +212,15 @@ const HomeScreen = ({
           />
         </div>
         <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
-        {/* まめは木の右に（タップで出題キャラ選択） */}
+        {/* まめは木の右に（タップで出題キャラ選択 / 長押しで名前変更） */}
         <div
-          onClick={() => onCharacterChange && onCharacterChange('mame')}
+          onClick={() => handleCharaTap('mame')}
+          onTouchStart={() => handlePressStart('mame')}
+          onTouchEnd={handlePressEnd}
+          onTouchCancel={handlePressEnd}
+          onMouseDown={() => handlePressStart('mame')}
+          onMouseUp={handlePressEnd}
+          onMouseLeave={handlePressEnd}
           style={{
             flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible',
             position: 'relative', cursor: 'pointer',
@@ -393,6 +442,81 @@ const HomeScreen = ({
           )}
         </div>
       </div>
+
+      {/* ===== 🏷️ キャラ名変更モーダル ===== */}
+      {showRenameModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100, padding: 20,
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowRenameModal(false); }}
+        >
+          <div style={{
+            background: 'white', borderRadius: 24, padding: '28px 24px',
+            width: '100%', maxWidth: 320, textAlign: 'center',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+            animation: 'mame-fadeIn 0.2s ease-out',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>
+              {renameTarget === 'robot' ? '🤖' : '🐕'}
+            </div>
+            <div style={{
+              fontSize: 16, fontWeight: 800, color: '#2E7D32', marginBottom: 4,
+            }}>
+              {renameTarget === 'robot' ? 'ロボちゃん' : 'まめ'}の なまえを かえるよ！
+            </div>
+            <div style={{
+              fontSize: 11, color: '#999', marginBottom: 16,
+            }}>
+              すきな なまえを つけてね 🌟
+            </div>
+            <input
+              type="text"
+              value={renameInput}
+              onChange={(e) => setRenameInput(e.target.value)}
+              maxLength={10}
+              autoFocus
+              style={{
+                width: '100%', padding: '12px 16px',
+                fontSize: 18, fontWeight: 700, textAlign: 'center',
+                border: '2px solid #C8E6C9', borderRadius: 14,
+                outline: 'none', fontFamily: "'Rounded Mplus 1c', sans-serif",
+                background: '#F1F8E9', color: '#333',
+              }}
+              onFocus={(e) => e.target.select()}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleRenameSubmit(); }}
+            />
+            <div style={{ fontSize: 10, color: '#BDBDBD', marginTop: 6 }}>
+              {renameInput.length}/10もじ
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <button
+                onClick={() => setShowRenameModal(false)}
+                style={{
+                  flex: 1, padding: '10px', fontSize: 14, fontWeight: 700,
+                  background: '#F5F5F5', border: '1px solid #E0E0E0',
+                  borderRadius: 14, color: '#888', cursor: 'pointer',
+                  fontFamily: "'Rounded Mplus 1c', sans-serif",
+                }}
+              >もどる</button>
+              <button
+                onClick={handleRenameSubmit}
+                disabled={!renameInput.trim()}
+                style={{
+                  flex: 1, padding: '10px', fontSize: 14, fontWeight: 800,
+                  background: renameInput.trim() ? 'linear-gradient(135deg, #66BB6A, #43A047)' : '#E0E0E0',
+                  border: 'none', borderRadius: 14,
+                  color: renameInput.trim() ? 'white' : '#999',
+                  cursor: renameInput.trim() ? 'pointer' : 'default',
+                  fontFamily: "'Rounded Mplus 1c', sans-serif",
+                  boxShadow: renameInput.trim() ? '0 3px 10px rgba(67,160,71,0.3)' : 'none',
+                }}
+              >けってい！✨</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
