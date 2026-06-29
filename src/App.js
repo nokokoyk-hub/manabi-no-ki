@@ -223,6 +223,17 @@ function App() {
     try { localStorage.setItem('manabi_selected_character', char); } catch {}
   };
 
+  // 🏷️ キャラ名変更ハンドラ（v1.0.4: 長押しで名前変更）
+  const handleRenameCharacter = useCallback((target, newName) => {
+    if (target === 'robot') {
+      const saved = saveRobotName(newName);
+      setRobotName(saved);
+    } else {
+      const saved = savePetName(newName);
+      setPetName(saved);
+    }
+  }, []);
+
   // ===== 🔓 ログアウト（v1.0.2）=====
   const handleLogout = async () => {
     if (!window.confirm('ログアウトしますか？\nべつの アカウントで ログインできます')) return;
@@ -671,12 +682,14 @@ function App() {
             todayDone={todayDone}
             subjectLevels={subjectLevels}
             petName={displayName}
+            robotName={robotName}
             puzzleData={puzzleData}
             equippedItem={costumeData.equippedItem}
             userPlan={userPlan}
             trialDaysLeft={trialDaysLeft}
             selectedCharacter={selectedCharacter}
             onCharacterChange={handleCharacterChange}
+            onRenameCharacter={handleRenameCharacter}
             onStartLearning={() => startLearning('mission')}
             onOpenMath={() => setScreen('subject-math')}
             onOpenKokugo={() => setScreen('subject-kokugo')}
