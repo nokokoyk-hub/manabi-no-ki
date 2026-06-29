@@ -595,6 +595,7 @@ function App() {
             onBack={() => setScreen('home')}
             onStartReview={startLearning}
             petName={displayName}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'gohoubi':
@@ -605,6 +606,7 @@ function App() {
             puzzleData={puzzleData}
             costumeData={costumeData}
             onEquipChange={() => setCostumeData(loadCostumeData())}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'zukan':
@@ -624,6 +626,7 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             equippedItem={costumeData.equippedItem}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'subject-genso':
@@ -636,6 +639,7 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             equippedItem={costumeData.equippedItem}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'subject-math':
@@ -647,6 +651,7 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             equippedItem={costumeData.equippedItem}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'subject-rika':
@@ -658,6 +663,7 @@ function App() {
             onBack={() => setScreen('home')}
             petName={displayName}
             equippedItem={costumeData.equippedItem}
+            selectedCharacter={selectedCharacter}
           />
         );
       case 'premium-gate':
