@@ -682,6 +682,7 @@ function App() {
             todayDone={todayDone}
             subjectLevels={subjectLevels}
             petName={displayName}
+            rawPetName={petName}
             robotName={robotName}
             puzzleData={puzzleData}
             equippedItem={costumeData.equippedItem}
