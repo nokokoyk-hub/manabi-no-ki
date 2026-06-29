@@ -16,7 +16,7 @@ import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, robotName, puzzleData, equippedItem,
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, rawPetName, robotName, puzzleData, equippedItem,
   userPlan, trialDaysLeft, selectedCharacter, onCharacterChange, onRenameCharacter,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi,
   canHarvest, onHarvest, onOpenCollection, fruitCollection
@@ -48,10 +48,10 @@ const HomeScreen = ({
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
       setRenameTarget(target);
-      setRenameInput(target === 'robot' ? (robotName || 'ロボちゃん') : (petName || 'まめ'));
+      setRenameInput(target === 'robot' ? (robotName || 'ロボちゃん') : (rawPetName || 'まめ'));
       setShowRenameModal(true);
     }, 500);
-  }, [robotName, petName]);
+  }, [robotName, rawPetName]);
 
   const handlePressEnd = useCallback(() => {
     if (longPressTimer.current) {
