@@ -131,8 +131,10 @@ export const loadSubjectLevels = () => {
 export const saveSubjectLevels = (levels) => {
   try {
     localStorage.setItem(SUBJECT_LEVELS_KEY, JSON.stringify(levels));
+    return levels;
   } catch (err) {
     console.error('❌ レベル保存エラー:', err);
+    return levels;
   }
 };
 
