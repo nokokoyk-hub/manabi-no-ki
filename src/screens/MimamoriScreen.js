@@ -161,7 +161,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
     for (let i = 0; i < 7; i++) {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = toSafeDateStr(date); // ★v1.0.4修正: toISOString()のUTCズレ解消
 
       const daySessions = sessions.filter(s => {
         // ★v1.0.4修正: toLocaleDateString('sv-SE')を廃止→機種依存しない手動フォーマット
@@ -180,7 +180,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
         totalScore,
         totalQuestions: totalQ,
         isFuture,
-        isToday: dateStr === today.toISOString().split('T')[0],
+        isToday: dateStr === toSafeDateStr(today), // ★v1.0.4修正: toISOString()のUTCズレ解消
       });
     }
     return week;
