@@ -29,7 +29,8 @@ import CollectionScreen from './screens/CollectionScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
 import { rollGacha } from './lib/gachaData';
-import { loadFruitCollection, addFruitToCollection, isNewFruit } from './lib/fruitCollection';
+// ★v1.0.4変更: initFruitCollection, clearFruitCollectionCache を追加
+import { loadFruitCollection, addFruitToCollection, isNewFruit, initFruitCollection, clearFruitCollectionCache } from './lib/fruitCollection';
 import {
   loadProgress,
   saveProgress,
@@ -112,6 +113,8 @@ function App() {
         // ⛑️ v1.0.2: アカウント切替検出（前のユーザーのlocalStorageをクリア）
         const userSwitched = checkAndSwitchUser(user.id);
         if (userSwitched) {
+          // ★v1.0.4追加: コレクションキャッシュもクリア
+          clearFruitCollectionCache();
           // localStorageクリア済み → stateもデフォルトに戻す
           setPetName(null);
           setCostumeData({ equippedItem: null, unlockedItems: ['item_none'], missionCount: 0 });
@@ -135,6 +138,10 @@ function App() {
         setFruits(migrated.fruits);
         setStreak(migrated.streak);
         setTodayDone(migrated.todayDone);
+
+        // ★v1.0.4追加: 果実コレクションのSupabase同期
+        const syncedCollection = await initFruitCollection(user.id);
+        setFruitCollection(syncedCollection);
 
         const { data, error } = await supabase
           .from('profiles')
@@ -245,6 +252,8 @@ function App() {
         try { localStorage.removeItem(k); } catch {}
       });
       await supabase.auth.signOut();
+      // ★v1.0.4追加: コレクションキャッシュクリア
+      clearFruitCollectionCache();
       setPetName(null);
       setRobotName(null);
       setFruitCollection({ items: {}, totalHarvests: 0, lastHarvestAt: null });
