@@ -310,7 +310,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: 20,
         }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.text, marginBottom: 16 }}>
-            📅 こんしゅうの きろく
+            🗓️ こんしゅうの きろく
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {weekData.map((d, i) => (
