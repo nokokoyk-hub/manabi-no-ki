@@ -2,7 +2,7 @@
 
 > このファイルはSupabaseのDB設計の正本です。
 > テーブル変更・RLS変更・トリガー変更時は必ずこのファイルも更新すること。
-> 最終更新: 2026-06-26（JST）
+> 最終更新: 2026-06-30（JST）スレッド29
 
 ---
 
@@ -78,6 +78,7 @@
 | `stripe_customer_id` | text | YES | null | Stripe顧客ID |
 | `created_at` | timestamptz | NO | now() | 作成日時 |
 | `updated_at` | timestamptz | NO | now() | 更新日時 |
+| `fruit_collection` | jsonb | YES | null | 果実コレクション（v1.0.4追加） |
 
 **RLSポリシー:**
 - SELECT: `auth.uid() = id` ✅
@@ -85,18 +86,18 @@
 - UPDATE: `auth.uid() = id` ✅
 
 **📋 追加予定カラム（localStorage→Supabase移行計画 / App Store出店に向けて）:**
-| カラム | 型 | 説明 | 優先度 |
+| カラム | 型 | 説明 | 状態 |
 |---|---|---|---|
-| `fruit_collection` | jsonb | 果実コレクション（現localStorage `manabi_fruit_collection`） | 🔴 最重要 |
-| `subject_levels` | jsonb | 教科レベル設定（現localStorage `manabi_subject_levels`） | 🟠 |
-| `pet_name` | text | まめの名前（現localStorage `manabi_pet_name`） | 🟡 |
-| `robot_name` | text | ロボちゃんの名前（現localStorage `manabi_robot_name`） | 🟡 |
-| `selected_character` | text | 選択中キャラ（現localStorage `manabi_selected_character`） | 🟡 |
-| `puzzle_data` | jsonb | パズルデータ（現localStorage `manabi_puzzle`） | 🟡 |
-| `costume_data` | jsonb | 着せ替えデータ（現localStorage `manabi_costume`） | 🟡 |
+| ~~`fruit_collection`~~ | ~~jsonb~~ | ~~果実コレクション~~ | ✅ **v1.0.4で追加済み**（上記テーブル定義参照） |
+| `subject_levels` | jsonb | 教科レベル設定（現localStorage `manabi_subject_levels`） | 🟠 未移行 |
+| `pet_name` | text | まめの名前（現localStorage `manabi_pet_name`） | 🟡 未移行 |
+| `robot_name` | text | ロボちゃんの名前（現localStorage `manabi_robot_name`） | 🟡 未移行 |
+| `selected_character` | text | 選択中キャラ（現localStorage `manabi_selected_character`） | 🟡 未移行 |
+| `puzzle_data` | jsonb | パズルデータ（現localStorage `manabi_puzzle`） | 🟡 未移行 |
+| `costume_data` | jsonb | 着せ替えデータ（現localStorage `manabi_costume`） | 🟡 未移行 |
 
+> ※ 移行パターンは fruitCollection.js が雛形（Supabase優先+localStorageフォールバック+initで1回ロード+メモリキャッシュ+デュアルライト）。
 > ※ 移行時は初回ログインでlocalStorage→Supabase自動マイグレーション機能を実装し、既存ユーザーのデータを保全すること。
-> ※ App Store出店前に最低限 `fruit_collection` の移行は必須（デバイス間同期がないと審査で指摘される可能性）。
 
 ### user_progress（学習進捗）
 
@@ -223,6 +224,7 @@
 |---|---|---|
 | `profiles` | `src/App.js` | SELECT, UPSERT |
 | | `src/components/PinGate.js` | SELECT, UPDATE |
+| | `src/lib/fruitCollection.js` | SELECT, UPDATE（fruit_collectionカラム） |
 | `user_progress` | `src/lib/storage.js` | SELECT, INSERT, UPDATE |
 | `learning_sessions` | `src/lib/storage.js` | INSERT, SELECT |
 | `answer_history` | `src/lib/storage.js` | INSERT, SELECT |
@@ -314,5 +316,6 @@ AuthScreen.js signInWithOtp → Supabase がOTPメール送信
 ---
 
 > 作成: ちゃぴ
-> 日時: 2026-06-26（金）スレッド25
-> 次回更新: 実の収穫機能実装・コレクションテーブル追加等
+> 日時: 2026-06-26（金）スレッド25 / 最終更新: 2026-06-30（月）スレッド29
+> 更新内容: profiles.fruit_collection jsonbカラム追加（v1.0.4）、ファイル波及マップにfruitCollection.js追加
+> 次回更新: 他のlocalStorage→Supabase移行時（subject_levels, pet_name等）
