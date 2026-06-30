@@ -2,11 +2,9 @@
 // 👀 MimamoriScreen - 保護者向け学習分析
 // v0.2.0: Supabase実データ対応
 // v0.9.2: 保護者モード全面リニューアル
-//   - 週間サマリー（学習日数・問題数・セッション数）
-//   - 教科別正答率バー（answer_historyベース）
-//   - 苦手ポイント自動検出
-//   - 正答率推移グラフ（SVG折れ線）
-//   - レベル設定導線
+// v1.0.4: ★日付フォーマット機種依存バグ修正
+//   - toLocaleDateString('sv-SE')を手動フォーマットに変更
+//   - Android/一部ブラウザで日付がおかしくなる問題を解消
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -21,6 +19,12 @@ import { supabase } from '../lib/supabase';
 
 // 曜日名（日本語）
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+
+// ★v1.0.4追加: 機種依存しない安全な日付フォーマット
+const toSafeDateStr = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
 
 // --- SVG折れ線グラフコンポーネント ---
 const AccuracyChart = ({ data }) => {
@@ -160,7 +164,8 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
       const dateStr = date.toISOString().split('T')[0];
 
       const daySessions = sessions.filter(s => {
-        const sessionDate = new Date(s.completed_at).toLocaleDateString('sv-SE');
+        // ★v1.0.4修正: toLocaleDateString('sv-SE')を廃止→機種依存しない手動フォーマット
+        const sessionDate = toSafeDateStr(new Date(s.completed_at));
         return sessionDate === dateStr;
       });
 
@@ -188,7 +193,6 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
     const weakPoints = [];
     subjectStats.forEach(s => {
       if (s.total >= 3 && s.accuracy < 60) {
-        // 教科全体が苦手
         weakPoints.push({
           subject: s.subject,
           emoji: s.emoji,
@@ -197,7 +201,6 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           type: 'subject',
         });
       }
-      // レベル別の苦手検出
       Object.entries(s.levels).forEach(([lv, d]) => {
         if (d.total >= 2 && d.accuracy < 50) {
           weakPoints.push({
@@ -221,10 +224,8 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
   const weeklyQuestions = weekData.reduce((sum, d) => sum + d.totalQuestions, 0);
   const weakPoints = getWeakPoints();
 
-  // 教科カラー取得
   const getSubjectColor = (subject) => SUBJECT_COLORS[subject] || '#9E9E9E';
 
-  // ローディング
   if (isLoading) {
     return (
       <div style={{
@@ -430,7 +431,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         </div>
 
-        {/* ⑥ 表示モード切り替え（ていがくねん / こうがくねん） */}
+        {/* ⑥ 表示モード切り替え */}
         <div style={{
           background: 'white', borderRadius: 16, padding: 20,
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: 20,
@@ -514,7 +515,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         )}
 
-        {/* ⑦ 励ましメッセージ */}
+        {/* 励ましメッセージ */}
         <div style={{
           background: 'linear-gradient(135deg, #FFF8E1, #FFF3E0)',
           borderRadius: 16, padding: 20,
@@ -540,7 +541,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         </div>
 
-        {/* ⑧ プラン管理（保護者向け） */}
+        {/* ⑧ プラン管理 */}
         <div style={{
           background: 'white', borderRadius: 16, padding: '16px 20px',
           margin: '0 16px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -701,7 +702,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           )}
         </div>
 
-        {/* 🔓 ログアウト（v1.0.2）*/}
+        {/* ログアウト */}
         {onLogout && (
           <div style={{ textAlign: 'center', paddingBottom: 16 }}>
             <button
@@ -721,7 +722,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         )}
 
-        {/* ⑨ 更新履歴 + バージョン */}
+        {/* 更新履歴 + バージョン */}
         <div style={{ textAlign: 'center', paddingBottom: 16 }}>
           <button
             onClick={() => window.open('/changelog.html', '_blank')}
@@ -739,7 +740,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
           </div>
         </div>
 
-        {/* ⑨ 利用規約等リンク */}
+        {/* 利用規約等リンク */}
         <div style={{
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           gap: 8, paddingBottom: 40, flexWrap: 'wrap',
