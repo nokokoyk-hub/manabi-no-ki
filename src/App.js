@@ -385,20 +385,25 @@ function App() {
 
   // 学習完了時のハンドラ
   const handleLearningComplete = useCallback(async (score, totalQuestions) => {
-    // 🌳 B案サイクル: 葉+1 → 葉2枚で花+1 → 花2つで実+1
-    let newLeaves = leaves + 1;
+    // 🌳 B案サイクル: ミッション完了時のみ木が育つ（★v1.0.4修正: 教科練習では育たない）
+    let newLeaves = leaves;
     let newFlowers = flowers;
     let newFruits = fruits;
 
-    // 葉2枚 → 花1つに変換
-    if (newLeaves >= 2) {
-      newFlowers += 1;
-      newLeaves -= 2;
-    }
-    // 花2つ → 実1つに変換
-    if (newFlowers >= 2) {
-      newFruits += 1;
-      newFlowers -= 2;
+    // ★v1.0.4修正: ミッション && 今日まだ完了してない時のみ葉+1
+    if (learningMode === 'mission' && !todayDone) {
+      newLeaves += 1;
+
+      // 葉2枚 → 花1つに変換
+      if (newLeaves >= 2) {
+        newFlowers += 1;
+        newLeaves -= 2;
+      }
+      // 花2つ → 実1つに変換
+      if (newFlowers >= 2) {
+        newFruits += 1;
+        newFlowers -= 2;
+      }
     }
 
     const newTodayDone = learningMode === 'mission' ? true : todayDone;
