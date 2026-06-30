@@ -35,7 +35,6 @@ const USER_LOCAL_KEYS = [
   'manabi_selected_character',
   'manabi_fruit_collection',  // ★v1.0.4追加: アカウント切替時にコレクションもクリア
 ];
-];
 
 export const checkAndSwitchUser = (userId) => {
   try {
