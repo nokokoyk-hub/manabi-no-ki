@@ -844,7 +844,8 @@ export const getDailyAccuracyTrend = async (days = 14) => {
     // 日別に集計
     const dailyStats = {};
     answers.forEach(a => {
-      const date = new Date(a.answered_at).toLocaleDateString('sv-SE');
+      const rawDate = new Date(a.answered_at);
+　　　const date = rawDate.getFullYear() + '-' + String(rawDate.getMonth() + 1).padStart(2, '0') + '-' + String(rawDate.getDate()).padStart(2, '0');
       if (!dailyStats[date]) {
         dailyStats[date] = { date, total: 0, correct: 0 };
       }
