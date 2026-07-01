@@ -281,7 +281,7 @@ const HomeScreen = ({
       {/* 木のステータス */}
       <div style={{ textAlign: 'center', padding: '0 20px 12px' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.greenDark }}>
-          🌿 はっぱ {leaves}まい　🌸 おはな {flowers}こ　🍎 みのり {fruits}こ
+          🌸 おはな {flowers}こ　🍎 みのり {fruits}こ
         </div>
         <div style={{ fontSize: 12, color: COLORS.textLight, marginTop: 4 }}>
           {canHarvest ? '🍎 みのりを タップして しゅうかくしよう！' : 'がくしゅうすると きが そだつよ！'}
