@@ -1,12 +1,18 @@
 // ============================================
 // 🌳 TreeSVG - まなびの木ビジュアル
-// props: leaves(葉の数0-10), flowers(花0-5), fruits(実0-3)
+// props: leaves(成長葉の数), flowers(花0-5), fruits(実0-3)
+// ★v1.0.5: BASE_LEAVES追加 - 木が常に緑に茂って見える
+//   表示葉 = BASE_LEAVES + leaves（最大10枚）
+//   内部カウンター(leaves)が0でも木は5枚の葉で青々と表示
 // ============================================
 
 import React from 'react';
 import { COLORS } from '../constants/colors';
 
-const TreeSVG = ({ leaves = 5, flowers = 2, fruits = 0 }) => {
+const BASE_LEAVES = 5; // 常に表示する基本の葉っぱ（木枯らし防止🌳）
+
+const TreeSVG = ({ leaves = 0, flowers = 0, fruits = 0 }) => {
+  const displayLeaves = Math.min(BASE_LEAVES + leaves, 10);
   const leafPositions = [
     { x: 150, y: 80, r: 35 },
     { x: 110, y: 110, r: 30 },
@@ -69,8 +75,8 @@ const TreeSVG = ({ leaves = 5, flowers = 2, fruits = 0 }) => {
       <path d="M148 155 Q135 130 125 115" stroke={COLORS.brown} strokeWidth="4" fill="none" strokeLinecap="round" />
       <path d="M152 155 Q165 130 175 115" stroke={COLORS.brown} strokeWidth="4" fill="none" strokeLinecap="round" />
 
-      {/* 葉っぱ */}
-      {leafPositions.slice(0, leaves).map((leaf, i) => (
+      {/* 葉っぱ（★v1.0.5: BASE_LEAVES + 成長分を表示） */}
+      {leafPositions.slice(0, displayLeaves).map((leaf, i) => (
         <circle
           key={`leaf-${i}`}
           cx={leaf.x}
