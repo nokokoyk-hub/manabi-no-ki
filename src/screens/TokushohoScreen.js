@@ -54,7 +54,8 @@ const TokushohoScreen = ({ onBack }) => {
           <div style={styles.row}>
             <div style={styles.label}>販売価格</div>
             <div style={styles.value}>
-              プレミアムプラン: 月額200円（税込）<br />
+              月額プラン: 200円（税込）/ 月<br />
+              年間プラン: 2,100円（税込）/ 年（1.5ヶ月分おトク）<br />
               <span style={{ fontSize: 12, color: '#999' }}>
                 ※ 無料プラン（機能制限あり）もご利用いただけます
               </span>
@@ -62,11 +63,11 @@ const TokushohoScreen = ({ onBack }) => {
           </div>
           <div style={styles.row}>
             <div style={styles.label}>支払方法</div>
-            <div style={styles.value}>クレジットカード（Stripe経由）</div>
+            <div style={styles.value}>クレジットカード、Google Pay、Apple Pay（Stripe経由）</div>
           </div>
           <div style={styles.row}>
             <div style={styles.label}>支払時期</div>
-            <div style={styles.value}>プラン申込時に初回決済。以降毎月自動更新。</div>
+            <div style={styles.value}>プラン申込時に初回決済。月額プランは毎月、年間プランは毎年自動更新。</div>
           </div>
           <div style={styles.row}>
             <div style={styles.label}>サービス提供時期</div>
@@ -99,7 +100,8 @@ const TokushohoScreen = ({ onBack }) => {
 
         {/* 施行日 */}
         <p style={styles.effectiveDate}>
-          制定日: 2026年6月18日
+          制定日: 2026年6月18日<br />
+          最終改定: 2026年7月1日（年間プラン・支払方法追記）
         </p>
       </div>
     </div>
