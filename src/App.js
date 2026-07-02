@@ -277,6 +277,7 @@ function App() {
   const [leaves, setLeaves] = useState(DEFAULT_PROGRESS.leaves);
   const [flowers, setFlowers] = useState(DEFAULT_PROGRESS.flowers);
   const [fruits, setFruits] = useState(DEFAULT_PROGRESS.fruits);
+  const [growthEvent, setGrowthEvent] = useState(null); // 🎬 v1.0.5: 成長演出イベント（'leaf'|'flower'|'fruit'|null）
   const [todayDone, setTodayDone] = useState(DEFAULT_PROGRESS.todayDone);
   const [streak, setStreak] = useState(DEFAULT_PROGRESS.streak);
 
@@ -393,17 +394,22 @@ function App() {
     // ★v1.0.4修正: ミッション && 今日まだ完了してない時のみ葉+1
     if (learningMode === 'mission' && !todayDone) {
       newLeaves += 1;
+      let eventType = 'leaf'; // 🎬 v1.0.5: 何が起きたか記録（優先度: fruit > flower > leaf）
 
       // 葉2枚 → 花1つに変換
       if (newLeaves >= 2) {
         newFlowers += 1;
         newLeaves -= 2;
+        eventType = 'flower';
       }
       // 花2つ → 実1つに変換
       if (newFlowers >= 2) {
         newFruits += 1;
         newFlowers -= 2;
+        eventType = 'fruit';
       }
+
+      setGrowthEvent(eventType); // 🎬 ホーム帰還時に演出再生
     }
 
     const newTodayDone = learningMode === 'mission' ? true : todayDone;
@@ -727,6 +733,8 @@ function App() {
             onHarvest={handleHarvest}
             onOpenCollection={() => setScreen('collection')}
             fruitCollection={fruitCollection}
+            growthEvent={growthEvent}
+            onGrowthEventEnd={() => setGrowthEvent(null)}
           />
         );
     }
