@@ -16,6 +16,7 @@ import {
   getDailyAccuracyTrend,
 } from '../lib/storage';
 import { supabase } from '../lib/supabase';
+import { isTwa } from '../lib/twaDetect';
 
 // 曜日名（日本語）
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
@@ -555,6 +556,11 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
                 ✅ <span style={{ fontWeight: 700, color: COLORS.green }}>プレミアムプラン</span> ご利用中
               </div>
               {hasStripeCustomer && (
+                isTwa() ? (
+                  <div style={{ fontSize: 12, color: '#777', lineHeight: 1.8, background: '#F5F5F5', borderRadius: 12, padding: '12px 14px' }}>
+                    ※ プランの解約・変更は、ブラウザで manabinoki.net を開き、みまもり画面からお手続きください。
+                  </div>
+                ) : (
                 <>
                   <button
                     onClick={async () => {
@@ -608,6 +614,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
                     Stripeの安全なページで手続きできます
                   </div>
                 </>
+                )
               )}
             </div>
           ) : userPlan === 'trial' ? (
@@ -615,6 +622,12 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 10 }}>
                 🎫 トライアル期間中（全機能お試し中）
               </div>
+              {isTwa() ? (
+                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.8, background: '#F5F5F5', borderRadius: 12, padding: '12px 14px' }}>
+                  ※ アプリ内からはご契約いただけません。プレミアムプランのご契約は、ブラウザで manabinoki.net を開き、みまもり画面からお手続きください。ご契約後はこのアプリでもすぐにプレミアム機能をご利用いただけます。
+                </div>
+              ) : (
+              <>
               <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                 <button
                   onClick={() => {
@@ -653,12 +666,20 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
                 トライアル終了を待たずにいつでも切り替えOK
               </div>
+              </>
+              )}
             </div>
           ) : (
             <div>
               <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.6, marginBottom: 12 }}>
                 無料プランをご利用中です。プレミアム（月額200円）にアップグレードすると、全教科の学習モード・ふくしゅう・みまもり機能がすべて使えるようになります。
               </div>
+              {isTwa() ? (
+                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.8, background: '#F5F5F5', borderRadius: 12, padding: '12px 14px' }}>
+                  ※ アプリ内からはご契約いただけません。プレミアムプランのご契約は、ブラウザで manabinoki.net を開き、みまもり画面からお手続きください。ご契約後はこのアプリでもすぐにプレミアム機能をご利用いただけます。
+                </div>
+              ) : (
+              <>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   onClick={() => {
@@ -698,6 +719,8 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
               <div style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 6 }}>
                 いつでも解約OK
               </div>
+              </>
+              )}
             </div>
           )}
         </div>
