@@ -4,10 +4,14 @@
 // v1.0.0: 新規作成（2026/06/19）
 // v1.0.2: 課金ボタン追加（2026/06/25）
 // v1.0.3: 月額/年間プラン選択追加（2026/06/28）
+// v1.0.6: TWA判定で課金導線出し分け（2026/07/02）
+//         Google Play課金ポリシー対応。TWA時はStripeボタン非表示、
+//         ウェブサイト案内文言（リンクなし）のみ表示
 // ============================================
 
 import React from 'react';
 import { COLORS } from '../constants/colors';
+import { isTwa } from '../lib/twaDetect';
 
 const PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/14A4gz3lY3vl2QZ8pt6AM00';
 const PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/8x214n2hUaXNezHfRV6AM01';
@@ -45,23 +49,36 @@ const PremiumGate = ({ onBack, featureName, user, onLogout }) => {
         </div>
       </div>
 
-      {/* 🌟 プラン選択（月額/年間）*/}
-      <div style={styles.planCards}>
-        {/* 月額プラン */}
-        <button onClick={() => openPayment(PAYMENT_LINK_MONTHLY)} style={styles.planCard}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF9800' }}>月額プラン</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>200<span style={{ fontSize: 13 }}>円/月</span></div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>いつでも かいやくOK</div>
-        </button>
+      {/* 🌟 プラン選択（月額/年間）: TWA時は非表示・案内文言のみ（Google Play課金ポリシー対応） */}
+      {isTwa() ? (
+        <div style={styles.twaNotice}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.greenDark, marginBottom: 8 }}>
+            🌐 ごけいやくについて
+          </div>
+          <div style={{ fontSize: 13, color: COLORS.text, lineHeight: 1.8 }}>
+            アプリからは ごけいやくできません。<br />
+            ブラウザで <span style={{ fontWeight: 700 }}>manabinoki.net</span> をひらいて、<br />
+            おうちのひとと おてつづきしてね。
+          </div>
+        </div>
+      ) : (
+        <div style={styles.planCards}>
+          {/* 月額プラン */}
+          <button onClick={() => openPayment(PAYMENT_LINK_MONTHLY)} style={styles.planCard}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#FF9800' }}>月額プラン</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>200<span style={{ fontSize: 13 }}>円/月</span></div>
+            <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>いつでも かいやくOK</div>
+          </button>
 
-        {/* 年間プラン（おトク！） */}
-        <button onClick={() => openPayment(PAYMENT_LINK_YEARLY)} style={{ ...styles.planCard, ...styles.planCardYearly }}>
-          <div style={styles.otokuBadge}>🉐 おトク！</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF5722' }}>年間プラン</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>2,100<span style={{ fontSize: 13 }}>円/年</span></div>
-          <div style={{ fontSize: 11, color: '#FF5722', fontWeight: 700, marginTop: 4 }}>1.5ヶ月ぶん おトク！🧃</div>
-        </button>
-      </div>
+          {/* 年間プラン（おトク！） */}
+          <button onClick={() => openPayment(PAYMENT_LINK_YEARLY)} style={{ ...styles.planCard, ...styles.planCardYearly }}>
+            <div style={styles.otokuBadge}>🉐 おトク！</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#FF5722' }}>年間プラン</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#333', marginTop: 4 }}>2,100<span style={{ fontSize: 13 }}>円/年</span></div>
+            <div style={{ fontSize: 11, color: '#FF5722', fontWeight: 700, marginTop: 4 }}>1.5ヶ月ぶん おトク！🧃</div>
+          </button>
+        </div>
+      )}
 
       {/* もどるボタン */}
       <div style={{ marginTop: 16, width: '100%', maxWidth: 300 }}>
@@ -160,6 +177,17 @@ const styles = {
     gap: 10,
     width: '100%',
     maxWidth: 300,
+  },
+  twaNotice: {
+    marginTop: 24,
+    background: 'white',
+    borderRadius: 16,
+    padding: '20px 24px',
+    maxWidth: 300,
+    width: '100%',
+    textAlign: 'center',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    border: '2px solid #C8E6C9',
   },
   planCard: {
     flex: 1,
