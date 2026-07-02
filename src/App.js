@@ -61,7 +61,7 @@ import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '1.0.5';
+export const APP_VERSION = '1.0.6';
 
 function App() {
   // ===== 🔐 認証状態（Phase A）=====
