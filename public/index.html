@@ -11,13 +11,13 @@
     <meta name="google-site-verification" content="MdJbQ25wgGTSuaJt6knVh0YDhFfQujPaNUqTYp9gC4Q" />
 
     <!-- SEO基本 -->
-    <title>🌳 まなびの木 | まなぶほど 木がそだつ！たのしい学習アプリ</title>
-    <meta name="description" content="まなびの木は、さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科を楽しく学べる小学生向け学習アプリです。まなぶほど木が育ち、パズルやきせかえも楽しめます。" />
+    <title>🌳 まなびの木 | 小学生向け無学年式学習アプリ・月額200円</title>
+    <meta name="description" content="まなびの木は、学年に関係なく自分のペースでレベルを選べる無学年式の小学生向け学習アプリ。さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科対応。まなぶほど木が育ち、実を収穫してコレクションも楽しめます。月額200円・5日間無料トライアルあり。" />
     <link rel="canonical" href="https://manabinoki.net/" />
 
     <!-- OGP（SNSシェア用） -->
     <meta property="og:title" content="🌳 まなびの木 | まなぶほど 木がそだつ！" />
-    <meta property="og:description" content="さんすう・こくご・りかなど7教科を楽しく学べる小学生向け学習アプリ。まなぶほど木が育ち、パズルやきせかえも楽しめます。" />
+    <meta property="og:description" content="学年に関係なく自分のペースで学べる無学年式。7教科対応の小学生向け学習アプリ。月額200円、5日間無料トライアルあり。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://manabinoki.net/" />
     <meta property="og:site_name" content="まなびの木" />
@@ -29,7 +29,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="🌳 まなびの木 | まなぶほど 木がそだつ！" />
-    <meta name="twitter:description" content="さんすう・こくご・りかなど7教科を楽しく学べる小学生向け学習アプリ。" />
+    <meta name="twitter:description" content="学年に関係なく自分のペースで学べる無学年式。7教科対応の小学生向け学習アプリ。月額200円。" />
     <meta name="twitter:image" content="https://manabinoki.net/og-image.png" />
 
     <!-- 追加SEO -->
@@ -57,15 +57,15 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "まなびの木",
-      "description": "さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科を楽しく学べる小学生向け学習アプリ",
+      "description": "学年に関係なく自分のペースでレベルを選べる無学年式の小学生向け学習アプリ。さんすう・こくご・りか・しゃかい・とけい・どうとく・げんその7教科対応。",
       "url": "https://manabinoki.net",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "price": "200",
         "priceCurrency": "JPY",
-        "description": "無料トライアル5日間、その後月額200円"
+        "description": "無料トライアル5日間、その後月額200円（年間プラン2,100円もあり）"
       },
       "audience": {
         "@type": "EducationalAudience",
@@ -74,9 +74,121 @@
       "inLanguage": "ja"
     }
     </script>
+
+    <!-- ============================================ -->
+    <!-- 🌳 静的LP用スタイル（v1.0.5 SEO対策）          -->
+    <!-- Reactがマウントすると#root内は自動置換される    -->
+    <!-- ============================================ -->
+    <style>
+      .lp-wrap {
+        font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+        background: linear-gradient(180deg, #E3F2FD 0%, #F1F8E9 40%, #FFFFFF 100%);
+        min-height: 100vh;
+        color: #37474F;
+        line-height: 1.8;
+      }
+      .lp-inner { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+      .lp-hero { text-align: center; padding: 48px 0 32px; }
+      .lp-hero h1 { font-size: 32px; color: #2E7D32; margin: 0 0 8px; font-weight: 800; }
+      .lp-hero .lp-tagline { font-size: 18px; font-weight: 700; color: #43A047; margin: 0 0 16px; }
+      .lp-hero p { font-size: 15px; color: #546E7A; margin: 0; }
+      .lp-loading { text-align: center; font-size: 13px; color: #90A4AE; padding: 12px 0 24px; }
+      .lp-section { margin: 36px 0; }
+      .lp-section h2 { font-size: 22px; color: #2E7D32; font-weight: 800; margin: 0 0 16px; text-align: center; }
+      .lp-card {
+        background: #fff; border-radius: 16px; padding: 20px 22px; margin: 0 0 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      }
+      .lp-card h3 { font-size: 17px; margin: 0 0 6px; color: #37474F; font-weight: 800; }
+      .lp-card p { font-size: 14px; margin: 0; color: #546E7A; }
+      .lp-subjects { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+      .lp-subject {
+        background: #fff; border-radius: 20px; padding: 8px 16px; font-size: 14px;
+        font-weight: 700; color: #2E7D32; box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      }
+      .lp-price {
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9); border-radius: 16px;
+        padding: 24px; text-align: center; border: 2px solid #A5D6A7;
+      }
+      .lp-price .lp-price-main { font-size: 28px; font-weight: 800; color: #2E7D32; }
+      .lp-price p { font-size: 14px; color: #546E7A; margin: 8px 0 0; }
+      .lp-links { text-align: center; font-size: 13px; margin-top: 40px; }
+      .lp-links a { color: #43A047; margin: 0 10px; text-decoration: none; }
+      .lp-links a:hover { text-decoration: underline; }
+      .lp-footer { text-align: center; font-size: 12px; color: #90A4AE; margin-top: 16px; }
+    </style>
   </head>
   <body>
-    <noscript>このアプリを使うにはJavaScriptを有効にしてください。</noscript>
-    <div id="root"></div>
+    <noscript>このアプリを使うにはJavaScriptを有効にしてください。使い方は<a href="/howto.html">こちら</a>をご覧ください。</noscript>
+    <div id="root">
+      <!-- ============================================ -->
+      <!-- 🌳 静的LPコンテンツ（SEO対策 v1.0.5）          -->
+      <!-- Googlebot向け: JSなしでも読めるコンテンツ       -->
+      <!-- 人間向け: アプリ起動までのローディング画面      -->
+      <!-- Reactがマウントすると自動でアプリ画面に置換     -->
+      <!-- ============================================ -->
+      <div class="lp-wrap">
+        <div class="lp-inner">
+
+          <div class="lp-hero">
+            <h1>🌳 まなびの木</h1>
+            <p class="lp-tagline">まなぶほど 木がそだつ！</p>
+            <p>学年に関係なく、自分のペースでレベルを選べる<br />無学年式の小学生向け学習アプリです。</p>
+          </div>
+
+          <div class="lp-loading">🌱 アプリを読み込んでいます…</div>
+
+          <div class="lp-section">
+            <h2>✨ まなびの木の特徴</h2>
+            <div class="lp-card">
+              <h3>📚 無学年式・自分のペースで学べる</h3>
+              <p>「1年生だから1年生の問題」ではなく、教科ごとにレベルを自由に選択。得意な教科はどんどん先へ、苦手な教科はじっくり基礎から。お子さまひとりひとりのペースに合わせた学習ができます。</p>
+            </div>
+            <div class="lp-card">
+              <h3>🌳 まなぶほど木がそだつ</h3>
+              <p>毎日のミッションをクリアすると木が育ち、花が咲き、実がなります。収穫した実からはフルーツやキャラクターをコレクション。楽しみながら学習習慣が身につきます。</p>
+            </div>
+            <div class="lp-card">
+              <h3>💰 ジュース1本分の月額200円</h3>
+              <p>高額な教材は必要ありません。月額200円（年間プランなら2,100円）で7教科すべて学び放題。たくさんの子どもたちに使ってほしいから、続けやすい価格にこだわりました。</p>
+            </div>
+            <div class="lp-card">
+              <h3>👀 保護者みまもり機能</h3>
+              <p>お子さまの学習状況（学習日・正答率・がんばりの記録)を保護者画面からいつでも確認できます。PINコードで設定画面を保護し、安心してお使いいただけます。</p>
+            </div>
+          </div>
+
+          <div class="lp-section">
+            <h2>📖 対応7教科</h2>
+            <div class="lp-subjects">
+              <span class="lp-subject">🔢 さんすう</span>
+              <span class="lp-subject">📖 こくご</span>
+              <span class="lp-subject">🔬 りか</span>
+              <span class="lp-subject">🗾 しゃかい</span>
+              <span class="lp-subject">🕐 とけい</span>
+              <span class="lp-subject">💛 どうとく</span>
+              <span class="lp-subject">⚗️ げんそ</span>
+            </div>
+          </div>
+
+          <div class="lp-section">
+            <h2>💰 料金プラン</h2>
+            <div class="lp-price">
+              <div class="lp-price-main">月額 200円（税込）</div>
+              <p>年間プランなら 2,100円/年（1.5ヶ月分おトク）<br />新規登録から5日間は全機能無料でお試しいただけます。<br />スマートフォン・タブレット・パソコンに対応。アプリのインストールは不要です。</p>
+            </div>
+          </div>
+
+          <div class="lp-links">
+            <a href="/howto.html">つかいかた</a>
+            <a href="/terms.html">利用規約</a>
+            <a href="/privacy.html">プライバシーポリシー</a>
+            <a href="/changelog.html">更新履歴</a>
+          </div>
+          <div class="lp-footer">© まなびの木 - 小学生向け無学年式学習アプリ</div>
+
+        </div>
+      </div>
+    </div>
   </body>
 </html>
