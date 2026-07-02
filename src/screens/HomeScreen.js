@@ -11,30 +11,53 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
+import GrowthEffect from '../components/GrowthEffect';
 import { COLORS } from '../constants/colors';
 import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
+import { GROWTH_FX, GROWTH_FX_ENABLED } from '../constants/growthEffects';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, rawPetName, robotName, puzzleData, equippedItem,
   userPlan, trialDaysLeft, selectedCharacter, onCharacterChange, onRenameCharacter,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi,
-  canHarvest, onHarvest, onOpenCollection, fruitCollection
+  canHarvest, onHarvest, onOpenCollection, fruitCollection,
+  growthEvent, onGrowthEventEnd
 }) => {
   const isFree = userPlan === 'free';
   const isTrial = userPlan === 'trial';
   const [mameMessage, setMameMessage] = useState('');
 
-  // 画面表示時にキャラのメッセージをセット
+  // ===== 🎬 成長演出（v1.0.5） =====
+  // growthEvent ('leaf'|'flower'|'fruit') を受け取ったら演出再生 → duration後に自動終了
+  const [activeFx, setActiveFx] = useState(null);
+
   useEffect(() => {
-    if (todayDone) {
+    if (!growthEvent || !GROWTH_FX_ENABLED) return;
+    const fx = GROWTH_FX[growthEvent];
+    if (!fx) return;
+
+    setActiveFx(fx);
+    const timer = setTimeout(() => {
+      setActiveFx(null);
+      onGrowthEventEnd && onGrowthEventEnd();
+    }, fx.duration);
+
+    return () => clearTimeout(timer);
+  }, [growthEvent, onGrowthEventEnd]);
+
+  // 画面表示時にキャラのメッセージをセット（演出中は演出メッセージ優先）
+  useEffect(() => {
+    if (activeFx) {
+      setMameMessage(activeFx.message);
+    } else if (todayDone) {
       setMameMessage('きょうの ミッション クリア！えらいね！🎉');
     } else if (streak >= 3) {
       setMameMessage(getStreakMessage(streak));
     } else {
       setMameMessage(getCharaMessage('home', petName, selectedCharacter));
     }
-  }, [todayDone, streak, petName, selectedCharacter]);
+  }, [activeFx, todayDone, streak, petName, selectedCharacter]);
 
   // ===== 🏷️ キャラ名変更（長押し） =====
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -206,12 +229,25 @@ const HomeScreen = ({
             }}>🎯 せんせい</div>
           )}
           <RobotCharacter
-            pose={todayDone ? 'cheer' : 'wave'}
+            pose={activeFx ? activeFx.charPose : (todayDone ? 'cheer' : 'wave')}
             size={72}
             enableTap={false}
           />
         </div>
-        <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
+        {/* 🎬 木 + 成長演出（v1.0.5: アニメーション + 粒子） */}
+        <div style={{
+          position: 'relative',
+          animation: activeFx ? activeFx.treeAnimation : 'none',
+          transformOrigin: 'center bottom',
+        }}>
+          <TreeSVG leaves={leaves} flowers={flowers} fruits={fruits} />
+          {activeFx && (
+            <GrowthEffect
+              particles={activeFx.particles}
+              count={activeFx.particleCount}
+            />
+          )}
+        </div>
         {/* まめは木の右に（タップで出題キャラ選択 / 長押しで名前変更） */}
         <div
           onClick={() => handleCharaTap('mame')}
@@ -269,7 +305,7 @@ const HomeScreen = ({
             </div>
           )}
           <MameCharacter
-            pose={todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal')}
+            pose={activeFx ? activeFx.charPose : (todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal'))}
             message=""
             size={80}
             petName={petName}
