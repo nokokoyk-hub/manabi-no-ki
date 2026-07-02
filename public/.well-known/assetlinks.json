@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "net.manabinoki.app",
+      "sha256_cert_fingerprints": [
+        "25:54:66:E8:D8:47:0F:95:FB:68:73:F7:D1:F3:0B:B2:48:25:1C:AB:5D:B5:9B:5A:C5:99:A5:2E:89:57:3E:80",
+        "E1:DC:AA:9F:C4:24:E1:74:46:66:E2:16:CC:A1:96:EA:68:A6:1B:2A:7C:83:2C:BF:37:07:5B:E1:5A:A3:C9:D9"
+      ]
+    }
+  }
+]
