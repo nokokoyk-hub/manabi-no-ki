@@ -2,7 +2,7 @@
 
 > このファイルはSupabaseのDB設計の正本です。
 > テーブル変更・RLS変更・トリガー変更時は必ずこのファイルも更新すること。
-> 最終更新: 2026-06-30（JST）スレッド29
+> 最終更新: 2026-07-02（JST）スレッド30
 
 ---
 
@@ -45,12 +45,16 @@
 
 ### 📊 管理用ビュー・関数
 
-| 名前 | 種別 | 用途 |
+| 名前 | 種別 | 状態 |
 |---|---|---|
-| `manabi_user_view` | ビュー | まなびの木ユーザー管理（メール・プラン・学習データ・最終学習日） |
-| `orphan_user_view` | ビュー | 孤児ユーザーチェック（どのアプリにも所属しないauth.users） |
-| `soul_user_management_view` | ビュー | soul-backupユーザー管理用 |
-| `delete_manabi_user(email)` | 関数 | まなびの木ユーザー安全削除（soulユーザーガード付き・CASCADE連鎖削除） |
+| ~~`manabi_user_view`~~ | ビュー | 🛡️ **v1.0.6でDROP済み**（publicスキーマ経由でauth.users情報が露出するCRITICAL警告のため削除。ユーザー確認はちゃぴがMCPで都度SQL実行する運用に変更） |
+| ~~`orphan_user_view`~~ | ビュー | 🛡️ 同上（DROP済み） |
+| ~~`soul_user_management_view`~~ | ビュー | 🛡️ 同上（DROP済み） |
+| `delete_manabi_user(email)` | 関数 | まなびの木ユーザー安全削除（soulユーザーガード付き・CASCADE連鎖削除）。🛡️ v1.0.6でanon/authenticated/PUBLICのEXECUTE権限をREVOKE（service_role・postgresのみ実行可） |
+| `handle_new_user()` | 関数 | トリガー専用。🛡️ v1.0.6でanon/authenticated/PUBLICのEXECUTE権限をREVOKE |
+
+> ⚠️ 全関数に `SET search_path = public` 設定済み（v1.0.6・スキーマ解決脆弱性対策）
+> ⚠️ ユーザー一覧の確認方法: Supabaseダッシュボード Authentication → Users、またはちゃぴにMCP経由で依頼
 
 ### 🔗 外部キー制約（6/25 CASCADE追加）
 
