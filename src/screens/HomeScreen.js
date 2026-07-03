@@ -5,6 +5,7 @@
 // v0.9.2: 教科再構成（しゃかい🗾・どうとく💛追加、2×3グリッド化）
 // v1.0.2: キャラ選択機能（まめ/ロボちゃん切替）（2026/06/26）
 // v1.0.4: キャラ名変更機能（長押しで名前変更ダイアログ）（2026/06/29）
+// v1.0.7: セリフ全分岐キャラ対応（ロボちゃんがまめのセリフを喋る問題を修正）（2026/07/03）
 // ============================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -47,17 +48,20 @@ const HomeScreen = ({
   }, [growthEvent, onGrowthEventEnd]);
 
   // 画面表示時にキャラのメッセージをセット（演出中は演出メッセージ優先）
+  // v1.0.7: 全分岐をキャラ対応化（ロボちゃん選択時はロボ口調＋ロボの名前で{name}置換）
+  const charaName = selectedCharacter === 'robot' ? robotName : petName;
+
   useEffect(() => {
     if (activeFx) {
-      setMameMessage(activeFx.message);
+      setMameMessage(selectedCharacter === 'robot' && activeFx.messageRobot ? activeFx.messageRobot : activeFx.message);
     } else if (todayDone) {
-      setMameMessage('きょうの ミッション クリア！えらいね！🎉');
+      setMameMessage(getCharaMessage('missionDone', charaName, selectedCharacter));
     } else if (streak >= 3) {
-      setMameMessage(getStreakMessage(streak));
+      setMameMessage(getStreakMessage(streak, selectedCharacter));
     } else {
-      setMameMessage(getCharaMessage('home', petName, selectedCharacter));
+      setMameMessage(getCharaMessage('home', charaName, selectedCharacter));
     }
-  }, [activeFx, todayDone, streak, petName, selectedCharacter]);
+  }, [activeFx, todayDone, streak, charaName, selectedCharacter]);
 
   // ===== 🏷️ キャラ名変更（長押し） =====
   const [showRenameModal, setShowRenameModal] = useState(false);
