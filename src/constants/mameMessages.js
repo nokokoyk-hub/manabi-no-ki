@@ -3,6 +3,7 @@
 // シーン別にランダムでメッセージを表示
 // v0.6.0: {name}プレースホルダーで名前カスタマイズ対応
 // v1.0.2: ロボちゃん専用セリフ追加 + getCharaMessage()
+// v1.0.7: ミッションクリア文言のキャラ対応 + ストリークのロボ口調追加（2026/07/03）
 // ============================================
 
 // ランダムに1つ選ぶヘルパー
@@ -64,6 +65,11 @@ export const COMPLETE_MESSAGES = [
   '{name}と いっしょに せいちょう してるね！🌟',
 ];
 
+// きょうのミッション完了後のホーム画面（v1.0.7: HomeScreen直書きから移設・文言は従来と同一）
+export const MISSION_DONE_MESSAGES = [
+  'きょうの ミッション クリア！えらいね！🎉',
+];
+
 // ============================================
 // 🤖 ロボちゃん セリフ
 // ============================================
@@ -120,12 +126,23 @@ const ROBOT_COMPLETE_MESSAGES = [
   '{name}の パワー ぜんかい だったね！⚡',
 ];
 
+// ミッション完了後のホーム画面（ロボちゃん版・v1.0.7）
+const ROBOT_MISSION_DONE_MESSAGES = [
+  'ミッション コンプリート！きょうも がんばったね！🎉',
+];
+
 // ============================================
 // 📦 セリフ取得関数
 // ============================================
 
-// ストリーク（まめ・ロボちゃん共通）
-export const getStreakMessage = (streak) => {
+// ストリーク（v1.0.7: キャラ別口調に対応。第2引数省略時は従来どおりまめ口調＝後方互換）
+export const getStreakMessage = (streak, character = 'mame') => {
+  if (character === 'robot') {
+    if (streak >= 7) return `${streak}にち れんぞく！てんさいと けいさんが でたよ！🔥`;
+    if (streak >= 3) return `${streak}にち れんぞく！データが かがやいてる！✨`;
+    if (streak >= 1) return `${streak}にち れんぞく きろく こうしんちゅう！ピコ！`;
+    return 'きょうから スタート だよ！ピコ！';
+  }
   if (streak >= 7) return `${streak}にち れんぞく！てんさい！🔥`;
   if (streak >= 3) return `${streak}にち れんぞく！すごいね！✨`;
   if (streak >= 1) return `${streak}にち れんぞく がんばってるね！`;
@@ -141,6 +158,7 @@ export const getMameMessage = (scene, petName) => {
     case 'correct': msg = pick(CORRECT_MESSAGES); break;
     case 'wrong': msg = pick(WRONG_MESSAGES); break;
     case 'complete': msg = pick(COMPLETE_MESSAGES); break;
+    case 'missionDone': msg = pick(MISSION_DONE_MESSAGES); break;
     default: msg = pick(HOME_MESSAGES); break;
   }
   return insertName(msg, petName);
@@ -155,6 +173,7 @@ export const getRobotMessage = (scene, robotName) => {
     case 'correct': msg = pick(ROBOT_CORRECT_MESSAGES); break;
     case 'wrong': msg = pick(ROBOT_WRONG_MESSAGES); break;
     case 'complete': msg = pick(ROBOT_COMPLETE_MESSAGES); break;
+    case 'missionDone': msg = pick(ROBOT_MISSION_DONE_MESSAGES); break;
     default: msg = pick(ROBOT_HOME_MESSAGES); break;
   }
   return insertName(msg, robotName || 'ロボちゃん');
