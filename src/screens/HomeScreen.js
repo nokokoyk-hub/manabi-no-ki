@@ -6,6 +6,7 @@
 // v1.0.2: キャラ選択機能（まめ/ロボちゃん切替）（2026/06/26）
 // v1.0.4: キャラ名変更機能（長押しで名前変更ダイアログ）（2026/06/29）
 // v1.0.7: セリフ全分岐キャラ対応（ロボちゃんがまめのセリフを喋る問題を修正）（2026/07/03）
+// v1.0.8: 吹き出しをせんせい側キャラに表示（ロボ選択時はロボの頭上に）（2026/07/03）
 // ============================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -62,6 +63,41 @@ const HomeScreen = ({
       setMameMessage(getCharaMessage('home', charaName, selectedCharacter));
     }
   }, [activeFx, todayDone, streak, charaName, selectedCharacter]);
+
+  // 💬 ホーム吹き出し（v1.0.8: せんせい側のキャラの頭上に表示）
+  // side: 'left'=ロボちゃん側（木の左・右方向に展開） / 'right'=まめ側（木の右・左方向に展開）
+  const renderBubble = (side) => mameMessage && (
+    <div style={{
+      position: 'absolute',
+      bottom: '100%',
+      ...(side === 'left' ? { left: -4 } : { right: -4 }),
+      marginBottom: 4,
+      background: 'white',
+      borderRadius: 14,
+      padding: '6px 14px',
+      fontSize: 12,
+      fontWeight: 700,
+      color: '#5D4037',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      maxWidth: '55vw',
+      width: 'max-content',
+      textAlign: 'center',
+      lineHeight: 1.5,
+      zIndex: 3,
+      animation: 'mame-fadeIn 0.3s ease-out',
+    }}>
+      {mameMessage}
+      <div style={{
+        position: 'absolute',
+        bottom: -7,
+        ...(side === 'left' ? { left: 18 } : { right: 18 }),
+        width: 0, height: 0,
+        borderLeft: '7px solid transparent',
+        borderRight: '7px solid transparent',
+        borderTop: '7px solid white',
+      }} />
+    </div>
+  );
 
   // ===== 🏷️ キャラ名変更（長押し） =====
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -232,6 +268,7 @@ const HomeScreen = ({
               boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
             }}>🎯 せんせい</div>
           )}
+          {selectedCharacter === 'robot' && renderBubble('left')}
           <RobotCharacter
             pose={activeFx ? activeFx.charPose : (todayDone ? 'cheer' : 'wave')}
             size={72}
@@ -275,39 +312,8 @@ const HomeScreen = ({
               boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
             }}>🎯 せんせい</div>
           )}
-          {/* ホーム専用吹き出し（まめの左上・コメントに合わせて伸縮） */}
-          {mameMessage && (
-            <div style={{
-              position: 'absolute',
-              bottom: '100%',
-              right: -4,
-              marginBottom: 4,
-              background: 'white',
-              borderRadius: 14,
-              padding: '6px 14px',
-              fontSize: 12,
-              fontWeight: 700,
-              color: '#5D4037',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              maxWidth: '55vw',
-              width: 'max-content',
-              textAlign: 'center',
-              lineHeight: 1.5,
-              zIndex: 3,
-              animation: 'mame-fadeIn 0.3s ease-out',
-            }}>
-              {mameMessage}
-              <div style={{
-                position: 'absolute',
-                bottom: -7,
-                right: 18,
-                width: 0, height: 0,
-                borderLeft: '7px solid transparent',
-                borderRight: '7px solid transparent',
-                borderTop: '7px solid white',
-              }} />
-            </div>
-          )}
+          {/* ホーム専用吹き出し（v1.0.8: せんせい側キャラに表示） */}
+          {selectedCharacter === 'mame' && renderBubble('right')}
           <MameCharacter
             pose={activeFx ? activeFx.charPose : (todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal'))}
             message=""
