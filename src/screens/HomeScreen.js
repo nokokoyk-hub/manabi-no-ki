@@ -7,6 +7,7 @@
 // v1.0.4: キャラ名変更機能（長押しで名前変更ダイアログ）（2026/06/29）
 // v1.0.7: セリフ全分岐キャラ対応（ロボちゃんがまめのセリフを喋る問題を修正）（2026/07/03）
 // v1.0.8: 吹き出しをせんせい側キャラに表示（ロボ選択時はロボの頭上に）（2026/07/03）
+// v1.0.9: せんせいバッジを足元ネームプレート化（吹き出しとの重なり解消）（2026/07/03）
 // ============================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -261,7 +262,7 @@ const HomeScreen = ({
         >
           {selectedCharacter === 'robot' && (
             <div style={{
-              position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
               fontSize: 10, fontWeight: 800, color: '#FF9800',
               background: '#FFF8E1', borderRadius: 8, padding: '2px 6px',
               whiteSpace: 'nowrap', zIndex: 5,
@@ -305,7 +306,7 @@ const HomeScreen = ({
         >
           {selectedCharacter === 'mame' && (
             <div style={{
-              position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
               fontSize: 10, fontWeight: 800, color: '#FF9800',
               background: '#FFF8E1', borderRadius: 8, padding: '2px 6px',
               whiteSpace: 'nowrap', zIndex: 5,
