@@ -5,6 +5,7 @@
 // v1.0.4: ★日付フォーマット機種依存バグ修正
 //   - toLocaleDateString('sv-SE')を手動フォーマットに変更
 //   - Android/一部ブラウザで日付がおかしくなる問題を解消
+// v1.0.10: お問い合わせ導線追加（Googleフォームへのリンク・2026/07/04）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -20,6 +21,9 @@ import { isTwa } from '../lib/twaDetect';
 
 // 曜日名（日本語）
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+
+// ★v1.0.10: お問い合わせフォーム（Googleフォーム・回答は連携スプレッドシートに自動記録）
+const INQUIRY_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScd1qdRqEzzzbtE2E5Me3aJsTN9joZ8AQ382-0VAA0WDMxZOQ/viewform';
 
 // ★v1.0.4追加: 機種依存しない安全な日付フォーマット
 const toSafeDateStr = (date) => {
@@ -785,6 +789,12 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
             color: '#AAAAAA', cursor: 'pointer', padding: '2px 4px',
             fontFamily: 'inherit', textDecoration: 'underline',
           }}>特商法表記</button>
+          <span style={{ fontSize: 11, color: '#DDDDDD' }}>|</span>
+          <button onClick={() => window.open(INQUIRY_FORM_URL, '_blank', 'noopener,noreferrer')} style={{
+            background: 'none', border: 'none', fontSize: 11,
+            color: '#AAAAAA', cursor: 'pointer', padding: '2px 4px',
+            fontFamily: 'inherit', textDecoration: 'underline',
+          }}>お問い合わせ</button>
         </div>
       </div>
     </div>
