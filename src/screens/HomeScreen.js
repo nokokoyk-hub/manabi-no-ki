@@ -136,6 +136,10 @@ const HomeScreen = ({
     setShowRenameModal(false);
   }, [renameInput, renameTarget, onRenameCharacter]);
 
+  const handleLogoClick = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const levelSummary = SUBJECT_LEVELS
     .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
     .join(' ');
@@ -165,12 +169,23 @@ const HomeScreen = ({
         justifyContent: 'space-between', alignItems: 'center',
       }}>
         <div>
-          <div style={{
-            fontSize: 22, fontWeight: 800, color: COLORS.greenDark,
-            letterSpacing: '0.05em',
-          }}>
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            aria-label="ホーム画面のトップへ戻る"
+            style={{
+              fontSize: 22, fontWeight: 800, color: COLORS.greenDark,
+              letterSpacing: '0.05em',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              margin: 0,
+              cursor: 'pointer',
+              fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
+            }}
+          >
             🌳 まなびの木
-          </div>
+          </button>
           <div style={{ fontSize: 13, color: COLORS.textLight, marginTop: 2 }}>
             {petName}と いっしょに がんばろう！
           </div>
