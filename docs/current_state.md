@@ -1,5 +1,5 @@
 # 🌳 まなびの木 - プロジェクト現在地（北極星ドキュメント）
-## 最終更新: 2026/07/05 スレッド31
+## 最終更新: 2026/07/11 Google Play起動不具合対応
 
 ---
 
@@ -7,14 +7,14 @@
 
 | 項目 | 値 |
 |---|---|
-| バージョン | v1.0.11 |
+| バージョン | v1.0.12 |
 | 本番URL | https://manabinoki.net |
 | GitHub | https://github.com/nokokoyk-hub/manabi-no-ki (Public) |
 | Supabase | Project ID: `ndqbtfahtjaafroevgwq`（Pro組織・ACTIVE_HEALTHY） |
 | Vercel | Project: `manabi-no-ki` / Team: `team_wLDUprmHVwDKbqydwaFCl5k7` |
 | GA4 | G-64GLZZQC24 |
 | Stripe | 月額200円 + 年間2,100円 |
-| Google Play | Developerアカウント登録済み（お受験マネージャーと共通）・出店準備中 |
+| Google Play | 初回審査で読み込み問題を指摘。v1.0.12コード修正済み・新AABで再申請待ち |
 
 ---
 
@@ -38,9 +38,10 @@
 
 ```
 src/
+├── index.js                        # v1.0.12: React起動Error Boundary（白画面防止・再読み込み導線）
 ├── App.js                          # メインアプリ（画面ルーティング・状態管理・growthEvent）
 ├── lib/
-│   ├── supabase.js                 # Supabaseクライアント
+│   ├── supabase.js                 # Supabaseクライアント（v1.0.12: getSession 8秒タイムアウト）
 │   ├── storage.js                  # データ永続化（Supabase + localStorage）
 │   ├── fruitCollection.js          # 果実コレクション管理（v1.0.4: Supabase同期対応）
 │   ├── gachaData.js                # ガチャデータ定義（43種）
@@ -195,6 +196,13 @@ docs/
 
 ## 🐛 既知のバグ・修正済み
 
+### v1.0.12でコード対応済み（Android新規インストール再確認待ち）
+- ✅ Google Play審査環境で、クリーム色の起動画面から先へ進まない可能性に対し、`supabase.auth.getSession()`へ8秒のタイムアウトを追加。
+- ✅ セッション確認がreject・例外・タイムアウトになっても、未ログイン状態としてログイン画面へ進むフォールバックを追加。
+- ✅ React描画中の致命的エラーを`BootErrorBoundary`で捕捉し、白画面ではなく再読み込み画面を表示。
+- ✅ 起動診断状態は`sessionStorage`に保存し、TWAとChrome間で状態を持ち越さない。
+- ⚠️ 根本原因は認証セッション確認の未応答が主要候補。新AABの新規インストール起動で最終確認する。
+
 ### v1.0.11で対応済み
 - ✅ ホーム画面の「まなびの木」表示をタップ/クリックしてもトップへ戻れない導線不足を修正。ロゴ表示をアクセシブルなボタン化し、ホーム画面上部へスムーズスクロールするようにした。
 
@@ -214,22 +222,23 @@ docs/
 
 ## 📋 次回タスク（優先順）
 
-### Phase 1: ストア出店（大詰め！）
-1. 🔨 **PWABuilderでTWAビルド**（のん操作＋ちゃぴ手順書並走）
-2. 🔗 **assetlinks.json設置**（/.well-known/assetlinks.json・ちゃぴがファイル作成）
-3. 🚀 **Play Console申請**（ストア掲載情報・データセーフティ・コンテンツレーティング・**ファミリーポリシー対応**）
-4. 📝 ストア説明文の作成（ちゃぴがドラフト）
+### Phase 1: Google Play再申請（最優先）
+1. ✅ TWAビルド・`assetlinks.json`設置・初回Play申請まで完了
+2. ✅ v1.0.12 起動安全網を実装（PR #19）
+3. 🔨 **PWABuilderで新AABを作成**（versionCodeを前回より増やす）
+4. 🧪 **Androidエミュレーターでアプリ削除→新規インストール起動を確認**
+5. 🚀 Play Consoleへ新AABをアップロードし、読み込み問題の修正版として再申請
 
 ### Phase 2: 品質向上
-5. 💰 年間プラン実決済テスト
-6. 🔍 Search Consoleインデックス経過確認（7/9頃 site:検索）+ URL検査リクエスト（のん未実施なら）
-7. 🔐 Googleバッジ取得申請
-8. 📊 他のlocalStorage→Supabase移行（subject_levels優先・fruitCollectionパターン）
+6. 💰 年間プラン実決済テスト
+7. 🔍 Search Consoleインデックス経過確認（7/9頃 site:検索）+ URL検査リクエスト（のん未実施なら）
+8. 🔐 Googleバッジ取得申請
+9. 📊 他のlocalStorage→Supabase移行（subject_levels優先・fruitCollectionパターン）
 
 ### Phase 3: 機能拡張
-9. 🎰 ガチャキャラを先生として選択可能に
-10. 🍎 App Store（iOS）展開検討（Google Play安定後。Apple Developer $99/年・Mac必要・ラッパー審査4.2リスクあり。当面はiOS PWA「ホーム画面に追加」で代替）
-11. 📉 成長サイクル調整（ユーザーFBに基づき growthEffects.js / App.js の数値変更）
+10. 🎰 ガチャキャラを先生として選択可能に
+11. 🍎 App Store（iOS）展開検討（Google Play安定後。Apple Developer $99/年・Mac必要・ラッパー審査4.2リスクあり。当面はiOS PWA「ホーム画面に追加」で代替）
+12. 📉 成長サイクル調整（ユーザーFBに基づき growthEffects.js / App.js の数値変更）
 
 ---
 
@@ -263,6 +272,8 @@ docs/
 ### TWA関連（v1.0.6〜）
 - TWA判定にlocalStorage使用禁止（Chromeと共有）→ sessionStorage
 - TWA内に外部決済への**タップ可能リンク**を置かない（文言のみOK）
+- v1.0.12起動安全網: `getSession()`は8秒でフォールバックし、React致命エラー時は再読み込み画面を表示
+- ロールバック: PR #19をrevertし、4箇所のバージョンをv1.0.11へ戻す
 
 ---
 

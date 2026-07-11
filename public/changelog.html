@@ -21,6 +21,16 @@
 <body>
   <h1>🌳 まなびの木 — 変更履歴</h1>
   <div class="version">
+    <h2>v1.0.12 — 起動安定性の向上 🌱🛡️</h2>
+    <p class="date">2026年7月11日（土）</p>
+    <ul>
+      <li><span class="tag fix">FIX</span> 一部の端末や通信状況で、起動画面から先へ進めなくなる可能性を減らしました</li>
+      <li><span class="tag fix">FIX</span> 読み込み中に予期しないエラーが起きた場合、白い画面ではなく再読み込みできる案内画面を表示します</li>
+      <li><span class="tag infra">INFRA</span> ログイン状態の確認に8秒の上限を設け、応答がない場合も安全にログイン画面へ進むようにしました</li>
+    </ul>
+  </div>
+
+  <div class="version">
     <h2>v1.0.11 — ホーム導線改善 🌳</h2>
     <p class="date">2026年7月5日（日）</p>
     <ul>
@@ -358,7 +368,8 @@
       <li><span class="tag new">NEW</span> answer_historyテーブル作成（誤答記録・復習強化の土台）</li>
       <li><span class="tag new">NEW</span> みまもり画面に「こうしんりれき」ボタン＋バージョン表示追加</li>
       <li><span class="tag new">NEW</span> ミッション問題数を5問→8問に変更</li>
-      <li><span class="tag fix">FIX</span> 問題文の改行（\n）が正しく表示されないバグを修正</li>
+      <li><span class="tag fix">FIX</span> 問題文の改行（
+）が正しく表示されないバグを修正</li>
       <li><span class="tag fix">FIX</span> changelog.html の重複エントリ・欠落を完全修復</li>
       <li><span class="tag infra">INFRA</span> questionLoader.js: ミッション除外ロジック（MISSION_EXCLUDE_SUBJECTS）</li>
       <li><span class="tag infra">INFRA</span> Supabase answer_historyテーブル＋インデックス＋RLS設定</li>
