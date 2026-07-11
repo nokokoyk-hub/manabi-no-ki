@@ -1,0 +1,142 @@
+name: One-off guarded release 1.0.12
+
+on:
+  push:
+    branches:
+      - agent/fix-auth-boot-timeout
+    paths:
+      - .github/workflows/release-1.0.12.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-release-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/fix-auth-boot-timeout
+          fetch-depth: 0
+
+      - name: Update version and release records
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path_str, old, new):
+              path = Path(path_str)
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path_str}: expected exactly one match, found {count}: {old!r}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once('src/App.js', '// バージョン: 1.0.4', '// バージョン: 1.0.12')
+          replace_once('src/App.js', '// 最終更新: 2026/06/30', '// 最終更新: 2026/07/11')
+          replace_once('src/App.js', "export const APP_VERSION = '1.0.11';", "export const APP_VERSION = '1.0.12';")
+          replace_once('package.json', '"version": "1.0.11"', '"version": "1.0.12"')
+          Path('public/version.json').write_text('{"version":"1.0.12"}\n', encoding='utf-8')
+          Path('docs/version.json').write_text('{"version":"1.0.12"}\n', encoding='utf-8')
+
+          changelog_path = Path('public/changelog.html')
+          changelog = changelog_path.read_text(encoding='utf-8')
+          marker = '  <h1>🌳 まなびの木 — 変更履歴</h1>\n'
+          if changelog.count(marker) != 1:
+              raise SystemExit('public/changelog.html: h1 marker mismatch')
+          release_entry = '''  <div class="version">
+    <h2>v1.0.12 — 起動安定性の向上 🌱🛡️</h2>
+    <p class="date">2026年7月11日（土）</p>
+    <ul>
+      <li><span class="tag fix">FIX</span> 一部の端末や通信状況で、起動画面から先へ進めなくなる可能性を減らしました</li>
+      <li><span class="tag fix">FIX</span> 読み込み中に予期しないエラーが起きた場合、白い画面ではなく再読み込みできる案内画面を表示します</li>
+      <li><span class="tag infra">INFRA</span> ログイン状態の確認に8秒の上限を設け、応答がない場合も安全にログイン画面へ進むようにしました</li>
+    </ul>
+  </div>
+
+'''
+          changelog_path.write_text(changelog.replace(marker, marker + release_entry, 1), encoding='utf-8')
+
+          replace_once(
+              'docs/current_state.md',
+              '## 最終更新: 2026/07/05 スレッド31',
+              '## 最終更新: 2026/07/11 Google Play起動不具合対応'
+          )
+          replace_once(
+              'docs/current_state.md',
+              '| バージョン | v1.0.11 |',
+              '| バージョン | v1.0.12 |'
+          )
+          replace_once(
+              'docs/current_state.md',
+              '| Google Play | Developerアカウント登録済み（お受験マネージャーと共通）・出店準備中 |',
+              '| Google Play | 初回審査で読み込み問題を指摘。v1.0.12コード修正済み・新AABで再申請待ち |'
+          )
+          replace_once(
+              'docs/current_state.md',
+              'src/\n├── App.js                          # メインアプリ（画面ルーティング・状態管理・growthEvent）',
+              'src/\n├── index.js                        # v1.0.12: React起動Error Boundary（白画面防止・再読み込み導線）\n├── App.js                          # メインアプリ（画面ルーティング・状態管理・growthEvent）'
+          )
+          replace_once(
+              'docs/current_state.md',
+              '│   ├── supabase.js                 # Supabaseクライアント',
+              '│   ├── supabase.js                 # Supabaseクライアント（v1.0.12: getSession 8秒タイムアウト）'
+          )
+
+          bug_marker = '### v1.0.11で対応済み\n'
+          bug_entry = '''### v1.0.12でコード対応済み（Android新規インストール再確認待ち）
+- ✅ Google Play審査環境で、クリーム色の起動画面から先へ進まない可能性に対し、`supabase.auth.getSession()`へ8秒のタイムアウトを追加。
+- ✅ セッション確認がreject・例外・タイムアウトになっても、未ログイン状態としてログイン画面へ進むフォールバックを追加。
+- ✅ React描画中の致命的エラーを`BootErrorBoundary`で捕捉し、白画面ではなく再読み込み画面を表示。
+- ✅ 起動診断状態は`sessionStorage`に保存し、TWAとChrome間で状態を持ち越さない。
+- ⚠️ 根本原因は認証セッション確認の未応答が主要候補。新AABの新規インストール起動で最終確認する。
+
+'''
+          current_path = Path('docs/current_state.md')
+          current = current_path.read_text(encoding='utf-8')
+          if current.count(bug_marker) != 1:
+              raise SystemExit('docs/current_state.md: bug marker mismatch')
+          current_path.write_text(current.replace(bug_marker, bug_entry + bug_marker, 1), encoding='utf-8')
+
+          old_phase = '''### Phase 1: ストア出店（大詰め！）
+1. 🔨 **PWABuilderでTWAビルド**（のん操作＋ちゃぴ手順書並走）
+2. 🔗 **assetlinks.json設置**（/.well-known/assetlinks.json・ちゃぴがファイル作成）
+3. 🚀 **Play Console申請**（ストア掲載情報・データセーフティ・コンテンツレーティング・**ファミリーポリシー対応**）
+4. 📝 ストア説明文の作成（ちゃぴがドラフト）
+'''
+          new_phase = '''### Phase 1: Google Play再申請（最優先）
+1. ✅ TWAビルド・`assetlinks.json`設置・初回Play申請まで完了
+2. ✅ v1.0.12 起動安全網を実装（PR #19）
+3. 🔨 **PWABuilderで新AABを作成**（versionCodeを前回より増やす）
+4. 🧪 **Androidエミュレーターでアプリ削除→新規インストール起動を確認**
+5. 🚀 Play Consoleへ新AABをアップロードし、読み込み問題の修正版として再申請
+'''
+          replace_once('docs/current_state.md', old_phase, new_phase)
+
+          twa_marker = '''### TWA関連（v1.0.6〜）
+- TWA判定にlocalStorage使用禁止（Chromeと共有）→ sessionStorage
+- TWA内に外部決済への**タップ可能リンク**を置かない（文言のみOK）
+'''
+          twa_new = '''### TWA関連（v1.0.6〜）
+- TWA判定にlocalStorage使用禁止（Chromeと共有）→ sessionStorage
+- TWA内に外部決済への**タップ可能リンク**を置かない（文言のみOK）
+- v1.0.12起動安全網: `getSession()`は8秒でフォールバックし、React致命エラー時は再読み込み画面を表示
+- ロールバック: PR #19をrevertし、4箇所のバージョンをv1.0.11へ戻す
+'''
+          replace_once('docs/current_state.md', twa_marker, twa_new)
+
+          workflow_path = Path('.github/workflows/release-1.0.12.yml')
+          workflow_path.unlink()
+          PY
+
+      - name: Commit guarded release update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "chore: release v1.0.12 startup stability"
+          git push origin HEAD:agent/fix-auth-boot-timeout
