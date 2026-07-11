@@ -30,14 +30,13 @@ const installAuthSessionGuard = (client) => {
 
   client.auth.getSession = async (...args) => {
     const timeoutSentinel = Symbol('auth-session-timeout');
-    const timerHost = typeof window !== 'undefined' ? window : globalThis;
     let timeoutId;
 
     try {
       setAuthBootStatus('checking');
 
       const timeoutPromise = new Promise((resolve) => {
-        timeoutId = timerHost.setTimeout(
+        timeoutId = setTimeout(
           () => resolve(timeoutSentinel),
           AUTH_BOOT_TIMEOUT_MS
         );
@@ -64,7 +63,7 @@ const installAuthSessionGuard = (client) => {
       setAuthBootStatus('error');
       return { data: { session: null }, error };
     } finally {
-      if (timeoutId) timerHost.clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     }
   };
 
