@@ -50,12 +50,13 @@ const getComboPose = (combo) => {
 };
 
 // スコアに応じた結果メッセージ
-const getResultMessage = (score, total, petName) => {
+const getResultMessage = (score, total, petName, character = 'mame') => {
   const rate = score / total;
   if (rate === 1) return `ぜんもん せいかい！！${petName} だいかんどう！！😭💖🎉`;
   if (rate >= 0.8) return `すごいね！${petName} うれしそう！🌟✨`;
   if (rate >= 0.5) return `がんばったね！${petName} おうえんしてるよ！💪😊`;
-  return `だいじょうぶ！${petName}と いっしょに れんしゅうしよう！🐕💕`;
+  const cheerEmoji = character === 'mame' ? '🐕💕' : '🌱💕';
+  return `だいじょうぶ！${petName}と いっしょに れんしゅうしよう！${cheerEmoji}`;
 };
 
 // スコアに応じたポーズ
@@ -162,7 +163,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
     const total = questions.length;
     const isPerfect = score === total;
     const resultPose = getResultPose(score, total);
-    const resultMsg = getResultMessage(score, total, displayName);
+    const resultMsg = getResultMessage(score, total, displayName, selectedCharacter);
 
     return (
       <div style={{
