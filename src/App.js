@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 1.0.13
-// 最終更新: 2026/07/21
+// バージョン: 1.0.14
+// 最終更新: 2026/07/22
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -51,6 +51,7 @@ import {
   saveDisplayMode,
   getTodayJST,
   loadCostumeData,
+  createDefaultCostumeData,
   incrementMissionCount,
   checkCostumeUnlocks,
   setCurrentUserId,
@@ -61,7 +62,7 @@ import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '1.0.13';
+export const APP_VERSION = '1.0.14';
 
 function App() {
   // ===== 🔐 認証状態（Phase A）=====
@@ -117,7 +118,7 @@ function App() {
           clearFruitCollectionCache();
           // localStorageクリア済み → stateもデフォルトに戻す
           setPetName(null);
-          setCostumeData({ equippedItem: null, unlockedItems: ['item_none'], missionCount: 0 });
+          setCostumeData(createDefaultCostumeData());
           setPuzzleData({ completed: [], current: null });
           setSubjectLevels({});
           console.log('🔄 アカウント変更: stateもリセット完了');
@@ -448,7 +449,8 @@ function App() {
       const isPerfect = score === (totalQuestions || 5);
       incrementMissionCount(isPerfect);
       const latestPd = loadPuzzleData();
-      const { costumeData: newCostume } = checkCostumeUnlocks(newStreak, latestPd.completedIds.length);
+      const collectionCount = Object.keys(loadFruitCollection().items || {}).length;
+      const { costumeData: newCostume } = checkCostumeUnlocks(newStreak, latestPd.completedIds.length, collectionCount);
       setCostumeData(newCostume);
     }
 
@@ -491,10 +493,15 @@ function App() {
     if (harvestedFruit) {
       const updated = addFruitToCollection(harvestedFruit.id);
       setFruitCollection(updated);
+      // 👗 コレクション種類数で解放される着せ替えを、収穫直後に即反映（v1.0.14）
+      const collectionCount = Object.keys(updated.items || {}).length;
+      const pd = loadPuzzleData();
+      const { costumeData: newCostume } = checkCostumeUnlocks(streak, (pd.completedIds || []).length, collectionCount);
+      setCostumeData(newCostume);
     }
     setHarvestedFruit(null);
     setHarvestedIsNew(false);
-  }, [harvestedFruit]);
+  }, [harvestedFruit, streak]);
 
   // 学習開始ハンドラ
   const startLearning = (mode) => {
@@ -654,7 +661,7 @@ function App() {
             onStartMode={startLearning}
             onBack={() => setScreen('home')}
             petName={displayName}
-            equippedItem={costumeData.equippedItem}
+            equippedItems={costumeData.equippedItems}
             selectedCharacter={selectedCharacter}
           />
         );
@@ -667,7 +674,7 @@ function App() {
             onOpenZukan={() => setScreen('zukan')}
             onBack={() => setScreen('home')}
             petName={displayName}
-            equippedItem={costumeData.equippedItem}
+            equippedItems={costumeData.equippedItems}
             selectedCharacter={selectedCharacter}
           />
         );
@@ -679,7 +686,7 @@ function App() {
             onStartMode={startLearning}
             onBack={() => setScreen('home')}
             petName={displayName}
-            equippedItem={costumeData.equippedItem}
+            equippedItems={costumeData.equippedItems}
             selectedCharacter={selectedCharacter}
           />
         );
@@ -691,7 +698,7 @@ function App() {
             onStartMode={startLearning}
             onBack={() => setScreen('home')}
             petName={displayName}
-            equippedItem={costumeData.equippedItem}
+            equippedItems={costumeData.equippedItems}
             selectedCharacter={selectedCharacter}
           />
         );
@@ -720,7 +727,7 @@ function App() {
             rawPetName={petName}
             robotName={robotName}
             puzzleData={puzzleData}
-            equippedItem={costumeData.equippedItem}
+            equippedItems={costumeData.equippedItems}
             userPlan={userPlan}
             trialDaysLeft={trialDaysLeft}
             selectedCharacter={selectedCharacter}

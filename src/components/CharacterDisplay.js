@@ -3,6 +3,7 @@
 // selectedCharacter に応じて適切なキャラを表示する
 // v1.0.4: 新規作成（2026/06/29）
 // v1.0.13: ガチャキャラ先生対応（GachaCharacter追加）
+// v1.0.14: 着せ替え複数装着対応（equippedItems）。equippedItemは互換用に維持
 // ============================================
 
 import React from 'react';
@@ -17,7 +18,8 @@ const CharacterDisplay = ({
   message = '',
   size = 80,
   name,                 // キャラの表示名（まめ名 / ロボ名 / ガチャキャラの固定名）
-  equippedItem,         // まめ専用（着せ替えアイテム）
+  equippedItem,         // まめ専用（着せ替えアイテム・互換用の単数指定）
+  equippedItems,        // まめ専用（着せ替えアイテム・新形式: {head, face, neck, hand}）
   enableTap = false,
 }) => {
   if (character === 'robot') {
@@ -54,6 +56,7 @@ const CharacterDisplay = ({
       size={size}
       petName={name}
       equippedItem={equippedItem}
+      equippedItems={equippedItems}
       enableTap={enableTap}
     />
   );
