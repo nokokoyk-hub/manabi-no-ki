@@ -51,6 +51,7 @@ import {
   saveDisplayMode,
   getTodayJST,
   loadCostumeData,
+  createDefaultCostumeData,
   incrementMissionCount,
   checkCostumeUnlocks,
   setCurrentUserId,
@@ -117,12 +118,7 @@ function App() {
           clearFruitCollectionCache();
           // localStorageクリア済み → stateもデフォルトに戻す
           setPetName(null);
-          setCostumeData({
-            equippedItems: { head: null, face: null, neck: null, hand: null },
-            unlockedItems: ['item_none'],
-            missionCount: 0,
-            perfectCount: 0,
-          });
+          setCostumeData(createDefaultCostumeData());
           setPuzzleData({ completed: [], current: null });
           setSubjectLevels({});
           console.log('🔄 アカウント変更: stateもリセット完了');

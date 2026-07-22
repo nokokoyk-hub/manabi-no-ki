@@ -626,6 +626,13 @@ const DEFAULT_COSTUME_DATA = {
   perfectCount: 0,                // パーフェクト回数
 };
 
+// 初期状態の着せ替えデータを新規生成（リセット用。スロット構成はCATEGORY_ORDERに自動追従）
+export const createDefaultCostumeData = () => ({
+  ...DEFAULT_COSTUME_DATA,
+  unlockedItems: [],
+  equippedItems: EMPTY_EQUIPPED_ITEMS(),
+});
+
 export const loadCostumeData = () => {
   try {
     const raw = localStorage.getItem(COSTUME_KEY);
