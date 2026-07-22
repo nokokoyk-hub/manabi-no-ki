@@ -1,7 +1,7 @@
 // ============================================
 // 🌳 まなびの木 - メインアプリ
-// バージョン: 1.0.12
-// 最終更新: 2026/07/11
+// バージョン: 1.0.13
+// 最終更新: 2026/07/21
 // ============================================
 // ⚠️ 修正時の注意:
 // - version.json と APP_VERSION を同時に更新すること
@@ -28,7 +28,7 @@ import HarvestScreen from './screens/HarvestScreen';
 import CollectionScreen from './screens/CollectionScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
-import { rollGacha } from './lib/gachaData';
+import { rollGacha, isGachaCharacter, getFruitById } from './lib/gachaData';
 // ★v1.0.4変更: initFruitCollection, clearFruitCollectionCache を追加
 import { loadFruitCollection, addFruitToCollection, isNewFruit, initFruitCollection, clearFruitCollectionCache } from './lib/fruitCollection';
 import {
@@ -61,7 +61,7 @@ import { getNextPuzzle } from './data/puzzles';
 import { supabase } from './lib/supabase';
 
 // eslint-disable-next-line no-unused-vars
-export const APP_VERSION = '1.0.12';
+export const APP_VERSION = '1.0.13';
 
 function App() {
   // ===== 🔐 認証状態（Phase A）=====
@@ -220,10 +220,16 @@ function App() {
   const [petName, setPetName] = useState(() => loadPetName());
   const [robotName, setRobotName] = useState(() => loadRobotName());
 
-  // 🤖 出題キャラ選択（'mame' or 'robot'）v1.0.2
+  // 🤖 出題キャラ選択（'mame' | 'robot' | ガチャキャラID）v1.0.2
+  // v1.0.13: ガチャキャラが選択されているが未入手（複数端末・リセット後など）の場合は 'mame' にフォールバック
+  //          ※ここでの入手判定はSupabase同期前のローカルキャッシュ基準（ベストエフォート）
   const [selectedCharacter, setSelectedCharacter] = useState(() => {
-    try { return localStorage.getItem('manabi_selected_character') || 'mame'; }
-    catch { return 'mame'; }
+    try {
+      const saved = localStorage.getItem('manabi_selected_character') || 'mame';
+      if (saved === 'mame' || saved === 'robot') return saved;
+      if (isGachaCharacter(saved) && loadFruitCollection()?.items?.[saved]) return saved;
+      return 'mame';
+    } catch { return 'mame'; }
   });
   const handleCharacterChange = (char) => {
     setSelectedCharacter(char);
@@ -503,9 +509,12 @@ function App() {
 
   // 表示用のペット名（未設定時のフォールバック）
   // 🎯 v1.0.2: 選択中のキャラの名前を表示名にする
+  // v1.0.13: ガチャキャラせんせいのときは固定名（gachaData.jsのname）を使う
   const displayName = selectedCharacter === 'robot'
     ? (robotName || DEFAULT_ROBOT_NAME)
-    : (petName || DEFAULT_PET_NAME);
+    : isGachaCharacter(selectedCharacter)
+      ? (getFruitById(selectedCharacter)?.name || DEFAULT_PET_NAME)
+      : (petName || DEFAULT_PET_NAME);
 
   // ===== 🔐 認証チェック（Phase A）=====
   // 認証ローディング中

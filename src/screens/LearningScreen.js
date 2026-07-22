@@ -9,13 +9,13 @@
 //   - 出題: cheer（わくわく）
 //   - パーフェクト: medal→cry_happy
 //   - コンボバッジ強化
+// v1.0.13: CharacterDisplay経由に統一（ガチャキャラ せんせい対応）（2026/07/21）
 // ============================================
 
 import React, { useState, useEffect } from 'react';
 import StarBurst from '../components/StarBurst';
 import ClockSVG from '../components/ClockSVG';
-import MameCharacter from '../components/MameCharacter';
-import RobotCharacter from '../components/RobotCharacter';
+import CharacterDisplay from '../components/CharacterDisplay';
 import { COLORS } from '../constants/colors';
 import { getTodayQuestions, getQuestionsByCategory, getQuestionsBySubject } from '../lib/questionLoader';
 import { getCharaMessage } from '../constants/mameMessages';
@@ -106,10 +106,6 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
 
   const displayName = petName || 'まめ';
 
-  // 🤖 v1.0.2: キャラ選択に応じた表示切替ヘルパー
-  const CharaComponent = selectedCharacter === 'robot' ? RobotCharacter : MameCharacter;
-  const charaNameProp = selectedCharacter === 'robot' ? 'robotName' : 'petName';
-
   const [mamePose, setMamePose] = useState('cheer');
   const [mameMsg, setMameMsg] = useState(getCharaMessage('question', displayName, selectedCharacter));
 
@@ -122,7 +118,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', padding: 24,
       }}>
-        <CharaComponent pose="dash" message={`${displayName}が もんだいを さがしてるよ！`} size={90} {...{[charaNameProp]: displayName}} />
+        <CharacterDisplay character={selectedCharacter} pose="dash" message={`${displayName}が もんだいを さがしてるよ！`} size={90} name={displayName} />
         <div style={{ marginTop: 16, fontSize: 14, color: COLORS.textLight, fontWeight: 700 }}>
           じゅんび ちゅう...
         </div>
@@ -141,7 +137,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
         color: COLORS.text,
       }}>
         <div style={{ background: 'white', borderRadius: 20, padding: 24, textAlign: 'center' }}>
-          <CharaComponent pose="sad" message="もんだいが たりないよ…" size={80} {...{[charaNameProp]: displayName}} />
+          <CharacterDisplay character={selectedCharacter} pose="sad" message="もんだいが たりないよ…" size={80} name={displayName} />
           <div style={{ fontSize: 18, fontWeight: 800, marginTop: 12, marginBottom: 8 }}>問題を じゅんび中です</div>
           <div style={{ color: COLORS.textLight, lineHeight: 1.6, marginBottom: 16 }}>
             このレベルの問題が まだ少ないみたい。<br />
@@ -195,11 +191,12 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
         </div>
 
         {/* キャラクター */}
-        <CharaComponent
+        <CharacterDisplay
+          character={selectedCharacter}
           pose={resultPose}
           message={resultMsg}
           size={100}
-          {...{[charaNameProp]: displayName}}
+          name={displayName}
         />
 
         {/* スコア表示 */}
@@ -406,7 +403,7 @@ const LearningScreen = ({ mode = 'mission', subjectLevels, petName, selectedChar
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <CharaComponent pose={mamePose} message={mameMsg} size={70} {...{[charaNameProp]: displayName}} />
+          <CharacterDisplay character={selectedCharacter} pose={mamePose} message={mameMsg} size={70} name={displayName} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

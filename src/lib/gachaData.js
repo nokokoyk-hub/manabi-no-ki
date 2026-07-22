@@ -183,3 +183,17 @@ export const TOTAL_FRUITS = FRUITS.length;
 export const getFruitCountByRarity = (rarity) => {
   return FRUITS.filter(f => f.rarity === rarity).length;
 };
+
+// ==============================
+// 🎓 ガチャキャラ せんせい対応（v1.0.13）
+// ==============================
+
+/**
+ * ガチャ限定キャラ（type: 'character'）だけを抽出した配列
+ */
+export const GACHA_CHARACTERS = FRUITS.filter(f => f.type === 'character');
+
+/**
+ * 指定したidがガチャ限定キャラかどうか
+ */
+export const isGachaCharacter = (id) => GACHA_CHARACTERS.some(f => f.id === id);

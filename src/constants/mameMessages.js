@@ -4,7 +4,10 @@
 // v0.6.0: {name}プレースホルダーで名前カスタマイズ対応
 // v1.0.2: ロボちゃん専用セリフ追加 + getCharaMessage()
 // v1.0.7: ミッションクリア文言のキャラ対応 + ストリークのロボ口調追加（2026/07/03）
+// v1.0.13: ガチャキャラ せんせい用の汎用セリフ追加（2026/07/21）
 // ============================================
+
+import { isGachaCharacter } from '../lib/gachaData';
 
 // ランダムに1つ選ぶヘルパー
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -132,6 +135,71 @@ const ROBOT_MISSION_DONE_MESSAGES = [
 ];
 
 // ============================================
+// 🎰 ガチャキャラ せんせい 共通セリフ（v1.0.13）
+// にじぴよ/ぽっけ/ももぴ/ガーディ/ライドラ/ひめにゃ 共通で使う
+// かわいい共通口調（「〜だよ！」系）
+// ============================================
+
+const GACHA_HOME_MESSAGES = [
+  'きょうも いっしょに がんばろうね！',
+  '{name}と おべんきょう しよ！',
+  'わくわく するね！',
+  'きょうの ミッション、やってみよ！',
+  '{name}、おうえん してるよ！',
+  'きょうは なにを まなぶ？',
+];
+
+const GACHA_QUESTION_MESSAGES = [
+  'どれかな〜？',
+  'よーく かんがえてね！',
+  '{name}も いっしょに かんがえるよ！',
+  'ゆっくりで いいよ！',
+  'できるできる！',
+];
+
+const GACHA_CORRECT_MESSAGES = [
+  'すごーい！せいかいだよ！🎉',
+  'やったね！てんさい！✨',
+  '{name}、うれしいよ！💖',
+  'かっこいい〜！🌟',
+  'ばっちり！すごいよ！',
+];
+
+const GACHA_WRONG_MESSAGES = [
+  'おしい！もういっかい！',
+  'だいじょうぶ！つぎ がんばろ！',
+  'まちがえても へいき だよ！',
+  'いっしょに かんがえよ！',
+  'つぎは できるよ！',
+];
+
+const GACHA_COMPLETE_MESSAGES = [
+  'ミッション クリア！すごいよ！🏆',
+  'がんばったね！{name}も うれしい！💖',
+  'きょうも えらいね！🌳',
+];
+
+// ミッション完了後のホーム画面（ガチャキャラ版）
+const GACHA_MISSION_DONE_MESSAGES = [
+  'きょうの ミッション クリア！えらいね！🎉',
+];
+
+// ガチャキャラ用セリフ取得
+export const getGachaCharaMessage = (scene, name) => {
+  let msg;
+  switch (scene) {
+    case 'home': msg = pick(GACHA_HOME_MESSAGES); break;
+    case 'question': msg = pick(GACHA_QUESTION_MESSAGES); break;
+    case 'correct': msg = pick(GACHA_CORRECT_MESSAGES); break;
+    case 'wrong': msg = pick(GACHA_WRONG_MESSAGES); break;
+    case 'complete': msg = pick(GACHA_COMPLETE_MESSAGES); break;
+    case 'missionDone': msg = pick(GACHA_MISSION_DONE_MESSAGES); break;
+    default: msg = pick(GACHA_HOME_MESSAGES); break;
+  }
+  return insertName(msg, name || 'せんせい');
+};
+
+// ============================================
 // 📦 セリフ取得関数
 // ============================================
 
@@ -142,6 +210,12 @@ export const getStreakMessage = (streak, character = 'mame') => {
     if (streak >= 3) return `${streak}にち れんぞく！データが かがやいてる！✨`;
     if (streak >= 1) return `${streak}にち れんぞく きろく こうしんちゅう！ピコ！`;
     return 'きょうから スタート だよ！ピコ！';
+  }
+  if (isGachaCharacter(character)) {
+    if (streak >= 7) return `${streak}にち れんぞく！てんさいだよ！🔥`;
+    if (streak >= 3) return `${streak}にち れんぞく！すごいね！✨`;
+    if (streak >= 1) return `${streak}にち れんぞく がんばってるね！`;
+    return 'きょうから はじめよう！';
   }
   if (streak >= 7) return `${streak}にち れんぞく！てんさい！🔥`;
   if (streak >= 3) return `${streak}にち れんぞく！すごいね！✨`;
@@ -181,7 +255,7 @@ export const getRobotMessage = (scene, robotName) => {
 
 // 🎯 キャラ別セリフ取得（v1.0.2〜推奨）
 export const getCharaMessage = (scene, name, character = 'mame') => {
-  return character === 'robot'
-    ? getRobotMessage(scene, name)
-    : getMameMessage(scene, name);
+  if (character === 'robot') return getRobotMessage(scene, name);
+  if (isGachaCharacter(character)) return getGachaCharaMessage(scene, name);
+  return getMameMessage(scene, name);
 };
