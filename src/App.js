@@ -497,10 +497,15 @@ function App() {
     if (harvestedFruit) {
       const updated = addFruitToCollection(harvestedFruit.id);
       setFruitCollection(updated);
+      // 👗 コレクション種類数で解放される着せ替えを、収穫直後に即反映（v1.0.14）
+      const collectionCount = Object.keys(updated.items || {}).length;
+      const pd = loadPuzzleData();
+      const { costumeData: newCostume } = checkCostumeUnlocks(streak, (pd.completedIds || []).length, collectionCount);
+      setCostumeData(newCostume);
     }
     setHarvestedFruit(null);
     setHarvestedIsNew(false);
-  }, [harvestedFruit]);
+  }, [harvestedFruit, streak]);
 
   // 学習開始ハンドラ
   const startLearning = (mode) => {
