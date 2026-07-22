@@ -8,17 +8,20 @@
 // v1.0.7: セリフ全分岐キャラ対応（ロボちゃんがまめのセリフを喋る問題を修正）（2026/07/03）
 // v1.0.8: 吹き出しをせんせい側キャラに表示（ロボ選択時はロボの頭上に）（2026/07/03）
 // v1.0.9: せんせいバッジを足元ネームプレート化（吹き出しとの重なり解消）（2026/07/03）
+// v1.0.13: ガチャキャラ せんせい選択機能追加（2026/07/21）
 // ============================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TreeSVG from '../components/TreeSVG';
 import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
+import GachaCharacter from '../components/GachaCharacter';
 import GrowthEffect from '../components/GrowthEffect';
 import { COLORS } from '../constants/colors';
 import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { GROWTH_FX, GROWTH_FX_ENABLED } from '../constants/growthEffects';
 import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
+import { GACHA_CHARACTERS, isGachaCharacter, getFruitById } from '../lib/gachaData';
 
 const HomeScreen = ({
   leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, rawPetName, robotName, puzzleData, equippedItem,
@@ -139,6 +142,18 @@ const HomeScreen = ({
   const handleLogoClick = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // ===== 🎓 せんせい選択（ガチャキャラ対応・v1.0.13） =====
+  // ガチャキャラがせんせいのときは、木の右（まめの位置）にそのキャラを表示する
+  const isGachaSelected = isGachaCharacter(selectedCharacter);
+  const selectedGachaFruit = isGachaSelected ? getFruitById(selectedCharacter) : null;
+  const isMameSlotTeacher = selectedCharacter === 'mame' || isGachaSelected;
+  const [showCharaSelectModal, setShowCharaSelectModal] = useState(false);
+
+  const handleSelectTeacher = useCallback((charId) => {
+    onCharacterChange && onCharacterChange(charId);
+    setShowCharaSelectModal(false);
+  }, [onCharacterChange]);
 
   const levelSummary = SUBJECT_LEVELS
     .map(subject => `${subject.emoji}${getLevelLabel(subjectLevels?.[subject.key] || 1)}`)
@@ -305,21 +320,25 @@ const HomeScreen = ({
             />
           )}
         </div>
-        {/* まめは木の右に（タップで出題キャラ選択 / 長押しで名前変更） */}
+        {/* まめ（またはガチャキャラせんせい）は木の右に
+            v1.0.13: ガチャキャラがせんせいのときは、まめの代わりにそのキャラを表示。
+            タップで選択モーダルを開く（まめが隠れるため復帰導線）。長押し名前変更は適用しない（固定名） */}
         <div
-          onClick={() => handleCharaTap('mame')}
-          onTouchStart={() => handlePressStart('mame')}
-          onTouchEnd={handlePressEnd}
-          onTouchCancel={handlePressEnd}
-          onMouseDown={() => handlePressStart('mame')}
-          onMouseUp={handlePressEnd}
-          onMouseLeave={handlePressEnd}
+          onClick={() => (isGachaSelected ? setShowCharaSelectModal(true) : handleCharaTap('mame'))}
+          {...(isGachaSelected ? {} : {
+            onTouchStart: () => handlePressStart('mame'),
+            onTouchEnd: handlePressEnd,
+            onTouchCancel: handlePressEnd,
+            onMouseDown: () => handlePressStart('mame'),
+            onMouseUp: handlePressEnd,
+            onMouseLeave: handlePressEnd,
+          })}
           style={{
             flexShrink: 0, width: 80, marginLeft: -8, zIndex: 1, overflow: 'visible',
             position: 'relative', cursor: 'pointer',
           }}
         >
-          {selectedCharacter === 'mame' && (
+          {isMameSlotTeacher && (
             <div style={{
               position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
               fontSize: 10, fontWeight: 800, color: '#FF9800',
@@ -329,14 +348,25 @@ const HomeScreen = ({
             }}>🎯 せんせい</div>
           )}
           {/* ホーム専用吹き出し（v1.0.8: せんせい側キャラに表示） */}
-          {selectedCharacter === 'mame' && renderBubble('right')}
-          <MameCharacter
-            pose={activeFx ? activeFx.charPose : (todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal'))}
-            message=""
-            size={80}
-            petName={petName}
-            equippedItem={equippedItem}
-          />
+          {isMameSlotTeacher && renderBubble('right')}
+          {isGachaSelected ? (
+            <GachaCharacter
+              charaId={selectedCharacter}
+              pose={activeFx ? activeFx.charPose : (todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal'))}
+              message=""
+              size={80}
+              name={selectedGachaFruit?.name}
+              enableTap={false}
+            />
+          ) : (
+            <MameCharacter
+              pose={activeFx ? activeFx.charPose : (todayDone ? 'medal' : (streak >= 3 ? 'flag' : 'normal'))}
+              message=""
+              size={80}
+              petName={petName}
+              equippedItem={equippedItem}
+            />
+          )}
         </div>
       </div>
 
@@ -378,6 +408,18 @@ const HomeScreen = ({
                 ({Object.keys(fruitCollection.items).length}しゅるい)
               </span>
             )}
+          </button>
+        </div>
+
+        {/* 🎓 せんせい選択ボタン（v1.0.13） */}
+        <div style={{ marginTop: 8 }}>
+          <button onClick={() => setShowCharaSelectModal(true)} style={{
+            background: 'rgba(255,152,0,0.12)', border: '2px solid #FFB74D66',
+            borderRadius: 20, padding: '6px 18px',
+            fontSize: 12, fontWeight: 700, color: '#EF6C00',
+            cursor: 'pointer', fontFamily: "'Rounded Mplus 1c', sans-serif",
+          }}>
+            🎓 せんせいを えらぶ
           </button>
         </div>
       </div>
@@ -576,6 +618,85 @@ const HomeScreen = ({
                 }}
               >けってい！✨</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== 🎓 せんせい選択モーダル（v1.0.13） ===== */}
+      {showCharaSelectModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100, padding: 20,
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCharaSelectModal(false); }}
+        >
+          <div style={{
+            background: 'white', borderRadius: 24, padding: '24px 20px',
+            width: '100%', maxWidth: 360, textAlign: 'center',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+            animation: 'mame-fadeIn 0.2s ease-out',
+          }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#2E7D32', marginBottom: 4 }}>
+              🎓 せんせいを えらぼう！
+            </div>
+            <div style={{ fontSize: 11, color: '#999', marginBottom: 16 }}>
+              いっしょに べんきょうする こを えらんでね
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {[
+                { id: 'mame', name: rawPetName || 'まめ', emoji: '🐕' },
+                { id: 'robot', name: robotName || 'ロボちゃん', emoji: '🤖' },
+                ...GACHA_CHARACTERS.map((f) => ({ id: f.id, name: f.name, emoji: f.emoji })),
+              ].map((opt) => {
+                const isOwned = opt.id === 'mame' || opt.id === 'robot' || !!fruitCollection?.items?.[opt.id];
+                const isSelected = selectedCharacter === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => isOwned && handleSelectTeacher(opt.id)}
+                    disabled={!isOwned}
+                    style={{
+                      background: isSelected ? '#FFF3E0' : isOwned ? 'white' : '#F5F5F5',
+                      border: isSelected ? '2px solid #FF9800' : '2px solid #E0E0E0',
+                      borderRadius: 14, padding: '10px 4px',
+                      cursor: isOwned ? 'pointer' : 'default',
+                      textAlign: 'center',
+                      opacity: isOwned ? 1 : 0.45,
+                      transition: 'all 0.2s ease',
+                      fontFamily: "'Rounded Mplus 1c', sans-serif",
+                    }}
+                  >
+                    <div style={{ fontSize: 28 }}>
+                      {isOwned ? opt.emoji : '❓'}
+                    </div>
+                    <div style={{
+                      fontSize: 9, fontWeight: 700, marginTop: 4,
+                      color: isSelected ? '#EF6C00' : isOwned ? COLORS.text : COLORS.textLight,
+                      lineHeight: 1.3,
+                    }}>
+                      {isOwned ? opt.name : 'ガチャで ゲットしよう！'}
+                    </div>
+                    {isSelected && (
+                      <div style={{ fontSize: 8, color: '#FF9800', fontWeight: 800, marginTop: 2 }}>
+                        🎯 せんせい
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setShowCharaSelectModal(false)}
+              style={{
+                marginTop: 18, width: '100%', padding: '10px', fontSize: 14, fontWeight: 700,
+                background: '#F5F5F5', border: '1px solid #E0E0E0',
+                borderRadius: 14, color: '#888', cursor: 'pointer',
+                fontFamily: "'Rounded Mplus 1c', sans-serif",
+              }}
+            >とじる</button>
           </div>
         </div>
       )}
