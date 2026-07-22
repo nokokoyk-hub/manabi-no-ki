@@ -3,6 +3,7 @@
 // 教科ボタン → このメニュー → カテゴリ選んで問題 or ずかん
 // v0.9.5: 新規作成（りか/げんそ分離対応）
 // v1.0.4: CharacterDisplay対応（先生キャラ切替）（2026/06/29）
+// v1.0.14: 着せ替え複数装着対応（equippedItems）
 // ============================================
 
 import React from 'react';
@@ -48,7 +49,7 @@ const SUBJECT_CATEGORIES = {
   },
 };
 
-const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName, equippedItem, selectedCharacter = 'mame' }) => {
+const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName, equippedItems, selectedCharacter = 'mame' }) => {
   const config = SUBJECT_CATEGORIES[subject];
 
   if (!config) {
@@ -90,7 +91,7 @@ const SubjectMenuScreen = ({ subject, onStartMode, onOpenZukan, onBack, petName,
           message={`なにを れんしゅうする？`}
           size={80}
           name={petName}
-          equippedItem={equippedItem}
+          equippedItems={equippedItems}
         />
       </div>
 

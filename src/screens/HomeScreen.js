@@ -9,6 +9,7 @@
 // v1.0.8: 吹き出しをせんせい側キャラに表示（ロボ選択時はロボの頭上に）（2026/07/03）
 // v1.0.9: せんせいバッジを足元ネームプレート化（吹き出しとの重なり解消）（2026/07/03）
 // v1.0.13: ガチャキャラ せんせい選択機能追加（2026/07/21）
+// v1.0.14: 着せ替え複数装着対応（equippedItems）
 // ============================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -24,7 +25,7 @@ import { SUBJECT_LEVELS, getLevelLabel } from '../constants/learningLevels';
 import { GACHA_CHARACTERS, isGachaCharacter, getFruitById } from '../lib/gachaData';
 
 const HomeScreen = ({
-  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, rawPetName, robotName, puzzleData, equippedItem,
+  leaves, flowers, fruits, streak, todayDone, subjectLevels, petName, rawPetName, robotName, puzzleData, equippedItems,
   userPlan, trialDaysLeft, selectedCharacter, onCharacterChange, onRenameCharacter,
   onStartLearning, onOpenMath, onOpenKokugo, onOpenRika, onStartShakai, onStartClock, onStartDoutoku, onOpenGenso, onOpenMimamori, onOpenLevelSettings, onOpenFukushu, onOpenGohoubi,
   canHarvest, onHarvest, onOpenCollection, fruitCollection,
@@ -364,7 +365,7 @@ const HomeScreen = ({
               message=""
               size={80}
               petName={petName}
-              equippedItem={equippedItem}
+              equippedItems={equippedItems}
             />
           )}
         </div>

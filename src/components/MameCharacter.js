@@ -5,6 +5,8 @@
 // v0.6.1: アニメーション大幅強化
 // v0.6.4: 実在画像のみ参照 + fallback追加
 // v0.7.0: 新画像10枚追加！全15ポーズ対応
+// v1.0.14: 着せ替え複数装着対応（head/face/neck/hand を重ねて表示）
+//          画像アイテム(image)対応 + 読み込み失敗時はemojiへフォールバック
 // ============================================
 
 import React, { useState, useCallback } from 'react';
@@ -80,17 +82,65 @@ const SPARKLE_PARTICLES = [
   { tx: '-35px', ty: '5px', delay: '0.2s', emoji: '⭐' },
 ];
 
+// 👗 着せ替えアイテム1個分のオーバーレイ
+// image指定があれば<img>、なければemoji。画像読み込み失敗時はemojiにフォールバック
+const CostumeOverlay = ({ item, size }) => {
+  const [imgFailed, setImgFailed] = useState(false);
+  if (!item) return null;
+
+  const useImage = !!item.image && !imgFailed;
+
+  return (
+    <span style={{
+      position: 'absolute',
+      top: item.position.top,
+      left: item.position.left,
+      transform: 'translateX(-50%)',
+      pointerEvents: 'none',
+      filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))',
+      zIndex: 2,
+      ...(useImage ? {} : { fontSize: size * item.size }),
+    }}>
+      {useImage ? (
+        <img
+          src={item.image}
+          alt={item.name}
+          onError={() => setImgFailed(true)}
+          style={{ width: size * item.size, height: 'auto', display: 'block' }}
+        />
+      ) : item.emoji}
+    </span>
+  );
+};
+
+// 装着中アイテムの指定（equippedItems）を itemIdの配列に正規化
+// - 配列 → そのまま（nullは除去）
+// - オブジェクト（{head, face, neck, hand}）→ 値の配列
+// - 未指定 → 空配列
+const normalizeEquippedIds = (equippedItems) => {
+  if (!equippedItems) return [];
+  if (Array.isArray(equippedItems)) return equippedItems.filter(Boolean);
+  if (typeof equippedItems === 'object') return Object.values(equippedItems).filter(Boolean);
+  return [];
+};
+
 const MameCharacter = ({
   pose = 'normal',
   message = '',
   size = 100,
   petName = 'まめ',
   enableTap = true,
-  equippedItem = null,
+  equippedItem = null,     // 互換用（単数・旧形式）
+  equippedItems = null,    // 新形式（配列 or {head, face, neck, hand}）
   messagePosition = 'top',
   style = {},
 }) => {
   const [isTapped, setIsTapped] = useState(false);
+
+  // 新形式が渡っていればそちらを優先、無ければ旧形式(単数)にフォールバック
+  const equippedIds = equippedItems
+    ? normalizeEquippedIds(equippedItems)
+    : (equippedItem ? [equippedItem] : []);
 
   const imageSrc = POSE_IMAGES[pose] || FALLBACK_IMAGE;
   const animation = isTapped
@@ -206,25 +256,12 @@ const MameCharacter = ({
           }}
         />
 
-        {/* 👗 着せ替えアイテムオーバーレイ */}
-        {equippedItem && (() => {
-          const item = getItemById(equippedItem);
+        {/* 👗 着せ替えアイテムオーバーレイ（カテゴリごとに重ねて表示） */}
+        {equippedIds.map((itemId) => {
+          const item = getItemById(itemId);
           if (!item) return null;
-          return (
-            <span style={{
-              position: 'absolute',
-              top: item.position.top,
-              left: item.position.left,
-              transform: 'translateX(-50%)',
-              fontSize: size * item.size,
-              pointerEvents: 'none',
-              filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))',
-              zIndex: 2,
-            }}>
-              {item.emoji}
-            </span>
-          );
-        })()}
+          return <CostumeOverlay key={itemId} item={item} size={size} />;
+        })}
       </div>
       {isRight && bubble}
     </div>

@@ -4,6 +4,8 @@
 // v0.7.1: 新規作成
 // v1.0.4: CharacterDisplay対応（先生キャラ切替）（2026/06/29）
 //         着せ替えプレビューはまめ専用のため MameCharacter を維持
+// v1.0.14: きせかえコーナーをカテゴリ別（あたま/かお/くび/て）表示に対応
+//          カテゴリごとに1個ずつ重ねづけ + 「ぜんぶ はずす」で全スロット解除
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -11,9 +13,9 @@ import MameCharacter from '../components/MameCharacter';
 import CharacterDisplay from '../components/CharacterDisplay';
 import { COLORS } from '../constants/colors';
 import { loadPuzzleData } from '../lib/storage';
-import { loadCostumeData, equipItem } from '../lib/storage';
+import { loadCostumeData, equipItem, unequipAll } from '../lib/storage';
 import { getPuzzleById } from '../data/puzzles';
-import COSTUME_ITEMS from '../data/costumeItems';
+import COSTUME_ITEMS, { CATEGORY_ORDER, CATEGORY_TO_SLOT, SLOT_LABELS } from '../data/costumeItems';
 
 const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeData: propsCostumeData, onEquipChange, selectedCharacter = 'mame' }) => {
   const [puzzleData] = useState(propsPuzzleData || loadPuzzleData());
@@ -26,6 +28,10 @@ const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeDa
   const collected = puzzleData.collected || 0;
   const isComplete = collected >= 9;
   const completedIds = puzzleData.completedIds || [];
+
+  // 👗 きせかえ: 装着中アイテムまとめ（後方互換: equippedItemsが無ければ全スロットnull扱い）
+  const equippedItems = costumeData.equippedItems || {};
+  const anyEquipped = Object.values(equippedItems).some(Boolean);
 
   // まめのメッセージ
   const getMessage = () => {
@@ -304,71 +310,86 @@ const GohoubiScreen = ({ onBack, petName, puzzleData: propsPuzzleData, costumeDa
           }}>
             <MameCharacter
               pose="happy"
-              message={costumeData.equippedItem ? 'にあう？💖' : 'なにか つけてみて！'}
+              message={anyEquipped ? 'にあう？💖' : 'なにか つけてみて！'}
               size={90}
               petName={displayName}
-              equippedItem={costumeData.equippedItem}
+              equippedItems={equippedItems}
               enableTap={true}
             />
           </div>
 
-          {/* アイテム一覧 */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
-          }}>
-            {COSTUME_ITEMS.map(item => {
-              const isUnlocked = costumeData.unlockedItems.includes(item.id);
-              const isEquipped = costumeData.equippedItem === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (!isUnlocked) return;
-                    const updated = equipItem(item.id);
-                    setCostumeData(updated);
-                    if (onEquipChange) onEquipChange(updated.equippedItem);
-                  }}
-                  style={{
-                    background: isEquipped ? '#E8F5E9' : isUnlocked ? 'white' : '#F5F5F5',
-                    border: isEquipped ? '2px solid #4CAF50' : '2px solid #E0E0E0',
-                    borderRadius: 14, padding: '10px 4px',
-                    cursor: isUnlocked ? 'pointer' : 'default',
-                    textAlign: 'center',
-                    opacity: isUnlocked ? 1 : 0.5,
-                    transition: 'all 0.2s ease',
-                    fontFamily: "'Rounded Mplus 1c', sans-serif",
-                  }}
-                >
-                  <div style={{ fontSize: 28 }}>
-                    {isUnlocked ? item.emoji : '❓'}
-                  </div>
-                  <div style={{
-                    fontSize: 9, fontWeight: 700, marginTop: 4,
-                    color: isEquipped ? '#2E7D32' : isUnlocked ? COLORS.text : COLORS.textLight,
-                    lineHeight: 1.3,
-                  }}>
-                    {isUnlocked ? item.name : item.category}
-                  </div>
-                  {isEquipped && (
-                    <div style={{ fontSize: 8, color: '#4CAF50', fontWeight: 800, marginTop: 2 }}>
-                      つけてる！
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {/* カテゴリ別アイテム一覧（あたま/かお/くび/て、それぞれ1個ずつ） */}
+          {CATEGORY_ORDER.map(slot => {
+            const slotItems = COSTUME_ITEMS.filter(item => CATEGORY_TO_SLOT[item.category] === slot);
+            if (slotItems.length === 0) return null;
+            const { emoji: slotEmoji, label: slotLabel } = SLOT_LABELS[slot];
+
+            return (
+              <div key={slot} style={{ marginBottom: 16 }}>
+                <div style={{
+                  fontSize: 13, fontWeight: 800, color: COLORS.text, marginBottom: 8,
+                }}>
+                  {slotEmoji} {slotLabel}
+                </div>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+                }}>
+                  {slotItems.map(item => {
+                    const isUnlocked = costumeData.unlockedItems.includes(item.id);
+                    const isEquipped = equippedItems[slot] === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          if (!isUnlocked) return;
+                          const updated = equipItem(item.id);
+                          setCostumeData(updated);
+                          if (onEquipChange) onEquipChange(updated.equippedItems);
+                        }}
+                        style={{
+                          background: isEquipped ? '#E8F5E9' : isUnlocked ? 'white' : '#F5F5F5',
+                          border: isEquipped ? '2px solid #4CAF50' : '2px solid #E0E0E0',
+                          borderRadius: 14, padding: '10px 4px',
+                          cursor: isUnlocked ? 'pointer' : 'default',
+                          textAlign: 'center',
+                          opacity: isUnlocked ? 1 : 0.5,
+                          transition: 'all 0.2s ease',
+                          fontFamily: "'Rounded Mplus 1c', sans-serif",
+                        }}
+                      >
+                        <div style={{ fontSize: 28 }}>
+                          {isUnlocked ? item.emoji : '❓'}
+                        </div>
+                        <div style={{
+                          fontSize: 9, fontWeight: 700, marginTop: 4,
+                          color: isEquipped ? '#2E7D32' : isUnlocked ? COLORS.text : COLORS.textLight,
+                          lineHeight: 1.3,
+                        }}>
+                          {isUnlocked ? item.name : '？？？'}
+                        </div>
+                        {isEquipped && (
+                          <div style={{ fontSize: 8, color: '#4CAF50', fontWeight: 800, marginTop: 2 }}>
+                            つけてる！
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
 
           {/* はずすボタン */}
-          {costumeData.equippedItem && (
+          {anyEquipped && (
             <button
               onClick={() => {
-                const updated = equipItem(costumeData.equippedItem);
+                const updated = unequipAll();
                 setCostumeData(updated);
-                if (onEquipChange) onEquipChange(null);
+                if (onEquipChange) onEquipChange(updated.equippedItems);
               }}
               style={{
-                width: '100%', marginTop: 10, background: '#FFF3E0',
+                width: '100%', marginTop: 2, background: '#FFF3E0',
                 border: '2px solid #FFE0B2', borderRadius: 12, padding: '8px',
                 fontSize: 12, fontWeight: 700, color: COLORS.orange,
                 cursor: 'pointer', fontFamily: "'Rounded Mplus 1c', sans-serif",

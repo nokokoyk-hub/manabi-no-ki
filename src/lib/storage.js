@@ -6,7 +6,7 @@
 // ============================================
 
 import { supabase } from './supabase';
-import COSTUME_ITEMS_DATA from '../data/costumeItems';
+import COSTUME_ITEMS_DATA, { CATEGORY_TO_SLOT, CATEGORY_ORDER, getItemById as getCostumeItemById } from '../data/costumeItems';
 
 // ------------------------------------------
 // 🆔 デバイスID管理（レガシー・フォールバック用）
@@ -610,30 +610,63 @@ export const addPuzzlePiece = (puzzleId) => {
 // 👗 着せ替えアイテム
 // アンロック状態と装着中アイテムを管理
 // v0.7.2: 新規追加
+// v1.0.14: カテゴリごとに1個ずつ重ねづけ対応（equippedItems化）
+//          旧形式（equippedItem: 単数文字列）からの自動マイグレーション対応
 // ------------------------------------------
 const COSTUME_KEY = 'manabi_costume';
 
+// 装着スロットの初期状態（head/face/neck/hand）
+const EMPTY_EQUIPPED_ITEMS = () =>
+  CATEGORY_ORDER.reduce((acc, slot) => ({ ...acc, [slot]: null }), {});
+
 const DEFAULT_COSTUME_DATA = {
-  unlockedItems: [],    // アンロック済みアイテムIDリスト
-  equippedItem: null,   // 現在装着中のアイテムID（null=なし）
-  missionCount: 0,      // 総ミッションクリア回数
-  perfectCount: 0,      // パーフェクト回数
+  unlockedItems: [],              // アンロック済みアイテムIDリスト
+  equippedItems: EMPTY_EQUIPPED_ITEMS(), // カテゴリ別 装着中アイテムID（null=なし）
+  missionCount: 0,                // 総ミッションクリア回数
+  perfectCount: 0,                // パーフェクト回数
 };
 
 export const loadCostumeData = () => {
   try {
     const raw = localStorage.getItem(COSTUME_KEY);
-    if (!raw) return DEFAULT_COSTUME_DATA;
+    if (!raw) {
+      return { ...DEFAULT_COSTUME_DATA, equippedItems: EMPTY_EQUIPPED_ITEMS() };
+    }
     const parsed = JSON.parse(raw);
-    return {
+
+    const equippedItems = {
+      ...EMPTY_EQUIPPED_ITEMS(),
+      ...(parsed.equippedItems || {}),
+    };
+
+    // 🔄 旧形式マイグレーション: equippedItem（単数文字列）→ equippedItems[slot]
+    // 新形式（equippedItems）が無く、旧フィールドだけが残っている場合のみ実行
+    let migrated = false;
+    if (!parsed.equippedItems && parsed.equippedItem) {
+      const legacyItem = getCostumeItemById(parsed.equippedItem);
+      const slot = legacyItem && CATEGORY_TO_SLOT[legacyItem.category];
+      if (slot) {
+        equippedItems[slot] = legacyItem.id;
+        migrated = true;
+      }
+    }
+
+    const data = {
       unlockedItems: parsed.unlockedItems || [],
-      equippedItem: parsed.equippedItem || null,
+      equippedItems,
       missionCount: parsed.missionCount || 0,
       perfectCount: parsed.perfectCount || 0,
     };
+
+    // マイグレーション結果を保存し直す（次回以降は新形式を正とする）
+    if (migrated) {
+      saveCostumeData(data);
+    }
+
+    return data;
   } catch (err) {
     console.error('❌ 着せ替えデータ読み込みエラー:', err);
-    return DEFAULT_COSTUME_DATA;
+    return { ...DEFAULT_COSTUME_DATA, equippedItems: EMPTY_EQUIPPED_ITEMS() };
   }
 };
 
@@ -645,10 +678,25 @@ export const saveCostumeData = (data) => {
   }
 };
 
-// アイテム装着/解除
+// アイテム装着/解除（同カテゴリはトグル、別カテゴリには影響しない）
 export const equipItem = (itemId) => {
   const data = loadCostumeData();
-  data.equippedItem = data.equippedItem === itemId ? null : itemId;
+  const item = getCostumeItemById(itemId);
+  const slot = item && CATEGORY_TO_SLOT[item.category];
+  if (!slot) return data;
+
+  data.equippedItems = {
+    ...data.equippedItems,
+    [slot]: data.equippedItems[slot] === itemId ? null : itemId,
+  };
+  saveCostumeData(data);
+  return data;
+};
+
+// ぜんぶ はずす（全スロット解除）
+export const unequipAll = () => {
+  const data = loadCostumeData();
+  data.equippedItems = EMPTY_EQUIPPED_ITEMS();
   saveCostumeData(data);
   return data;
 };
@@ -664,7 +712,8 @@ export const unlockItem = (itemId) => {
 };
 
 // ミッション完了時のアンロック判定
-export const checkCostumeUnlocks = (streak, puzzleCompletedCount) => {
+// collectionCount: 果実コレクションの収集済み種類数（unlockType: 'collection'の判定に使用）
+export const checkCostumeUnlocks = (streak, puzzleCompletedCount, collectionCount = 0) => {
   const data = loadCostumeData();
   const ITEMS = COSTUME_ITEMS_DATA;
   const newUnlocks = [];
@@ -685,6 +734,9 @@ export const checkCostumeUnlocks = (streak, puzzleCompletedCount) => {
         break;
       case 'puzzle':
         shouldUnlock = puzzleCompletedCount >= item.unlockValue;
+        break;
+      case 'collection':
+        shouldUnlock = collectionCount >= item.unlockValue;
         break;
       default:
         break;
