@@ -1,5 +1,5 @@
 # 🌳 まなびの木 - プロジェクト現在地（北極星ドキュメント）
-## 最終更新: 2026/07/11 Google Play再申請送信・iOS戦略確定（スレッド31）
+## 最終更新: 2026/07/22 🎉Google Play審査通過・v1.0.13/v1.0.14リリース（スレッド32）
 
 ---
 
@@ -7,14 +7,14 @@
 
 | 項目 | 値 |
 |---|---|
-| バージョン | v1.0.12 |
+| バージョン | v1.0.14 |
 | 本番URL | https://manabinoki.net |
 | GitHub | https://github.com/nokokoyk-hub/manabi-no-ki (Public) |
 | Supabase | Project ID: `ndqbtfahtjaafroevgwq`（Pro組織・ACTIVE_HEALTHY） |
 | Vercel | Project: `manabi-no-ki` / Team: `team_wLDUprmHVwDKbqydwaFCl5k7` |
 | GA4 | G-64GLZZQC24 |
 | Stripe | 月額200円 + 年間2,100円 |
-| Google Play | **v1.0.12で再申請 送信済み（2026/07/11・審査待ち）**。初回否承認=起動時読み込み問題→Codex起動安全網で対応 |
+| Google Play | 🎉 **審査通過（2026/07/22までに承認）**。v1.0.12の起動安全網（getSessionタイムアウト+Error Boundary）で逆転承認。公開状態・ストア掲載はPlay Consoleで確認 |
 
 ---
 
@@ -44,8 +44,11 @@ src/
 │   ├── supabase.js                 # Supabaseクライアント（v1.0.12: getSession 8秒タイムアウト）
 │   ├── storage.js                  # データ永続化（Supabase + localStorage）
 │   ├── fruitCollection.js          # 果実コレクション管理（v1.0.4: Supabase同期対応）
-│   ├── gachaData.js                # ガチャデータ定義（43種）
+│   ├── gachaData.js                # ガチャデータ定義（43種）+ v1.0.13: GACHA_CHARACTERS / isGachaCharacter
 │   └── twaDetect.js                # ★v1.0.6新規: TWA（Google Playアプリ）判定
+├── data/
+│   ├── puzzles.js                  # ごほうびパズル定義（3種・9ピース）
+│   └── costumeItems.js             # ★v1.0.14拡張: 着せ替え16個+CATEGORY_TO_SLOT等の対応表
 ├── screens/
 │   ├── AuthScreen.js               # ログイン画面
 │   ├── HomeScreen.js               # ホーム画面（v1.0.5: 成長演出統合・葉表示廃止）
@@ -62,7 +65,8 @@ src/
 │   ├── TermsScreen.js              # 利用規約（v1.0.4: 年間プラン追記済み）
 │   └── TokushohoScreen.js          # 特商法表記（v1.0.4: 年間プラン追記済み）
 ├── components/
-│   ├── CharacterDisplay.js         # 汎用キャラ表示（まめ/ロボちゃん切替）
+│   ├── CharacterDisplay.js         # 汎用キャラ表示（まめ/ロボ/ガチャキャラ切替・v1.0.13拡張）
+│   ├── GachaCharacter.js           # ★v1.0.13新規: ガチャキャラせんせい表示（立ち絵+吹き出し）
 │   ├── MameCharacter.js            # まめキャラ（16ポーズ）
 │   ├── RobotCharacter.js           # ロボちゃんキャラ
 │   ├── GrowthEffect.js             # ★v1.0.5新規: 成長演出パーティクル
@@ -122,6 +126,25 @@ docs/
 - Supabase優先 + localStorageフォールバック（profiles.fruit_collection jsonb）
 - 初回ログイン時に自動マイグレーション・複数端末マージ対応
 - このパターンが他のlocalStorage移行の雛形
+
+### 🎓 ガチャキャラせんせい機能（v1.0.13新規）
+- ガチャキャラ6体を「せんせい」（出題キャラ）として選択可能。**コレクション入手済みのみ選択可**（ガチャの動機づけ）
+- ホームの「🎓 せんせいを えらぶ」ボタン→選択モーダル（まめ・ロボ+6体。未入手は❓+「ガチャで ゲットしよう！」）
+- ガチャキャラは1枚絵のため「立ち絵+吹き出し」方式（GachaCharacter.js）。ふわふわ浮遊アニメ・固定名（名前変更不可）
+- ガチャキャラ選択中はホームの木の右（まめの位置）に表示、タップで選択モーダル再オープン
+- セリフは mameMessages.js のガチャキャラ用汎用セット（まめ/ロボの既存文言は不変）
+- 未入手・不明IDが選択状態のときは起動時に'mame'へ自動フォールバック（App.js）
+- 7体目の追加は gachaData.js に1行+画像1枚で完結するデータ駆動設計
+
+## 👗 着せ替えシステム（v1.0.14で豪華版に）
+
+- **4スロット重ねづけ**：あたま(head)/かお(face)/くび(neck)/て(hand) にカテゴリごと1個ずつ装着可
+- アイテム**16個**（絵文字方式）。解放条件5タイプ：mission_count / streak / perfect / puzzle / **collection（果実コレクション種類数・v1.0.14新設）**
+- collection型（にじのヘアバンド🌈=10種 / おうごんカップ🏆=25種）は**収穫直後に即反映**（handleHarvestClose内でcheckCostumeUnlocks）
+- データ構造：`manabi_costume` の `equippedItems: {head,face,neck,hand}`。**旧形式 `equippedItem`（単数）からの自動マイグレーション実装済み**（二重移行ガードあり）
+- アイテム定義に任意 `image` フィールドあり：**画像パスを足すと絵文字→イラストに差し替わる**（松プランの受け入れ口。image失敗時はemojiフォールバック）
+- 着せ替えは**まめ専用**（ロボ・ガチャキャラには適用されない）。GohoubiScreenのプレビューもまめ固定
+- 新カテゴリ追加時は costumeItems.js の CATEGORY_TO_SLOT / CATEGORY_ORDER / SLOT_LABELS を更新（1ファイル完結。リセット値は createDefaultCostumeData() が自動追従）
 
 ---
 
@@ -189,12 +212,18 @@ docs/
 | robot_name | manabi_robot_name | ❌ 未移行 |
 | selected_character | manabi_selected_character | ❌ 未移行 |
 | puzzle | manabi_puzzle | ❌ 未移行 |
-| costume | manabi_costume | ❌ 未移行 |
+| costume | manabi_costume | ❌ 未移行（v1.0.14で構造変更: equippedItems 4スロット・旧形式自動移行あり） |
 | display_mode | manabi_display_mode | ❌ 未移行 |
 
 ---
 
 ## 🐛 既知のバグ・修正済み
+
+### v1.0.13〜v1.0.14で対応済み（2026/07/22）
+- ✅ 結果画面（スコア50%未満）でどのせんせいでも犬絵文字🐕が出る既存バグ → キャラ出し分けに修正
+- ✅ collection型の着せ替え解放が次のミッションまで反映されない非対称 → 収穫直後に即反映
+- ✅ アカウント切替リセット値のスロット手打ち・item_none遺物 → createDefaultCostumeData()に集約
+- ⚠️ 既知の軽微な残り：成長演出セリフはガチャキャラ専用トーンなし（まめ用汎用文で代用・実害なし）/ LevelSettingsScreenはまめ固定表示（既存）
 
 ### v1.0.12でコード対応済み（Android新規インストール再確認待ち）
 - ✅ Google Play審査環境で、クリーム色の起動画面から先へ進まない可能性に対し、`supabase.auth.getSession()`へ8秒のタイムアウトを追加。
@@ -229,38 +258,28 @@ docs/
 
 ## 📋 次回タスク（優先順）
 
-### Phase 1: Google Play審査結果待ち（最優先・現在ここ）
-1. ✅ TWAビルド・`assetlinks.json`設置・初回Play申請まで完了
-2. ✅ v1.0.12 起動安全網を実装（PR #19・本番反映確認済み）
-3. ✅ PWABuilderで新AAB作成（versionCode増加）
-4. ✅ エミュレーターでWeb版起動確認
-5. ✅ **Play Consoleへ新AABアップロード・再申請 送信済み（2026/07/11）**
-6. 📮 **審査結果を待つ（数日〜2週間）** ← 今ここ
-7. ⚠️ **審査結果を見て分岐**：
-   - **通過**🎉 → 公開！Phase2へ
-   - **再度否承認（ログイン導線が原因の場合）** → 保険策を投入（下記「WelcomeScreen保険」or「審査官用メール+パスワードログイン」）
+### ✅ Phase 1 完了: Google Play審査通過🎉（2026/07/22確認）
+- 保険策（WelcomeScreen / 審査官用パスワードログイン）は**出番なしで通過**。素材（welcome_bg.webp等）はのんローカル保管のまま、将来のLP改善に転用可
 
-### Phase 1.5: 否承認だった場合の保険策（素材準備済み・未実装）
-- **保険A: WelcomeScreen（LP）を起動時に挟む**
-  - 既存index.html静的LPは「React起動で消える」ため、審査の機械が見る前に消滅している可能性
-  - お受験マネージャーは「LPで踏みとどまる」構造で通過実績あり→同型を狙う
-  - 素材完成済み：幻想イラスト（れっさー+ロボ+木+果実）をWeb最適化（welcome_bg.webp 150KB / welcome_bg.jpg 211KB）+ 見本モックアップ（welcome_mockup.html）
-  - 実装：WelcomeScreen.js新規 + App.js起動フローに「未ログイン→Welcome、ログイン済→ホーム直行」の1分岐追加
-  - ⚠️ 二重管理注意：index.html LP（SEO用・骨組み）とWelcomeScreen（ユーザー用・主役）で文言が2箇所になる。役割分担で許容（完全一元化はSSR必要=過剰）
-- **保険B: 審査官用メール+パスワードログイン導線をAuthScreenに追加**
-  - 現状の認証=Google OAuth + メールOTPの2方式、**両方パスワードレス**=審査官に固定の鍵を渡せない構造的問題
-  - 今回の再申請はアクセス権に「審査官がGoogle認証」と記入=審査官がGoogleアカウント持ち込めず詰まるリスクあり（ちゃぴ懸念・のん承知の上で道2=スピード重視を選択）
-  - ダメだった場合、審査用アカウント（素のアドレス・エイリアス不可）にパスワード設定+専用ログイン欄追加
+### Phase 1.6: コンテンツ拡充（現在ここ・のんの素材待ち）
+1. 🧩 **パズル種類追加**：のんがGPTで画像作成中（正方形1024×1024・主役ドーン）→ 届いたら `src/data/puzzles.js` に1ブロック+画像設置で追加
+2. 🎨 **ガチャキャラのポーズ絵**（任意）：1キャラ3ポーズ案（よろこび/おうえん/だいよろこび）→ 届いたらGachaCharacterをポーズ対応に拡張
+3. 👗 **着せ替え松プラン**：アイテムのイラスト画像化。costumeItems.jsの`image`フィールドに差すだけの受け入れ口実装済み
+
+### Phase 1.7: リファクタ宿題（レビュアー指摘・動作は正常）
+4. 💬 SpeechBubble共通化（MameCharacter/RobotCharacter/GachaCharacterに吹き出しJSXが3重コピー。デザイン変更時の事故源）
+5. 📏 HomeScreen分割（708行・モーダル2枚をCharaSelectModal/RenameModalに抽出）・GohoubiScreen分割（417行・CostumeCorner抽出）
+6. 🎯 LevelSettingsScreenにselectedCharacter伝播（既存の抜け・現状まめ固定表示）
 
 ### Phase 2: 品質向上
-8. 💰 年間プラン実決済テスト
-9. 🔍 Search Consoleインデックス経過確認 + URL検査リクエスト
-10. 🔐 Googleバッジ取得申請
-11. 📊 他のlocalStorage→Supabase移行（subject_levels優先・fruitCollectionパターン）
+7. 💰 年間プラン実決済テスト
+8. 🔍 Search Consoleインデックス経過確認 + URL検査リクエスト
+9. 🔐 Googleバッジ取得申請
+10. 📊 他のlocalStorage→Supabase移行（subject_levels優先・fruitCollectionパターン。costume/puzzleも候補）
 
 ### Phase 3: 機能拡張・マルチプラットフォーム
-12. 🎰 ガチャキャラを先生として選択可能に
-13. 🍎 **App Store（iOS）展開**（お受験マネージャーが本命・別スレで本腰）
+11. ✅ ~~ガチャキャラを先生として選択可能に~~（v1.0.13で実装完了）
+12. 🍎 **App Store（iOS）展開**（お受験マネージャーが本命・別スレで本腰）
    - ルート確定：**Capacitor + クラウドビルド（Macなし）**。のんリサーチ済み
    - Apple Developer $99/年 = 了解済み。**まなびの木単独で回収想定せず、お受験マネージャー（本命）と1アカウント共有で分散**
    - iOS価格：手数料上乗せ予定（Small Business Program申請で15%になる／年商10万ドル以下）
@@ -294,6 +313,7 @@ docs/
 - 複数ファイル変更時の中間ERRORは正常挙動
 - import依存のある新規ファイルは**同時1コミット必須**
 - mainに直接pushが確実 / 確認はVercel list_deployments
+- **Vercelプレビューの動作確認はメールOTPログインを使う**：GoogleログインはSupabaseのリダイレクト許可リスト外のプレビューURLから本番へ着地してしまい「新機能が出ない」ように見える（2026/07/22確認）
 
 ### 日付処理
 - toISOString / toLocaleDateString 禁止 → **toSafeDateStr() パターン**（MimamoriScreen.jsに定義）
