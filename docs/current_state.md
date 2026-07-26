@@ -1,5 +1,5 @@
 # 🌳 まなびの木 - プロジェクト現在地（北極星ドキュメント）
-## 最終更新: 2026/07/22 🎉Google Play審査通過・v1.0.13/v1.0.14リリース（スレッド32）
+## 最終更新: 2026/07/26 スレッド32: 問題+70問(657問)・pg_cron自動化・API要件確認
 
 ---
 
@@ -10,7 +10,7 @@
 | バージョン | v1.0.14 |
 | 本番URL | https://manabinoki.net |
 | GitHub | https://github.com/nokokoyk-hub/manabi-no-ki (Public) |
-| Supabase | Project ID: `ndqbtfahtjaafroevgwq`（Pro組織・ACTIVE_HEALTHY） |
+| Supabase | Project ID: `ndqbtfahtjaafroevgwq`（Pro組織・ACTIVE_HEALTHY） | pg_cron | ✅ 有効化済み。`expire-trial-to-free`: 毎日UTC 0:00にtrial期限切れを自動free化 |
 | Vercel | Project: `manabi-no-ki` / Team: `team_wLDUprmHVwDKbqydwaFCl5k7` |
 | GA4 | G-64GLZZQC24 |
 | Stripe | 月額200円 + 年間2,100円 |
@@ -20,18 +20,16 @@
 
 ## 👥 ユーザー状況
 
-- auth.users: 9件（まなびの木タグ付きは5件: のん2 + raffaele + asami + info用）
+- auth.users: 13件（7/26時点。外部ユーザー jaime*** 等の新規あり）
 - soul-backup: 3名（隔離管理必須）
-- 実ユーザー: raffaele含む外部ユーザーあり
-
+- 実ユーザー: raffaele, jaime 含む外部ユーザーあり
 ---
 
 ## 📊 コンテンツ状況
 
-- questions: 587問
-- 解説（explanation）: 587問（100%）
-- こうがくねん版解説（explanation_advanced）: 587問（100%）
-
+- questions: 657問（スレ32で+70問: とけいLv2-5各+10, しゃかいLv1-3各+10）
+- 解説（explanation）: 657問（100%）
+- こうがくねん版解説（explanation_advanced）: 657問（100%）
 ---
 
 ## 🗂️ ファイル構造（主要ファイル）
@@ -82,7 +80,7 @@ src/
 public/
 ├── index.html                      # ★v1.0.5: 静的LP埋め込み（SEO対策）
 ├── howto.html / terms.html / privacy.html / changelog.html
-├── sitemap.xml                     # 5URL版
+├── sitemap.xml                     # 6URL版
 ├── robot-icon-512.png              # PWAアイコン
 ├── og-image.png                    # OGP画像（1200×630）
 ├── version.json
@@ -276,6 +274,7 @@ docs/
 8. 🔍 Search Consoleインデックス経過確認 + URL検査リクエスト
 9. 🔐 Googleバッジ取得申請
 10. 📊 他のlocalStorage→Supabase移行（subject_levels優先・fruitCollectionパターン。costume/puzzleも候補）
+11. 📱 **API レベル要件対応**（期限 2026/08/31、BubbleWrap再ビルドのみ・React変更不要）
 
 ### Phase 3: 機能拡張・マルチプラットフォーム
 11. ✅ ~~ガチャキャラを先生として選択可能に~~（v1.0.13で実装完了）
