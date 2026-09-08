@@ -52,7 +52,7 @@ export default function GardenVisitors() {
       setVisitor({ kind, reverse: Math.random() < 0.5, height: kind === 'squirrel' ? 65 : kind === 'bird' ? 8 + Math.random() * 12 : 25 + Math.random() * 15 });
       timer = setTimeout(() => {
         setVisitor(null);
-        timer = setTimeout(arrive, 4000 + Math.random() * 7000);
+        timer = setTimeout(arrive, 2000 + Math.random() * 3000);
       }, DURATIONS[kind]);
     };
     timer = setTimeout(arrive, 1800 + Math.random() * 1200);

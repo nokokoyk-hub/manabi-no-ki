@@ -81,6 +81,39 @@ afterEach(async () => {
   jest.restoreAllMocks();
 });
 
+test('花はカウントに応じて枝に残り、実になる日は２輪から実へ表示を切り替える', async () => {
+  jest.useFakeTimers();
+  const onGrowthEventEnd = jest.fn();
+  const props = { leaves: 0, flowers: 1, fruits: 0, selectedCharacter: 'mame', petName: 'まめ', onGrowthEventEnd };
+  await act(async () => root.render(<HomeScreen {...props} growthEvent="flower" />));
+  expect(host.querySelectorAll('.mn-blossom')).toHaveLength(1);
+  expect(host.querySelector('.mn-blossom.is-opening')).not.toBeNull();
+  await act(async () => jest.advanceTimersByTime(2500));
+  expect(host.querySelectorAll('.mn-blossom')).toHaveLength(1);
+  expect(host.querySelector('.mn-blossom.is-opening')).toBeNull();
+  await act(async () => root.render(<HomeScreen {...props} flowers={0} fruits={1} canHarvest growthEvent="fruit" />));
+  expect(host.querySelectorAll('.mn-blossom')).toHaveLength(2);
+  expect(host.querySelector('.mn-growth-counts').textContent).toContain('はな 2こ');
+  expect(host.querySelector('.mn-growth-counts').textContent).toContain('みのり 0こ');
+  expect(host.querySelector('.mn-tree-fruit')).toBeNull();
+  await act(async () => jest.advanceTimersByTime(1400));
+  expect(host.querySelector('.mn-growth-counts').textContent).toContain('はな 0こ');
+  expect(host.querySelector('.mn-growth-counts').textContent).toContain('みのり 1こ');
+  expect(host.querySelector('.mn-tree-fruit.is-new-fruit')).not.toBeNull();
+  await act(async () => jest.advanceTimersByTime(1600));
+  expect(host.querySelectorAll('.mn-blossom')).toHaveLength(0);
+  expect(host.querySelector('.mn-tree-fruit')).not.toBeNull();
+  expect(onGrowthEventEnd).toHaveBeenCalledTimes(2);
+});
+
+test('動きを減らす設定では花から実への途中表示を省き、保存値をそのまま見せる', async () => {
+  window.matchMedia.mockReturnValue({ matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() });
+  await act(async () => root.render(<HomeScreen flowers={0} fruits={1} canHarvest growthEvent="fruit" selectedCharacter="mame" />));
+  expect(host.querySelectorAll('.mn-blossom')).toHaveLength(0);
+  expect(host.querySelector('.mn-growth-counts').textContent).toContain('みのり 1こ');
+  expect(host.querySelector('.mn-tree-fruit')).not.toBeNull();
+});
+
 test('森の動物は１匹ずつ現れ、ランダムな次の訪問と停止・再開を扱う', async () => {
   jest.useFakeTimers();
   const schedule = jest.spyOn(global, 'setTimeout');
@@ -92,7 +125,7 @@ test('森の動物は１匹ずつ現れ、ランダムな次の訪問と停止�
   random.mockReturnValue(0.9);
   await act(async () => jest.advanceTimersByTime(9000));
   expect(host.querySelector('.garden-traveler')).toBeNull();
-  await act(async () => jest.advanceTimersByTime(10300));
+  await act(async () => jest.advanceTimersByTime(4700));
   expect(host.querySelectorAll('.garden-traveler')).toHaveLength(1);
   expect(host.querySelector('.garden-traveler.squirrel')).not.toBeNull();
   await click(button('うごきを とめる'));
@@ -103,7 +136,7 @@ test('森の動物は１匹ずつ現れ、ランダムな次の訪問と停止�
   await act(async () => jest.advanceTimersByTime(3000));
   expect(host.querySelector('.garden-traveler.butterfly')).not.toBeNull();
   random.mockReturnValue(0.6);
-  await act(async () => jest.advanceTimersByTime(9000 + 8200));
+  await act(async () => jest.advanceTimersByTime(9000 + 3800));
   expect(host.querySelector('.garden-traveler.bird')).not.toBeNull();
   const birdTimerIndex = schedule.mock.calls.findIndex(call => call[1] === 5500);
   const birdTimer = schedule.mock.results[birdTimerIndex].value;
