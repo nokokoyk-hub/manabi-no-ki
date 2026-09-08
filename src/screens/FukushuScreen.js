@@ -162,7 +162,7 @@ const FukushuScreen = ({ onBack, onStartReview, petName, selectedCharacter = 'ma
   const displayName = petName || 'まめ';
 
   return (
-    <div style={{
+    <div className="mn-page mn-legacy mn-fukushuscreen" style={{
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${COLORS.sky} 0%, ${COLORS.bg} 42%, ${COLORS.bgSoft} 100%)`,
       fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",

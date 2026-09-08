@@ -12,7 +12,7 @@ const ZukanScreen = ({ petName, onBack }) => {
   const [isZoomed, setIsZoomed] = useState(false);
 
   return (
-    <div style={{
+    <div className="mn-page mn-legacy mn-zukanscreen" style={{
       minHeight: '100vh',
       background: 'linear-gradient(180deg, #E8F5E9 0%, #F1F8E9 30%, #FFFFFF 100%)',
       fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",

@@ -23,7 +23,7 @@ const PremiumGate = ({ onBack, featureName, user, onLogout }) => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="mn-page mn-legacy mn-premiumgate" style={styles.container}>
       {/* もどるボタン */}
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>

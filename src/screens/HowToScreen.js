@@ -11,7 +11,7 @@ import React from 'react';
 
 const HowToScreen = ({ onBack }) => {
   return (
-    <div style={styles.container}>
+    <div className="mn-page mn-legacy mn-howtoscreen" style={styles.container}>
       {/* ヘッダー */}
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>

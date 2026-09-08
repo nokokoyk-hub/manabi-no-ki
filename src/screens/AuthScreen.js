@@ -153,7 +153,7 @@ function AuthScreen({ onOpenTerms, onOpenPrivacy, onOpenTokushoho, onOpenHowTo }
   const otpReady = otpCode.length === 8;
 
   return (
-    <div style={styles.container}>
+    <div className="mn-page mn-legacy mn-authscreen" style={styles.container}>
       <div style={styles.card}>
         {/* ===== ロゴ・タイトル ===== */}
         <div style={styles.logoSection}>

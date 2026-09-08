@@ -233,7 +233,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
 
   if (isLoading) {
     return (
-      <div style={{
+      <div className="mn-page mn-legacy mn-mimamoriscreen" style={{
         minHeight: '100vh', background: '#F5F5F5',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
@@ -249,7 +249,7 @@ const MimamoriContent = ({ onBack, streak = 0, appVersion = '', onOpenLevelSetti
   }
 
   return (
-    <div style={{
+    <div className="mn-page mn-legacy mn-mimamoriscreen" style={{
       minHeight: '100vh', background: '#F5F5F5',
       fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
     }}>

@@ -10,7 +10,7 @@ import React from 'react';
 
 const TokushohoScreen = ({ onBack }) => {
   return (
-    <div style={styles.container}>
+    <div className="mn-page mn-legal" style={styles.container}>
       {/* ヘッダー */}
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>
@@ -21,7 +21,9 @@ const TokushohoScreen = ({ onBack }) => {
 
       {/* 本文 */}
       <div style={styles.content}>
-        <div style={styles.table}>
+        <nav className="mn-commerce-index" aria-label="表記の目次">{[['business','事業者情報'],['payment','料金・お支払い'],['usage','ご利用・解約']].map(([id,label]) => <button key={id} onClick={() => { const heading=document.getElementById('commerce-'+id); heading.scrollIntoView({block:'start'}); heading.focus({preventScroll:true}); }}>{label} ↓</button>)}</nav>
+        <div>
+        <section className="mn-commerce-section"><h2 id="commerce-business" tabIndex={-1}>01 事業者情報</h2>
           <div style={styles.row}>
             <div style={styles.label}>販売事業者</div>
             <div style={styles.value}>NON WORKS</div>
@@ -51,6 +53,7 @@ const TokushohoScreen = ({ onBack }) => {
             <div style={styles.label}>電話番号</div>
             <div style={styles.value}>請求があった場合は遅滞なく開示いたします</div>
           </div>
+          </section><section className="mn-commerce-section"><h2 id="commerce-payment" tabIndex={-1}>02 料金・お支払い</h2>
           <div style={styles.row}>
             <div style={styles.label}>販売価格</div>
             <div style={styles.value}>
@@ -63,21 +66,23 @@ const TokushohoScreen = ({ onBack }) => {
           </div>
           <div style={styles.row}>
             <div style={styles.label}>支払方法</div>
-            <div style={styles.value}>クレジットカード、Google Pay、Apple Pay（Stripe経由）</div>
+            <div style={styles.value}>Stripeを利用します。クレジットカードのほか、決済画面に表示される場合はGoogle Pay・Apple Payをご利用いただけます。利用できる支払方法は、ご利用の端末・ブラウザ等によって異なります。申込み時の決済画面でご確認ください。</div>
           </div>
           <div style={styles.row}>
             <div style={styles.label}>支払時期</div>
-            <div style={styles.value}>プラン申込時に初回決済。月額プランは毎月、年間プランは毎年自動更新。</div>
+            <div style={styles.value}>プラン申込時に初回決済を行います。月額プランは毎月、年間プランは毎年、契約期間ごとに自動更新されます。次回更新前に解約手続きを完了しない限り、次の契約期間の料金が請求されます。次回更新日・請求内容は、プラン管理画面でご確認ください。</div>
           </div>
           <div style={styles.row}>
             <div style={styles.label}>サービス提供時期</div>
             <div style={styles.value}>決済完了後、直ちにご利用いただけます</div>
           </div>
+          </section><section className="mn-commerce-section"><h2 id="commerce-usage" tabIndex={-1}>03 ご利用・解約</h2>
           <div style={styles.row}>
             <div style={styles.label}>返品・キャンセル</div>
             <div style={styles.value}>
-              デジタルコンテンツの性質上、お支払い後の返金はいたしかねます。<br />
-              解約はいつでも可能です。解約後も当該決済期間の終了までサービスをご利用いただけます。
+              解約は、ブラウザで本サービスを開き、「みまもり」の「プランを管理する（解約・変更）」からお手続きください。手続きができない場合は、上記の連絡先までお問い合わせください。<br />
+              解約後も、お支払い済みの契約期間の終了まで有料機能をご利用いただけます。お客様の都合による期間途中の解約について、日割り・月割りの返金は行いません。ただし、法令上返金が必要な場合はこの限りではありません。<br />
+              有料プランの解約とアカウントの退会・データ削除は別の手続きです。
             </div>
           </div>
           <div style={styles.row}>
@@ -96,12 +101,13 @@ const TokushohoScreen = ({ onBack }) => {
               新規登録から5日間は無料トライアル（全機能開放）をご利用いただけます。トライアル終了後、自動課金は発生しません。
             </div>
           </div>
-        </div>
+        </section></div>
 
         {/* 施行日 */}
         <p style={styles.effectiveDate}>
           制定日: 2026年6月18日<br />
-          最終改定: 2026年7月1日（年間プラン・支払方法追記）
+          最終改定: 2026年7月1日（年間プラン・支払方法追記）<br />
+          改定案作成日: 2026年9月8日（未公開）
         </p>
       </div>
     </div>

@@ -25,7 +25,7 @@ const LevelSettingsScreen = ({ levels, onChange, onBack }) => {
   };
 
   return (
-    <div style={{
+    <div className="mn-page mn-legacy mn-levelsettingsscreen" style={{
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${COLORS.sky} 0%, ${COLORS.bg} 40%, ${COLORS.bgSoft} 100%)`,
       fontFamily: "'Rounded Mplus 1c', 'Noto Sans JP', sans-serif",
@@ -96,7 +96,7 @@ const LevelSettingsScreen = ({ levels, onChange, onBack }) => {
               </div>
 
               <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+                display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 8,
                 marginTop: 14,
               }}>
                 {Array.from({ length: MAX_LEARNING_LEVEL - MIN_LEARNING_LEVEL + 1 }, (_, i) => i + MIN_LEARNING_LEVEL).map(level => {
@@ -104,6 +104,8 @@ const LevelSettingsScreen = ({ levels, onChange, onBack }) => {
                   return (
                     <button
                       key={level}
+                      aria-label={subject.label + " レベル" + level}
+                      aria-pressed={selected}
                       onClick={() => updateLevel(subject.key, level)}
                       style={{
                         border: selected ? `2px solid ${COLORS.green}` : '2px solid #E0E0E0',
