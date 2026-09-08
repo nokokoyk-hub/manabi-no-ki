@@ -18,6 +18,7 @@ import RobotCharacter from '../components/RobotCharacter';
 import GachaCharacter from '../components/GachaCharacter';
 import GrowthEffect from '../components/GrowthEffect';
 import GardenVisitors from '../components/GardenVisitors';
+import GardenBlossoms from '../components/GardenBlossoms';
 import { COLORS } from '../constants/colors';
 import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { GROWTH_FX, GROWTH_FX_ENABLED } from '../constants/growthEffects';
@@ -81,16 +82,28 @@ const HomeScreen = ({
   // ===== 🎬 成長演出（v1.0.5） =====
   // growthEvent ('leaf'|'flower'|'fruit') を受け取ったら演出再生 → duration後に自動終了
   const [activeFx, setActiveFx] = useState(null);
+  const [bloomPhase, setBloomPhase] = useState(null);
   useEffect(() => {
     if (!growthEvent || !GROWTH_FX_ENABLED) return;
     const fx = GROWTH_FX[growthEvent];
     if (!fx) return;
     setActiveFx(fx);
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const showBloom = !media.matches && (growthEvent === 'flower' || growthEvent === 'fruit');
+    setBloomPhase(showBloom ? growthEvent === 'fruit' ? 'pair' : 'flower' : null);
+    const ripenTimer = showBloom && growthEvent === 'fruit' ? setTimeout(() => setBloomPhase(media.matches ? null : 'ripen'), 1400) : null;
+    const stopBloom = () => { if (media.matches) setBloomPhase(null); };
+    media.addEventListener('change', stopBloom);
     const timer = setTimeout(() => {
       setActiveFx(null);
+      setBloomPhase(null);
       onGrowthEventEnd && onGrowthEventEnd();
     }, fx.duration);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(ripenTimer);
+      media.removeEventListener('change', stopBloom);
+    };
   }, [growthEvent, onGrowthEventEnd]);
 
   // 画面表示時にキャラのメッセージをセット（演出中は演出メッセージ優先）
@@ -155,17 +168,21 @@ const HomeScreen = ({
     onCharacterChange && onCharacterChange(charId);
     setShowCharaSelectModal(false);
   }, [onCharacterChange]);
+  // 実になる日の短い演出中だけ、変換前の２輪とカウントを表示する。
+  const displayedFlowers = Math.max(0, Number(flowers) || 0) + (bloomPhase === 'pair' ? 2 : 0);
+  const displayedFruits = Math.max(0, (Number(fruits) || 0) - (bloomPhase === 'pair' ? 1 : 0));
   return <main className="mn-page mn-home">
     <header className="mn-home-heading"><div><button className="mn-logo" onClick={handleLogoClick}>🌳 まなびの木</button><p>まいにちの「できた！」を そだてよう</p></div><button className="reward-back" onClick={onOpenMimamori}>{isFree ? '🔒' : '👀'} みまもり</button></header>
     <div className="mn-streak">🌱 {streak > 0 ? streak + 'にち れんぞく！' : 'きょうの いっぽを はじめよう'}</div>
-    <section className="mn-home-garden" aria-label={'まなびの木：葉' + leaves + '、花' + flowers + '、実' + fruits}>
+    <section className="mn-home-garden" aria-label={'まなびの木：葉' + leaves + '、花' + displayedFlowers + '、実' + displayedFruits}>
       <img src="/ui/garden.png" alt="青空の下に育つまなびの木" className="mn-garden-image" style={{
         animation: activeFx ? activeFx.treeAnimation : 'none'
       }} />
-      {canHarvest && <button className="mn-tree-fruit" onClick={onHarvest} aria-label={'みのりを しゅうかく（' + fruits + 'こ）'}><img src="/public/images/fruits/fruit_apple.png" alt="" /></button>}
+      <GardenBlossoms flowers={flowers} phase={bloomPhase} />
+      {canHarvest && displayedFruits > 0 && <button className={'mn-tree-fruit' + (bloomPhase === 'ripen' ? ' is-new-fruit' : '')} onClick={onHarvest} aria-label={'みのりを しゅうかく（' + displayedFruits + 'こ）'}><img src="/public/images/fruits/fruit_apple.png" alt="" /></button>}
       {activeFx && <GrowthEffect particles={activeFx.particles} count={activeFx.particleCount} />}
       <GardenVisitors />
-      <div className="mn-growth-counts"><span>🌸 はな {flowers}こ</span><span>🍎 みのり {fruits}こ</span></div>
+      <div className="mn-growth-counts"><span>🌸 はな {displayedFlowers}こ</span><span>🍎 みのり {displayedFruits}こ</span></div>
     </section>
     <div className="mn-growth-next"><span>🌱 つぎの みのりまで</span><strong>ミッション あと {missionsUntilFruit}かい！</strong><progress value={4 - missionsUntilFruit} max="4" aria-label="つぎの実への進みぐあい" /><small>{todayDone ? 'きょうも そだったね。つづきは あした！' : '１にち１かい、クリアで 木が そだつよ'}</small></div>
     <div className="mn-coach-message">{mameMessage}</div>
@@ -181,7 +198,7 @@ const HomeScreen = ({
         setRenameInput(selectedCharacter === 'robot' ? robotName || 'ロボちゃん' : rawPetName || 'まめ');
         setShowRenameModal(true);
       }}>名前を変更する</button></div>
-    {canHarvest && <button className="mn-harvest-link" onClick={onHarvest}>🍎 みのりが {fruits}こ！ しゅうかくする ›</button>}
+    {canHarvest && displayedFruits > 0 && <button className="mn-harvest-link" onClick={onHarvest}>🍎 みのりが {displayedFruits}こ！ しゅうかくする ›</button>}
     <section className="mn-mission"><span>きょうの ミッション</span><h1>{todayDone ? 'きょうも がんばったね！' : '８もんに チャレンジ！'}</h1><p>{todayDone ? 'あしたも いっしょに そだてよう' : '１もんずつ、じぶんの ペースで'}</p><button className="reward-primary" disabled={todayDone} onClick={onStartLearning}>{todayDone ? '✓ ミッション クリア！' : 'はじめる'} {!todayDone && <span aria-hidden="true">›</span>}</button></section>
     <nav className="mn-quick" aria-label="ごほうびとふくしゅう"><button onClick={onOpenGohoubi}>🧩 <strong>ごほうび</strong><small>{puzzleData?.collected || 0} / ９ ピース</small></button><button onClick={onOpenFukushu}>{isFree ? '🔒' : '📖'} <strong>ふくしゅう</strong><small>もういちど やろう</small></button></nav>
     <h2 className="mn-section-title">🌱 すきな きょうかで れんしゅう</h2>
