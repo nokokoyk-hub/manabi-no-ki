@@ -123,7 +123,7 @@ const TermsScreen = ({ onBack }) => {
         {/* 施行日 */}
         <p style={styles.effectiveDate}>
           制定日: 2026年6月18日<br />
-          改定案作成日: 2026年9月8日（未公開）
+          最終更新日: 2026年9月8日
         </p>
       </div>
     </div>

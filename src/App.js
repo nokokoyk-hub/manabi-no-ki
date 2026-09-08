@@ -641,6 +641,8 @@ function App() {
         return (
           <GohoubiScreen
             key={screen}
+            initialTab={screen === 'gohoubi' ? 'puzzle' : 'collection'}
+            todayDone={todayDone}
             collection={fruitCollection}
             fruits={fruits}
             onHarvest={handleHarvest}

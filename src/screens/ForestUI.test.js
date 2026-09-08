@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import LearningScreen from './LearningScreen';
 import HarvestScreen from './HarvestScreen';
 import GohoubiScreen from './GohoubiScreen';
+import HomeScreen from './HomeScreen';
+import GardenVisitors from '../components/GardenVisitors';
 import { getTodayQuestions } from '../lib/questionLoader';
 import { recordAnswer, equipItem, unequipAll } from '../lib/storage';
 jest.mock('../lib/questionLoader', () => ({
@@ -76,6 +78,56 @@ afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
   jest.useRealTimers();
+  jest.restoreAllMocks();
+});
+
+test('森の動物は１匹ずつ現れ、ランダムな次の訪問と停止・再開を扱う', async () => {
+  jest.useFakeTimers();
+  const schedule = jest.spyOn(global, 'setTimeout');
+  const cancel = jest.spyOn(global, 'clearTimeout');
+  const random = jest.spyOn(Math, 'random').mockReturnValue(0);
+  await act(async () => root.render(<GardenVisitors />));
+  await act(async () => jest.advanceTimersByTime(1800));
+  expect(host.querySelector('.garden-traveler.butterfly')).not.toBeNull();
+  random.mockReturnValue(0.9);
+  await act(async () => jest.advanceTimersByTime(9000));
+  expect(host.querySelector('.garden-traveler')).toBeNull();
+  await act(async () => jest.advanceTimersByTime(10300));
+  expect(host.querySelectorAll('.garden-traveler')).toHaveLength(1);
+  expect(host.querySelector('.garden-traveler.squirrel')).not.toBeNull();
+  await click(button('うごきを とめる'));
+  await act(async () => jest.advanceTimersByTime(30000));
+  expect(host.querySelector('.garden-traveler')).toBeNull();
+  random.mockReturnValue(0);
+  await click(button('うごかす'));
+  await act(async () => jest.advanceTimersByTime(3000));
+  expect(host.querySelector('.garden-traveler.butterfly')).not.toBeNull();
+  random.mockReturnValue(0.6);
+  await act(async () => jest.advanceTimersByTime(9000 + 8200));
+  expect(host.querySelector('.garden-traveler.bird')).not.toBeNull();
+  const birdTimerIndex = schedule.mock.calls.findIndex(call => call[1] === 5500);
+  const birdTimer = schedule.mock.results[birdTimerIndex].value;
+  await act(async () => root.render(null));
+  expect(cancel).toHaveBeenCalledWith(birdTimer);
+});
+
+test('端末の動きを減らす設定を反映し、タブが非表示なら動物とタイマーを止める', async () => {
+  jest.useFakeTimers();
+  let onMotion;
+  const media = { matches: true, addEventListener: (type, callback) => { onMotion = callback; }, removeEventListener: jest.fn() };
+  window.matchMedia.mockReturnValue(media);
+  await act(async () => root.render(<GardenVisitors />));
+  expect(button('うごきは おやすみ').disabled).toBe(true);
+  await act(async () => jest.advanceTimersByTime(30000));
+  expect(host.querySelector('.garden-traveler')).toBeNull();
+  await act(async () => { media.matches = false; onMotion(); });
+  await act(async () => jest.advanceTimersByTime(3000));
+  expect(host.querySelector('.garden-traveler')).not.toBeNull();
+  jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+  await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+  expect(host.querySelector('.garden-traveler')).toBeNull();
+  await act(async () => jest.advanceTimersByTime(30000));
+  expect(host.querySelector('.garden-traveler')).toBeNull();
 });
 test('８問を手動で進め、各回答と完了を一度だけ通知する', async () => {
   jest.useFakeTimers();
@@ -185,4 +237,24 @@ test('図鑑は所有数を表示し、ロック中の着せ替えは装着せ�
   expect(unequipAll).toHaveBeenCalledTimes(1);
   await click(button('パズル'));
   expect(host.querySelectorAll('.mn-puzzle .found')).toHaveLength(4);
+});
+
+test('パズルを直接開き、完了済みミッションは開始せず、未完了なら開始できる', async () => {
+  const onMission = jest.fn();
+  await act(async () => root.render(<GohoubiScreen initialTab="puzzle" todayDone onMission={onMission} />));
+  expect(host.querySelector('.mn-puzzle')).not.toBeNull();
+  expect(host.querySelector('.treasure-card')).toBeNull();
+  const doneButton = button('きょうは クリア！');
+  expect(doneButton.disabled).toBe(true);
+  await click(doneButton);
+  expect(onMission).not.toHaveBeenCalled();
+  await act(async () => root.render(<GohoubiScreen initialTab="puzzle" todayDone={false} onMission={onMission} />));
+  await click(button('ミッションへ いこう！'));
+  expect(onMission).toHaveBeenCalledTimes(1);
+});
+
+test.each([[0, 0, 4], [1, 0, 3], [0, 1, 2], [1, 1, 1], [4, 0, 2], [4, 1, 1]])('葉%s・花%sから次の実までのミッション数は%s回', async (leaves, flowers, expected) => {
+  await act(async () => root.render(<HomeScreen leaves={leaves} flowers={flowers} fruits={0} streak={0} todayDone selectedCharacter="mame" petName="まめ" rawPetName="まめ" />));
+  expect(host.querySelector('.mn-growth-next').textContent).toContain('ミッション あと ' + expected + 'かい！');
+  expect(host.querySelector('.mn-growth-next').textContent).toContain('つづきは あした');
 });
