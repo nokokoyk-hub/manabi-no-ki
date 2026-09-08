@@ -162,7 +162,7 @@ const HomeScreen = ({
         setRenameTarget(selectedCharacter === 'robot' ? 'robot' : 'mame');
         setRenameInput(selectedCharacter === 'robot' ? robotName || 'ロボちゃん' : rawPetName || 'まめ');
         setShowRenameModal(true);
-      }}>まめ・ロボの なまえ</button></div>
+      }}>名前を変更する</button></div>
     {canHarvest && <button className="mn-harvest-link" onClick={onHarvest}>🍎 みのりが {fruits}こ！ しゅうかくする ›</button>}
     <section className="mn-mission"><span>きょうの ミッション</span><h1>{todayDone ? 'きょうも がんばったね！' : '８もんに チャレンジ！'}</h1><p>{todayDone ? 'あしたも いっしょに そだてよう' : '１もんずつ、じぶんの ペースで'}</p><button className="reward-primary" disabled={todayDone} onClick={onStartLearning}>{todayDone ? '✓ ミッション クリア！' : 'はじめる'} {!todayDone && <span aria-hidden="true">›</span>}</button></section>
     <nav className="mn-quick" aria-label="ごほうびとふくしゅう"><button onClick={onOpenGohoubi}>🧩 <strong>ごほうび</strong><small>{puzzleData?.collected || 0} / ９ ピース</small></button><button onClick={onOpenFukushu}>{isFree ? '🔒' : '📖'} <strong>ふくしゅう</strong><small>もういちど やろう</small></button></nav>
