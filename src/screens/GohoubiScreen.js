@@ -15,6 +15,7 @@ export default function GohoubiScreen({
   fruits,
   onHarvest,
   onMission,
+  todayDone = false,
   initialTab = 'collection'
 }) {
   const [tab, setTab] = useState(initialTab),
@@ -45,7 +46,7 @@ export default function GohoubiScreen({
             backgroundPosition: i % 3 * 50 + '% ' + Math.floor(i / 3) * 50 + '%'
           } : {}}>{i < collected ? '' : '✿'}</div>)}</div>
       <div className="puzzle-progress"><strong>{collected}<span> / ９ ピース</span></strong><span>{collected >= 9 ? 'かんせい！' : 'あと ' + (9 - collected) + 'こ！'}</span></div><progress value={collected} max="9" aria-label="パズルの進みぐあい" />
-      <p>ミッションを クリアすると<br />ピースが １こ もらえるよ。</p><button className="reward-primary" onClick={onMission}>ミッションへ いこう！ <span aria-hidden="true">›</span></button></section>
+      <p>ミッションを クリアすると<br />ピースが １こ もらえるよ。</p><button className="reward-primary" disabled={todayDone} onClick={onMission}>{todayDone ? '✓ きょうは クリア！ また あした' : 'ミッションへ いこう！'} {!todayDone && <span aria-hidden="true">›</span>}</button></section>
       <div className="reward-section-title"><h2>かんせいした パズル</h2><span>{completed.length}まい</span></div>{completed.length ? <div className="mn-archive">{completed.map(id => {
           const p = getPuzzleById(id);
           return <figure key={id}><img src={p.image} alt={p.title} loading="lazy" /><figcaption>{p.title}</figcaption></figure>;

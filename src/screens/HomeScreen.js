@@ -17,6 +17,7 @@ import MameCharacter from '../components/MameCharacter';
 import RobotCharacter from '../components/RobotCharacter';
 import GachaCharacter from '../components/GachaCharacter';
 import GrowthEffect from '../components/GrowthEffect';
+import GardenVisitors from '../components/GardenVisitors';
 import { COLORS } from '../constants/colors';
 import { getCharaMessage, getStreakMessage } from '../constants/mameMessages';
 import { GROWTH_FX, GROWTH_FX_ENABLED } from '../constants/growthEffects';
@@ -60,6 +61,21 @@ const HomeScreen = ({
 }) => {
   const isFree = userPlan === 'free';
   const isTrial = userPlan === 'trial';
+  // 表示用の目安。保存値は変更せず、既存の成長処理と同じ順序で数える。
+  let remainingLeaves = Math.max(0, Number(leaves) || 0);
+  let remainingFlowers = Math.max(0, Number(flowers) || 0);
+  let missionsUntilFruit = 4;
+  for (let count = 1; count <= 4; count += 1) {
+    remainingLeaves += 1;
+    if (remainingLeaves >= 2) {
+      remainingLeaves -= 2;
+      remainingFlowers += 1;
+    }
+    if (remainingFlowers >= 2) {
+      missionsUntilFruit = count;
+      break;
+    }
+  }
   const [mameMessage, setMameMessage] = useState('');
 
   // ===== 🎬 成長演出（v1.0.5） =====
@@ -148,8 +164,10 @@ const HomeScreen = ({
       }} />
       {canHarvest && <button className="mn-tree-fruit" onClick={onHarvest} aria-label={'みのりを しゅうかく（' + fruits + 'こ）'}><img src="/public/images/fruits/fruit_apple.png" alt="" /></button>}
       {activeFx && <GrowthEffect particles={activeFx.particles} count={activeFx.particleCount} />}
+      <GardenVisitors />
       <div className="mn-growth-counts"><span>🌸 はな {flowers}こ</span><span>🍎 みのり {fruits}こ</span></div>
     </section>
+    <div className="mn-growth-next"><span>🌱 つぎの みのりまで</span><strong>ミッション あと {missionsUntilFruit}かい！</strong><progress value={4 - missionsUntilFruit} max="4" aria-label="つぎの実への進みぐあい" /><small>{todayDone ? 'きょうも そだったね。つづきは あした！' : '１にち１かい、クリアで 木が そだつよ'}</small></div>
     <div className="mn-coach-message">{mameMessage}</div>
     <div className="mn-teachers">
       <button className="mn-teacher" aria-pressed={selectedCharacter === 'robot'} onClick={() => handleCharaTap('robot')} onPointerDown={() => handlePressStart('robot')} onPointerUp={handlePressEnd} onPointerCancel={handlePressEnd} onPointerLeave={handlePressEnd}><RobotCharacter pose={activeFx ? activeFx.charPose : 'wave'} size={80} enableTap={false} /><strong>{robotName || 'ロボちゃん'}</strong><small>{selectedCharacter === 'robot' ? '✓ せんせい' : 'えらぶ'}</small></button>
