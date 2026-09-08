@@ -25,7 +25,6 @@ import PrivacyScreen from './screens/PrivacyScreen';
 import TokushohoScreen from './screens/TokushohoScreen';
 import HowToScreen from './screens/HowToScreen';
 import HarvestScreen from './screens/HarvestScreen';
-import CollectionScreen from './screens/CollectionScreen';
 import UpdateBanner from './components/UpdateBanner';
 import PremiumGate from './components/PremiumGate';
 import { rollGacha, isGachaCharacter, getFruitById } from './lib/gachaData';
@@ -214,6 +213,9 @@ function App() {
 
   // ===== 既存の画面・学習状態 =====
   const [screen, setScreen] = useState('home');
+  const legalReturnScreen = useRef('home');
+  const openLegal = (page) => { legalReturnScreen.current = screen; setScreen(page); };
+  useEffect(() => { window.scrollTo(0, 0); }, [screen]);
   const [learningMode, setLearningMode] = useState('mission');
   const [subjectLevels, setSubjectLevels] = useState(() => loadSubjectLevels());
 
@@ -545,7 +547,7 @@ function App() {
 
   // 📜 利用規約等は認証不要で表示（ログイン前でもアクセス可能）
   if (['terms', 'privacy', 'tokushoho', 'howto'].includes(screen)) {
-    const legalOnBack = () => setScreen('home');
+    const legalOnBack = () => setScreen(legalReturnScreen.current);
     switch (screen) {
       case 'terms': return <TermsScreen onBack={legalOnBack} />;
       case 'privacy': return <PrivacyScreen onBack={legalOnBack} />;
@@ -559,10 +561,10 @@ function App() {
   if (supabase && !user) {
     return (
       <AuthScreen
-        onOpenTerms={() => setScreen('terms')}
-        onOpenPrivacy={() => setScreen('privacy')}
-        onOpenTokushoho={() => setScreen('tokushoho')}
-        onOpenHowTo={() => setScreen('howto')}
+        onOpenTerms={() => openLegal('terms')}
+        onOpenPrivacy={() => openLegal('privacy')}
+        onOpenTokushoho={() => openLegal('tokushoho')}
+        onOpenHowTo={() => openLegal('howto')}
       />
     );
   }
@@ -614,7 +616,7 @@ function App() {
         );
       case 'mimamori':
         if (!canAccessPremium) return <PremiumGate featureName="みまもり" onBack={() => setScreen('home')} user={user} onLogout={handleLogout} />;
-        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => setScreen('terms')} onOpenPrivacy={() => setScreen('privacy')} onOpenTokushoho={() => setScreen('tokushoho')} onLogout={handleLogout} />;
+        return <MimamoriScreen onBack={() => setScreen('home')} streak={streak} appVersion={APP_VERSION} onOpenLevelSettings={() => setScreen('level-settings')} displayMode={displayMode} onChangeDisplayMode={handleDisplayModeChange} user={user} userPlan={userPlan} hasStripeCustomer={hasStripeCustomer} onOpenTerms={() => openLegal('terms')} onOpenPrivacy={() => openLegal('privacy')} onOpenTokushoho={() => openLegal('tokushoho')} onLogout={handleLogout} />;
       case 'level-settings':
         if (!canAccessPremium) return <PremiumGate featureName="レベルせってい" onBack={() => setScreen('home')} user={user} />;
         return (
@@ -634,9 +636,15 @@ function App() {
             selectedCharacter={selectedCharacter}
           />
         );
+      case 'collection':
       case 'gohoubi':
         return (
           <GohoubiScreen
+            key={screen}
+            collection={fruitCollection}
+            fruits={fruits}
+            onHarvest={handleHarvest}
+            onMission={() => todayDone ? setScreen("home") : startLearning("mission")}
             onBack={() => setScreen('home')}
             petName={displayName}
             puzzleData={puzzleData}
@@ -653,6 +661,11 @@ function App() {
             petName={displayName}
           />
         );
+      case 'subject-shakai':
+      case 'subject-clock':
+      case 'subject-doutoku':
+        if (!canAccessPremium) return <PremiumGate featureName="きょうかの れんしゅう" onBack={() => setScreen('home')} user={user} />;
+        return <SubjectMenuScreen subject={screen.slice(8)} onStartMode={startLearning} onBack={() => setScreen('home')} petName={displayName} equippedItems={costumeData.equippedItems} selectedCharacter={selectedCharacter} />;
       case 'subject-kokugo':
         if (!canAccessPremium) return <PremiumGate featureName="こくご れんしゅう" onBack={() => setScreen('home')} user={user} />;
         return (
@@ -712,11 +725,10 @@ function App() {
         return <TokushohoScreen onBack={() => setScreen('home')} />;
       case 'howto':
         return <HowToScreen onBack={() => setScreen('home')} />;
-      case 'collection':
-        return <CollectionScreen collection={fruitCollection} onBack={() => setScreen('home')} />;
       default:
         return (
           <HomeScreen
+            onOpenHowTo={() => openLegal('howto')}
             leaves={leaves}
             flowers={flowers}
             fruits={fruits}
@@ -737,9 +749,9 @@ function App() {
             onOpenMath={() => setScreen('subject-math')}
             onOpenKokugo={() => setScreen('subject-kokugo')}
             onOpenRika={() => setScreen('subject-rika')}
-            onStartShakai={() => startLearning('shakai')}
-            onStartClock={() => startLearning('clock')}
-            onStartDoutoku={() => startLearning('doutoku')}
+            onStartShakai={() => setScreen('subject-shakai')}
+            onStartClock={() => setScreen('subject-clock')}
+            onStartDoutoku={() => setScreen('subject-doutoku')}
             onOpenGenso={() => setScreen('subject-genso')}
             onOpenMimamori={() => setScreen('mimamori')}
             onOpenLevelSettings={() => setScreen('level-settings')}
@@ -764,6 +776,7 @@ function App() {
         <HarvestScreen
           fruit={harvestedFruit}
           isNew={harvestedIsNew}
+          onCollection={() => { handleHarvestClose(); setScreen("collection"); }}
           onClose={handleHarvestClose}
         />
       )}

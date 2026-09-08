@@ -159,14 +159,14 @@ const PinGate = ({ user, onSuccess, onBack }) => {
   // --- ローディング ---
   if (mode === 'loading') {
     return (
-      <div style={styles.container}>
+      <div className="mn-page mn-legacy mn-pingate" style={styles.container}>
         <div style={styles.loadingText}>よみこみちゅう...</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="mn-page mn-legacy mn-pingate" style={styles.container}>
       {/* ヘッダー */}
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>

@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './reward-ui.css';
+import './forest.css';
 import App from './App';
 
 // React内部で致命的な描画エラーが起きても、白画面のままにしない安全網。
