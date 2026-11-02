@@ -4,6 +4,7 @@
 > テーブル変更・RLS変更・トリガー変更・Cron変更時は必ずこのファイルも更新すること。
 > 最終更新: 2026-11-02（JST）。本番DBを**読み取り専用**で照会し、現行コード（main `1277954`）と突き合わせて全面更新。
 > 前回: 2026-07-02（スレッド30）
+> 追記: 2026-11-02 17:50頃（JST）マイグレーション `relax_learning_mode_and_fruits_checks` を適用（§10 の2件を解決）。下の「この版で確認した範囲」は照会時点の記録。
 
 ## 📌 この版で確認した範囲
 
@@ -129,7 +130,7 @@
 | `user_id` | uuid | YES | null | | auth.users.id。v1.0.3以降は必須 |
 | `leaves` | integer | YES | **5** | **0〜10** | 🍃 葉（成長計算用の内部カウンター。画面には出さない） |
 | `flowers` | integer | YES | **2** | **0〜5** | 🌸 花の数 |
-| `fruits` | integer | YES | 0 | **0〜3** | 🍎 実の数（未収穫の実） |
+| `fruits` | integer | YES | 0 | **0以上（上限なし）** | 🍎 実の数（未収穫の実）。2026-11-02に上限3を撤廃 |
 | `streak` | integer | YES | 0 | 0以上 | 🔥 連続学習日数 |
 | `last_study_date` | date | YES | null | | 最終学習日 |
 | `today_done` | boolean | YES | false | | 今日のミッション完了フラグ |
@@ -139,7 +140,7 @@
 **RLSポリシー（対象ロール: authenticated）:** SELECT / INSERT / UPDATE / DELETE すべて `auth.uid() = user_id`
 
 > ⚠️ DB側のデフォルト（葉5・花2）と、コード側 `storage.js` の `DEFAULT_PROGRESS`（葉0・花0）が違う。新規行は `insert({device_id, user_id})` で作られるため **DB側の5・2が入る**。成長計算は App.js `handleLearningComplete` 内1か所。
-> ⚠️ 実（fruits）の上限3については §10 の要確認事項を参照。
+> ✅ 実（fruits）の上限3は2026-11-02に撤廃済み（§10 ②）。葉0〜10・花0〜5の上限は、成長計算（葉2→花、花2→実で繰り上げ）の範囲内なので維持。
 
 ### learning_sessions（学習セッション）
 
@@ -148,14 +149,17 @@
 | `id` | uuid | NO | gen_random_uuid() | PK | |
 | `device_id` | text | NO | — | | レガシー |
 | `user_id` | uuid | YES | null | | auth.users.id |
-| `mode` | text | NO | — | **'mission' / 'okurigana' / 'clock' のみ** | 学習モード |
+| `mode` | text | NO | — | **下記9種のみ**（2026-11-02拡張） | 学習モード |
 | `score` | integer | NO | — | 0以上 | スコア |
 | `total_questions` | integer | NO | — | 1以上 | 出題数 |
 | `completed_at` | timestamptz | YES | now() | | 完了日時 |
 
 **RLSポリシー（authenticated）:** SELECT / INSERT / UPDATE / DELETE すべて `auth.uid() = user_id`
 
-**記録の実績（11/2）:** mission 141件（6/18〜10/31）/ okurigana 2件 / clock 1件。それ以外のモード名の記録は0件 → §10 の要確認事項を参照。
+**受け付ける `mode`（CHECK制約 `learning_sessions_mode_check`）:** `mission` / `okurigana` / `clock` / `math` / `kokugo` / `shakai` / `doutoku` / `rika` / `genso`
+→ アプリ側の学習モード（`App.js` の `startLearning`、`SubjectMenuScreen.js`、`FukushuScreen.js` の `startMode`）と**必ず一致させる**。教科を増やすときはこの制約も同時に変更する。
+
+**記録の実績（11/2・制約拡張前）:** mission 141件（6/18〜10/31）/ okurigana 2件 / clock 1件。教科練習の記録は制約で弾かれていたため0件（§10 ①）。拡張前の教科練習の記録は復元できない。
 
 ### answer_history（回答履歴）
 
@@ -361,20 +365,28 @@ AuthScreen.js signInWithOtp（options.data.app='manabi-no-ki'）→ Supabase が
 
 ---
 
-## 10. ⚠️ 要確認事項（2026-11-02 の照会で見つかったもの・未修正）
+## 10. ✅ 2026-11-02 に見つかり、同日に解決した食い違い
 
-どちらも **DBの決まり（CHECK制約）とコードの送る値が食い違っている** 可能性。ログが直近24時間分しか見られず、実際にエラーが出た記録は確認できていないため、**推測を含む**。修正はDB変更になるので、のんの承認を得てから行う。
+どちらも **DBの決まり（CHECK制約）とアプリが送る値の食い違い** が根本原因。保存失敗は `storage.js` の `console.error` だけで終わり、画面にも通知されないため発見が遅れた。
 
-### ① learning_sessions.mode が3種類しか受け付けない
-- **事実:** CHECK制約は `mode ∈ {mission, okurigana, clock}`。一方 `App.js` は `recordSession(learningMode, …)` で教科練習のモード名（`math`・`rika`・`kokugo`・`shakai`・`doutoku`・`genso` など。`SubjectMenuScreen.js` で定義）もそのまま送る。
-- **事実:** 実データは mission 141件・okurigana 2件・clock 1件のみ。教科名のモードは0件。
-- **推測:** 教科練習のセッション記録は保存時に弾かれ、`storage.js` の `console.error` だけで終わっている。子どもの画面には影響しないが、**みまもり画面の「学習回数」に教科練習が数えられていない**可能性がある。
-- 対応案: (a) CHECK制約にモード名を追加する（DB変更）、(b) 制約を外す、(c) コード側で教科練習は `'practice'` 等に寄せる。いずれも要相談。
+**適用したマイグレーション:** `relax_learning_mode_and_fruits_checks`（2026-11-02 JST、のん承認のうえ適用）
+**ロールバックSQL:** `docs/rollback/2026-11-02_relax_mode_and_fruits_checks.sql`（元の制約に戻す。既存データは壊れない）
+**適用後の検証:** 6教科のモードの記録と fruits=7 の保存が通り、未知のモード名は引き続き弾かれることを、ロールバックするテストで確認。本番データは変化なし（記録144件・実の最大1）。
 
-### ② user_progress.fruits の上限が3
-- **事実:** CHECK制約は `fruits 0〜3`（花0〜5・葉0〜10も同様）。コードの成長計算には上限処理がなく、収穫しないと実は増え続ける。
-- **推測:** 実を4つ以上ためた（＝収穫せずに約16日分ミッションを続けた）時点で、進捗の保存が失敗し、クラウドに成長が残らなくなる可能性がある。11/2時点の最大値は fruits=1 なので、現在困っているユーザーはいない。
-- 対応案: 上限を広げる（DB変更）か、コード側で4つ目以降を保留する等。要相談。
+### ① learning_sessions.mode が3種類しか受け付けなかった
+- **原因:** CHECK制約が `{mission, okurigana, clock}` のまま。アプリは `recordSession(learningMode, …)` で教科練習のモード名（`math`・`kokugo`・`shakai`・`doutoku`・`rika`・`genso`）も送っていた。
+- **影響:** 教科練習の記録が全件弾かれていた（11/2時点で0件）。**みまもりの週間カレンダー**（`MimamoriScreen.js` は `learning_sessions` で「やった日」を判定）に教科練習の日が出ず、**ふくしゅう画面**（`FukushuScreen.js`）の math/kokugo/shakai/doutoku の成績も空だった。問題ごとの正誤 `answer_history` は別表で正常に保存されていた。
+- **対応:** 制約を上記9種に拡張。拡張前の教科練習の記録は復元しない（`answer_history` からの推測再構成は「本物の記録」と混ざるため見送り）。
+
+### ② user_progress.fruits の上限が3だった
+- **原因:** CHECK制約 `fruits 0〜3`。アプリの成長計算に上限はなく、収穫しないと実は増え続ける。
+- **影響:** 実が4つになる保存（＝約16日分ミッションを収穫せず続けた時点）は UPDATE 全体が失敗し、葉・花・連続日数・今日の完了もクラウドに残らない状態になり得た。11/2時点の最大は fruits=1 で、実害を受けたユーザーはいない。
+- **対応:** 制約を `fruits >= 0` に変更（上限なし）。
+
+### 残課題（コード側・次のPRで対応予定）
+- 学習モード一覧がアプリ内の複数ファイルに散らばっている → 1か所にまとめ、DBの許可一覧との一致をテストで見張る
+- `FukushuScreen.js` の `DEFAULT_REVIEW_MODES` に `rika`・`genso` が入っていない
+- 保存失敗を握りつぶす構造（`console.error` のみ）は将来対応の候補
 
 ---
 
@@ -402,4 +414,4 @@ AuthScreen.js signInWithOtp（options.data.app='manabi-no-ki'）→ Supabase が
 
 > 作成: ちゃぴ（2026-06-26 スレッド25）
 > 更新: 2026-06-30 スレッド29 / 2026-07-02 スレッド30 / **2026-11-02 本番DB読み取り照会による全面更新**
-> 次回更新: §10の対応時、localStorage→Supabase移行時、問題追加でテーブル構造が変わる時
+> 次回更新: 学習モード（教科）追加時、localStorage→Supabase移行時、問題追加でテーブル構造が変わる時
