@@ -257,7 +257,20 @@ test('図鑑は所有数を表示し、ロック中の着せ替えは装着せ�
     },
     totalHarvests: 3
   }} fruits={0} onBack={jest.fn()} onMission={jest.fn()} />));
-  expect(host.querySelector('.treasure-card').textContent).toContain('りんご3こ');
+  const groupTitles = [...host.querySelectorAll('.zukan-group h3')].map(h => h.textContent.trim());
+  expect(groupTitles).toEqual(['👑 レジェンド', '💎 スーパーレア', '⭐ レア', '🍏 ノーマル']);
+  expect(host.querySelectorAll('.treasure-card')).toHaveLength(43);
+  expect(host.querySelectorAll('.treasure-card.undiscovered')).toHaveLength(42);
+  const apple = host.querySelector('[aria-label="りんご 3こ"]');
+  expect(apple.textContent).toContain('×3');
+  expect(apple.className).not.toContain('undiscovered');
+  expect(host.querySelector('.zukan-group.normal .zukan-group-head > span').textContent).toBe('1 / 13');
+  expect(host.querySelector('.zukan-progress').textContent).toContain('1 / 43');
+  expect(host.querySelector('.zukan-progress').textContent).toContain('2% コンプリート');
+  await click(button('なかま'));
+  expect(host.querySelectorAll('.treasure-card')).toHaveLength(6);
+  expect(host.querySelector('.zukan-group.normal')).toBeNull();
+  await click(button('すべて'));
   await click(button('きせかえ'));
   await click(button('おうかん'));
   expect(equipItem).not.toHaveBeenCalled();
