@@ -1,6 +1,6 @@
 # 🌳 まなびの木 - プロジェクト現在地（北極星ドキュメント）
 
-## 最終更新: 2026/11/02（JST）DB設計書・公開更新履歴の追いつき（コード・DBは変更なし）
+## 最終更新: 2026/11/02（JST）DB設計書・公開更新履歴の追いつき＋DB制約の食い違い2件を修正（コード変更なし）
 ## 前回: 2026/09/13（JST）Claudeスレッド33の記録と、現行main・DBを照合して統合
 
 ## 現在地と、この統合で確認した範囲
@@ -393,7 +393,8 @@ docs/
 - localStorageデータのSupabase移行案。subject_levelsを優先候補に、costume/puzzle等も検討する。移行設計・復旧方法を決めてから実施する。
 - AndroidのAPIレベル要件。旧文書の「2026/08/31」は経過済み。現在のPlay Console表示・配布AABのtarget API・適用期限を確認し、再ビルドだけで足りると先に断定しない。
 - `docs/supabase_structure.md` は2026/11/02に本番DBを読み取り照会して全面更新済み（832問・pg_cron・管理者専用ビュー・Edge Function２本・CHECK制約）。
-- **DB設計書 §10 の要確認２件（未修正・要相談）**: ①`learning_sessions.mode` のCHECK制約が mission/okurigana/clock のみで、教科練習のセッション記録が保存されていない可能性（みまもりの学習回数に影響の可能性）。②`user_progress.fruits` の上限が3で、実を４つ以上ためると進捗保存が失敗する可能性。どちらもDB変更を伴うため承認後に対応。
+- ✅ **DB制約の食い違い２件を2026/11/02に修正**（マイグレーション `relax_learning_mode_and_fruits_checks`、のん承認）: ①`learning_sessions.mode` を教科練習を含む９種に拡張 → みまもりカレンダー・ふくしゅう成績に教科練習が記録されるようになった（修正前の記録は復元不可）。②`user_progress.fruits` の上限３を撤廃 → 実を何個ためても進捗が保存される。詳細とロールバックは DB設計書 §10。
+- 🔜 **次のPR候補（コード）**: 学習モード一覧を１か所に集約し、DBの許可一覧との一致をテストで見張る／`FukushuScreen.js` の `DEFAULT_REVIEW_MODES` に rika・genso を追加。目的は「みまもりと学習データの紐づけ」と「実の収穫回数」をきちんと数えられる状態にすること。
 
 ### Phase 3: 将来案
 
