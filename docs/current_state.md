@@ -1,6 +1,7 @@
 # 🌳 まなびの木 - プロジェクト現在地（北極星ドキュメント）
 
-## 最終更新: 2026/09/13（JST）Claudeスレッド33の記録と、現行main・DBを照合して統合
+## 最終更新: 2026/11/02（JST）DB設計書・公開更新履歴の追いつき（コード・DBは変更なし）
+## 前回: 2026/09/13（JST）Claudeスレッド33の記録と、現行main・DBを照合して統合
 
 ## 現在地と、この統合で確認した範囲
 
@@ -33,7 +34,7 @@
 | 本番URL | https://manabinoki.net |
 | GitHub | https://github.com/nokokoyk-hub/manabi-no-ki (Public) |
 | Supabase | Project ID: `ndqbtfahtjaafroevgwq`。`questions` 集計は2026/09/13確認。Pro組織・稼働状態の表記は旧記録で、今回は未再検証 |
-| pg_cron | 旧記録: `expire-trial-to-free` を毎日UTC 0:00（JST 09:00）に実行。現在の有効状態・実行結果は未再検証 |
+| pg_cron | `expire-trial-to-free` を毎日UTC 0:00（JST 09:00）に実行。2026/11/02確認: active、初回7/19から107回・失敗0回 |
 | Vercel | Project: `manabi-no-ki` / Team: `team_wLDUprmHVwDKbqydwaFCl5k7` |
 | GA4 | G-64GLZZQC24 |
 | Stripe | 月額200円 + 年間2,100円 |
@@ -159,7 +160,7 @@ public/
 ├── version.json
 docs/
 ├── current_state.md                # ★この文書（北極星）
-├── supabase_structure.md           # DB設計書。2026/07/02時点で止まっているため更新候補
+├── supabase_structure.md           # DB設計書（2026/11/02 本番DB読み取り照会で全面更新）
 └── version.json
 ```
 
@@ -391,7 +392,8 @@ docs/
 - Search Consoleの現在のインデックス状況、Googleバッジ申請状況の確認。
 - localStorageデータのSupabase移行案。subject_levelsを優先候補に、costume/puzzle等も検討する。移行設計・復旧方法を決めてから実施する。
 - AndroidのAPIレベル要件。旧文書の「2026/08/31」は経過済み。現在のPlay Console表示・配布AABのtarget API・適用期限を確認し、再ビルドだけで足りると先に断定しない。
-- `docs/supabase_structure.md` は2026/07/02、問題587問のまま。DB設計書の更新は別タスク候補。実スキーマ・RLS・Cronを確認して更新し、問題件数はこの北極星の確認日を参照する。パズル５種は現在ローカルコードの定義であり、DBスキーマ変更ではない。
+- `docs/supabase_structure.md` は2026/11/02に本番DBを読み取り照会して全面更新済み（832問・pg_cron・管理者専用ビュー・Edge Function２本・CHECK制約）。
+- **DB設計書 §10 の要確認２件（未修正・要相談）**: ①`learning_sessions.mode` のCHECK制約が mission/okurigana/clock のみで、教科練習のセッション記録が保存されていない可能性（みまもりの学習回数に影響の可能性）。②`user_progress.fruits` の上限が3で、実を４つ以上ためると進捗保存が失敗する可能性。どちらもDB変更を伴うため承認後に対応。
 
 ### Phase 3: 将来案
 
